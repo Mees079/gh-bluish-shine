@@ -22,6 +22,7 @@ export default {
         primary: {
           DEFAULT: "hsl(var(--primary))",
           foreground: "hsl(var(--primary-foreground))",
+          glow: "hsl(var(--primary-glow))",
         },
         secondary: {
           DEFAULT: "hsl(var(--secondary))",
@@ -57,6 +58,10 @@ export default {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
+      },
+      boxShadow: {
+        'glow': '0 0 30px hsl(var(--glow-blue) / 0.5)',
+        'glow-strong': '0 0 40px hsl(var(--glow-blue) / 0.7)',
       },
       borderRadius: {
         lg: "var(--radius)",
