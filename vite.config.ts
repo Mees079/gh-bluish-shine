@@ -15,4 +15,9 @@ export default defineConfig(({ mode }) => ({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  base: '/gh-bluish-shine/',
+  build: {
+    outDir: 'dist',
+    sourcemap: false,
+  },
 }));
