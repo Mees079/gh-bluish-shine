@@ -15,7 +15,7 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
-import { X } from "lucide-react";
+import { X, ExternalLink } from "lucide-react";
 
 interface ProductModalProps {
   product: Product | null;
@@ -26,8 +26,19 @@ interface ProductModalProps {
 export const ProductModal = ({ product, open, onOpenChange }: ProductModalProps) => {
   const [selectedImage, setSelectedImage] = useState(0);
   const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [instructionsOpen, setInstructionsOpen] = useState(false);
 
   if (!product) return null;
+
+  const handleBuyClick = () => {
+    setInstructionsOpen(true);
+  };
+
+  const handleProceedToDiscord = () => {
+    window.open("https://discord.com/channels/1032679994285109349/1302354288395419679", "_blank");
+    setInstructionsOpen(false);
+    onOpenChange(false);
+  };
 
   return (
     <>
@@ -88,18 +99,6 @@ export const ProductModal = ({ product, open, onOpenChange }: ProductModalProps)
                 <p className="text-muted-foreground leading-relaxed">{product.details}</p>
               </div>
 
-              {/* Aankoop Instructies */}
-              <div className="bg-primary/10 border border-primary/20 rounded-lg p-4 space-y-2">
-                <h4 className="font-semibold text-primary mb-2">📋 Hoe te kopen?</h4>
-                <ol className="text-sm text-foreground space-y-2 list-decimal list-inside">
-                  <li>Klik op "Koop Nu" hieronder</li>
-                  <li className="font-semibold">Maak een AANKOOP ticket aan (GEEN vragen ticket!)</li>
-                  <li>Vul het formulier in met je gegevens</li>
-                  <li>Tag <span className="text-primary font-mono">@Mees_079_</span> in het ticket</li>
-                  <li>Wacht op bevestiging en verdere instructies</li>
-                </ol>
-              </div>
-
               <div className="flex items-center justify-between pt-4 border-t border-border">
                 <div>
                   <p className="text-sm text-muted-foreground mb-1">Prijs</p>
@@ -109,15 +108,9 @@ export const ProductModal = ({ product, open, onOpenChange }: ProductModalProps)
                   variant="glow" 
                   size="lg" 
                   className="rounded-full px-8"
-                  asChild
+                  onClick={handleBuyClick}
                 >
-                  <a 
-                    href="https://discord.com/channels/1032679994285109349/1302354288395419679" 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                  >
-                    Koop Nu
-                  </a>
+                  Koop Nu
                 </Button>
               </div>
             </div>
@@ -158,6 +151,70 @@ export const ProductModal = ({ product, open, onOpenChange }: ProductModalProps)
               </>
             )}
           </Carousel>
+        </DialogContent>
+      </Dialog>
+
+      {/* Aankoop Instructies Modal */}
+      <Dialog open={instructionsOpen} onOpenChange={setInstructionsOpen}>
+        <DialogContent className="max-w-lg bg-card border-primary/30">
+          <DialogHeader>
+            <DialogTitle className="text-2xl text-primary flex items-center gap-2">
+              📋 Hoe te kopen?
+            </DialogTitle>
+            <DialogDescription className="text-muted-foreground">
+              Volg deze stappen om je aankoop te voltooien
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-6">
+            <div className="bg-primary/10 border border-primary/20 rounded-lg p-6">
+              <ol className="text-foreground space-y-4 list-none">
+                <li className="flex gap-3">
+                  <span className="flex-shrink-0 w-6 h-6 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-sm font-bold">1</span>
+                  <span>Klik op "Ga naar Discord" hieronder</span>
+                </li>
+                <li className="flex gap-3">
+                  <span className="flex-shrink-0 w-6 h-6 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-sm font-bold">2</span>
+                  <span className="font-semibold">Maak een AANKOOP ticket aan (GEEN vragen ticket!)</span>
+                </li>
+                <li className="flex gap-3">
+                  <span className="flex-shrink-0 w-6 h-6 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-sm font-bold">3</span>
+                  <span>Vul het formulier in met je gegevens</span>
+                </li>
+                <li className="flex gap-3">
+                  <span className="flex-shrink-0 w-6 h-6 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-sm font-bold">4</span>
+                  <span>Tag <span className="text-primary font-mono font-semibold">@Mees_079_</span> in het ticket</span>
+                </li>
+                <li className="flex gap-3">
+                  <span className="flex-shrink-0 w-6 h-6 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-sm font-bold">5</span>
+                  <span>Wacht op bevestiging en verdere instructies</span>
+                </li>
+              </ol>
+            </div>
+
+            <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-4">
+              <p className="text-sm text-foreground">
+                <span className="font-bold text-destructive">⚠️ Let op:</span> Maak alleen een AANKOOP ticket aan, geen vragen ticket!
+              </p>
+            </div>
+
+            <div className="flex gap-3">
+              <Button 
+                variant="outline" 
+                className="flex-1"
+                onClick={() => setInstructionsOpen(false)}
+              >
+                Annuleren
+              </Button>
+              <Button 
+                variant="glow" 
+                className="flex-1"
+                onClick={handleProceedToDiscord}
+              >
+                Ga naar Discord <ExternalLink className="ml-2 h-4 w-4" />
+              </Button>
+            </div>
+          </div>
         </DialogContent>
       </Dialog>
     </>
