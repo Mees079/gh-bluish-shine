@@ -7,6 +7,13 @@ import {
 } from "@/components/ui/dialog";
 import { Product } from "./ProductCard";
 import { Button } from "@/components/ui/button";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "@/components/ui/carousel";
 
 interface ProductModalProps {
   product: Product | null;
@@ -28,13 +35,23 @@ export const ProductModal = ({ product, open, onOpenChange }: ProductModalProps)
         </DialogHeader>
         
         <div className="space-y-6">
-          <div className="aspect-video overflow-hidden rounded-lg bg-secondary">
-            <img
-              src={product.image}
-              alt={product.name}
-              className="w-full h-full object-cover"
-            />
-          </div>
+          <Carousel className="w-full">
+            <CarouselContent>
+              {product.images.map((image, index) => (
+                <CarouselItem key={index}>
+                  <div className="aspect-video overflow-hidden rounded-lg bg-secondary">
+                    <img
+                      src={image}
+                      alt={`${product.name} - foto ${index + 1}`}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                </CarouselItem>
+              ))}
+            </CarouselContent>
+            <CarouselPrevious className="left-4" />
+            <CarouselNext className="right-4" />
+          </Carousel>
 
           <div className="space-y-4">
             <div>

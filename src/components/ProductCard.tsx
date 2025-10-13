@@ -3,7 +3,7 @@ import { Card, CardContent } from "@/components/ui/card";
 export interface Product {
   id: string;
   name: string;
-  image: string;
+  images: string[]; // Changed to array for multiple images
   price: string;
   description: string;
   details: string;
@@ -23,7 +23,7 @@ export const ProductCard = ({ product, onClick }: ProductCardProps) => {
       <CardContent className="p-0">
         <div className="aspect-video overflow-hidden bg-secondary">
           <img
-            src={product.image}
+            src={product.images[0]}
             alt={product.name}
             className="w-full h-full object-cover"
           />

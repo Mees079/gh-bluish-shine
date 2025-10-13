@@ -5,12 +5,32 @@ import weaponImage from "@/assets/weapon-example.jpg";
 import vipImage from "@/assets/vip-example.jpg";
 import itemsImage from "@/assets/items-example.jpg";
 
+// ===================================================================
+// PRODUCTEN CONFIGURATIE - Makkelijk aan te passen!
+// ===================================================================
+// 
+// HOE EEN PRODUCT TOEVOEGEN:
+// 1. Voeg je foto's toe in de /src/assets/ map
+// 2. Importeer de foto's bovenaan dit bestand
+// 3. Kopieer een bestaand product en pas de gegevens aan
+//
+// VOORBEELD:
+// {
+//   id: "unieke-id",           // Moet uniek zijn
+//   name: "Product Naam",      // Naam die getoond wordt
+//   images: [foto1, foto2],    // Array met meerdere foto's
+//   price: "€XX,XX",           // Prijs
+//   description: "Korte tekst", // Korte beschrijving onder de foto
+//   details: "Lange tekst",    // Uitgebreide beschrijving in popup
+// }
+// ===================================================================
+
 export const products: Record<Category, Product[]> = {
   voertuigen: [
     {
       id: "car-1",
       name: "Lamborghini Huracán",
-      image: carImage,
+      images: [carImage, carImage], // Je kan meerdere foto's toevoegen
       price: "€50,00",
       description: "Ultra snelle sportwagen met neon underglow",
       details:
@@ -19,7 +39,7 @@ export const products: Record<Category, Product[]> = {
     {
       id: "car-2",
       name: "Mercedes-AMG GT",
-      image: carImage,
+      images: [carImage],
       price: "€45,00",
       description: "Luxe sportwagen met premium afwerking",
       details:
@@ -28,7 +48,7 @@ export const products: Record<Category, Product[]> = {
     {
       id: "car-3",
       name: "BMW M4",
-      image: carImage,
+      images: [carImage],
       price: "€40,00",
       description: "Sport sedan met race performance",
       details:
@@ -39,7 +59,7 @@ export const products: Record<Category, Product[]> = {
     {
       id: "weapon-1",
       name: "Tactical AR-15",
-      image: weaponImage,
+      images: [weaponImage, weaponImage],
       price: "€25,00",
       description: "Zwaar aanvalsgeweer met blauwe neon",
       details:
@@ -48,7 +68,7 @@ export const products: Record<Category, Product[]> = {
     {
       id: "weapon-2",
       name: "Desert Eagle .50",
-      image: weaponImage,
+      images: [weaponImage],
       price: "€15,00",
       description: "Krachtig handvuurwapen",
       details:
@@ -57,7 +77,7 @@ export const products: Record<Category, Product[]> = {
     {
       id: "weapon-3",
       name: "MP5 SMG",
-      image: weaponImage,
+      images: [weaponImage],
       price: "€20,00",
       description: "Tactisch machinegeweer",
       details:
@@ -68,7 +88,7 @@ export const products: Record<Category, Product[]> = {
     {
       id: "item-1",
       name: "Tactical Backpack",
-      image: itemsImage,
+      images: [itemsImage],
       price: "€10,00",
       description: "Extra inventory space met stijl",
       details:
@@ -77,7 +97,7 @@ export const products: Record<Category, Product[]> = {
     {
       id: "item-2",
       name: "Medic Kit Pro",
-      image: itemsImage,
+      images: [itemsImage],
       price: "€8,00",
       description: "Uitgebreide medische set",
       details:
@@ -86,7 +106,7 @@ export const products: Record<Category, Product[]> = {
     {
       id: "item-3",
       name: "Lockpick Set Deluxe",
-      image: itemsImage,
+      images: [itemsImage],
       price: "€12,00",
       description: "Professional lockpicking tools",
       details:
@@ -97,7 +117,7 @@ export const products: Record<Category, Product[]> = {
     {
       id: "vip-1",
       name: "VIP Gold Status",
-      image: vipImage,
+      images: [vipImage],
       price: "€30,00 / maand",
       description: "Premium roleplay ervaring",
       details:
@@ -106,7 +126,7 @@ export const products: Record<Category, Product[]> = {
     {
       id: "vip-2",
       name: "VIP Diamond Status",
-      image: vipImage,
+      images: [vipImage],
       price: "€50,00 / maand",
       description: "Ultimate premium ervaring",
       details:
@@ -115,7 +135,7 @@ export const products: Record<Category, Product[]> = {
     {
       id: "vip-3",
       name: "VIP Lifetime",
-      image: vipImage,
+      images: [vipImage],
       price: "€250,00 eenmalig",
       description: "Levenslang VIP voordelen",
       details:
