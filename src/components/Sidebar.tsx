@@ -13,7 +13,7 @@ import { Button } from "@/components/ui/button";
 // Iconen vind je op: https://lucide.dev/icons
 // ===================================================================
 
-export type Category = "voertuigen" | "wapens" | "items" | "vip";
+export type Category = "Aankoop pakketen" | "specialisaties" | "Voertuigen" | "Voertuig pakketen"| "Wapens" | "Wapen pakketen" | "Mystery's";
 
 interface SidebarProps {
   activeCategory: Category;
@@ -22,10 +22,13 @@ interface SidebarProps {
 
 // Voeg hier nieuwe categorie buttons toe
 const categories = [
+  { id: "Aankoop pakketen" as Category, label: "Aankoop pakketen", icon: Car },
+  { id: "specialisaties" as Category, label: "specialisaties", icon: Sword },
   { id: "voertuigen" as Category, label: "Voertuigen", icon: Car },
-  { id: "wapens" as Category, label: "Wapens", icon: Sword },
-  { id: "items" as Category, label: "Items", icon: Package },
-  { id: "vip" as Category, label: "VIP", icon: Crown },
+  { id: "Voertuig pakketen" as Category, label: "Voertuig pakketen", icon: Car },
+  { id: "Wapens" as Category, label: "Wapens", icon: Package },
+  { id: "Wapen pakketen" as Category, label: "Wapen pakketen", icon: Package },
+  { id: "Mystery's" as Category, label: "Mystery's", icon: Crown },
   // NIEUWE CATEGORIE TOEVOEGEN? Kopieer een regel hierboven en pas aan!
   // Voorbeeld: { id: "huizen" as Category, label: "Huizen", icon: Home },
 ];
@@ -34,8 +37,8 @@ export const Sidebar = ({ activeCategory, onCategoryChange }: SidebarProps) => {
   return (
     <aside className="w-64 min-h-screen bg-card border-r border-border p-6 flex flex-col gap-4">
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-primary mb-2">Game Hoofddorp</h1>
-        <p className="text-sm text-muted-foreground">Roleplay Donatie Shop</p>
+        <h1 className="text-2xl font-bold text-primary mb-2">HDRP Hoofddorp roleplay</h1>
+        <p className="text-sm text-muted-foreground">Aankooop preview</p>
       </div>
 
       <nav className="flex flex-col gap-3">
