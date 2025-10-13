@@ -64,8 +64,19 @@ export const ProductModal = ({ product, open, onOpenChange }: ProductModalProps)
                 <p className="text-sm text-muted-foreground mb-1">Prijs</p>
                 <p className="text-2xl font-bold text-primary">{product.price}</p>
               </div>
-              <Button variant="glow" size="lg" className="rounded-full px-8">
-                Koop Nu
+              <Button 
+                variant="glow" 
+                size="lg" 
+                className="rounded-full px-8"
+                asChild
+              >
+                <a 
+                  href="https://discord.gg/jrXJ5uK4ZZ" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                >
+                  Koop Nu
+                </a>
               </Button>
             </div>
           </div>
