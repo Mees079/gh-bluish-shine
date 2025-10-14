@@ -1,4 +1,4 @@
-import { Car, Sword, Package, Crown } from "lucide-react";
+import { Car, Sword, Package, Crown, Users, Target, CarFront, Bomb, Gift } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 // ===================================================================
@@ -20,25 +20,25 @@ interface SidebarProps {
   onCategoryChange: (category: Category) => void;
 }
 
-// Voeg hier nieuwe categorie buttons toe met emoji's
+// Voeg hier nieuwe categorie buttons toe met passende iconen
 const categories = [
-  { id: "Aankoop pakketen" as Category, label: "📦 Aankoop Pakketen", icon: Package },
-  { id: "specialisaties" as Category, label: "🎯 Specialisaties", icon: Sword },
-  { id: "Voertuigen" as Category, label: "🚗 Voertuigen", icon: Car },
-  { id: "Voertuig pakketen" as Category, label: "🏎️ Voertuig Pakketen", icon: Car },
-  { id: "Wapens" as Category, label: "🔫 Wapens", icon: Sword },
-  { id: "Wapen pakketen" as Category, label: "💣 Wapen Pakketen", icon: Package },
-  { id: "Mystery's" as Category, label: "🎁 Mystery's", icon: Crown },
+  { id: "Aankoop pakketen" as Category, label: "Aankoop Pakketen", icon: Package },
+  { id: "specialisaties" as Category, label: "Specialisaties", icon: Target },
+  { id: "Voertuigen" as Category, label: "Voertuigen", icon: Car },
+  { id: "Voertuig pakketen" as Category, label: "Voertuig Pakketen", icon: CarFront },
+  { id: "Wapens" as Category, label: "Wapens", icon: Sword },
+  { id: "Wapen pakketen" as Category, label: "Wapen Pakketen", icon: Bomb },
+  { id: "Mystery's" as Category, label: "Mystery's", icon: Gift },
   // NIEUWE CATEGORIE TOEVOEGEN? Kopieer een regel hierboven en pas aan!
-  // Voorbeeld: { id: "huizen" as Category, label: "🏠 Huizen", icon: Home },
+  // Voorbeeld: { id: "huizen" as Category, label: "Huizen", icon: Home },
 ];
 
 export const Sidebar = ({ activeCategory, onCategoryChange }: SidebarProps) => {
   return (
     <aside className="w-64 min-h-screen bg-card border-r border-border p-6 flex flex-col gap-4">
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-primary mb-2">HDRP Hoofddorp roleplay</h1>
-        <p className="text-sm text-muted-foreground">Aankooop preview</p>
+        <h1 className="text-xl sm:text-2xl font-bold text-primary mb-2">HDRP Hoofddorp roleplay</h1>
+        <p className="text-xs sm:text-sm text-muted-foreground">Aankoop preview</p>
       </div>
 
       <nav className="flex flex-col gap-3">
@@ -49,13 +49,12 @@ export const Sidebar = ({ activeCategory, onCategoryChange }: SidebarProps) => {
           return (
             <Button
               key={category.id}
-              variant={isActive ? "glow" : "secondary"}
-              size="lg"
+              variant={isActive ? "glow" : "outline"}
+              className="w-full justify-start gap-3 text-sm sm:text-base h-11"
               onClick={() => onCategoryChange(category.id)}
-              className="w-full justify-start rounded-full"
             >
-              <Icon className="mr-3 h-5 w-5" />
-              {category.label}
+              <Icon className="h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0" />
+              <span className="truncate">{category.label}</span>
             </Button>
           );
         })}
