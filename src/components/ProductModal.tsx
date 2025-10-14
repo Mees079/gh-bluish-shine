@@ -43,15 +43,15 @@ export const ProductModal = ({ product, open, onOpenChange }: ProductModalProps)
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="max-w-3xl bg-card border-border max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-3xl bg-card border-border max-h-[90vh] overflow-y-auto custom-scrollbar sm:max-w-[90vw]">
           <DialogHeader>
-            <DialogTitle className="text-2xl text-foreground">{product.name}</DialogTitle>
-            <DialogDescription className="text-muted-foreground">
+            <DialogTitle className="text-xl sm:text-2xl text-foreground">{product.name}</DialogTitle>
+            <DialogDescription className="text-sm sm:text-base text-muted-foreground">
               {product.description}
             </DialogDescription>
           </DialogHeader>
           
-          <div className="space-y-6">
+          <div className="space-y-4 sm:space-y-6">
             {/* Afbeeldingen Galerie */}
             <div className="space-y-3">
               {/* Hoofd Afbeelding */}
@@ -95,19 +95,19 @@ export const ProductModal = ({ product, open, onOpenChange }: ProductModalProps)
 
             <div className="space-y-4">
               <div>
-                <h4 className="font-semibold text-foreground mb-2">Beschrijving</h4>
-                <p className="text-muted-foreground leading-relaxed">{product.details}</p>
+                <h4 className="font-semibold text-base sm:text-lg text-foreground mb-2">Beschrijving</h4>
+                <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">{product.details}</p>
               </div>
 
-              <div className="flex items-center justify-between pt-4 border-t border-border">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pt-4 border-t border-border">
                 <div>
-                  <p className="text-sm text-muted-foreground mb-1">Prijs</p>
-                  <p className="text-2xl font-bold text-primary">{product.price}</p>
+                  <p className="text-xs sm:text-sm text-muted-foreground mb-1">Prijs</p>
+                  <p className="text-xl sm:text-2xl font-bold text-primary">{product.price}</p>
                 </div>
                 <Button 
                   variant="glow" 
                   size="lg" 
-                  className="rounded-full px-8"
+                  className="rounded-full px-6 sm:px-8 w-full sm:w-auto text-sm sm:text-base"
                   onClick={handleBuyClick}
                 >
                   Koop Nu
@@ -156,62 +156,62 @@ export const ProductModal = ({ product, open, onOpenChange }: ProductModalProps)
 
       {/* Aankoop Instructies Modal */}
       <Dialog open={instructionsOpen} onOpenChange={setInstructionsOpen}>
-        <DialogContent className="max-w-lg bg-card border-primary/30">
+        <DialogContent className="max-w-lg bg-card border-primary/30 sm:max-w-[90vw] custom-scrollbar">
           <DialogHeader>
-            <DialogTitle className="text-2xl text-primary flex items-center gap-2">
+            <DialogTitle className="text-xl sm:text-2xl text-primary flex items-center gap-2">
               📋 Hoe te kopen?
             </DialogTitle>
-            <DialogDescription className="text-muted-foreground">
+            <DialogDescription className="text-sm sm:text-base text-muted-foreground">
               Volg deze stappen om je aankoop te voltooien
             </DialogDescription>
           </DialogHeader>
           
-          <div className="space-y-6">
-            <div className="bg-primary/10 border border-primary/20 rounded-lg p-6">
-              <ol className="text-foreground space-y-4 list-none">
-                <li className="flex gap-3">
-                  <span className="flex-shrink-0 w-6 h-6 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-sm font-bold">1</span>
+          <div className="space-y-4 sm:space-y-6">
+            <div className="bg-primary/10 border border-primary/20 rounded-lg p-4 sm:p-6">
+              <ol className="text-foreground space-y-3 sm:space-y-4 list-none text-sm sm:text-base">
+                <li className="flex gap-2 sm:gap-3">
+                  <span className="flex-shrink-0 w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-xs sm:text-sm font-bold">1</span>
                   <span>Klik op "Ga naar Discord" hieronder</span>
                 </li>
-                <li className="flex gap-3">
-                  <span className="flex-shrink-0 w-6 h-6 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-sm font-bold">2</span>
+                <li className="flex gap-2 sm:gap-3">
+                  <span className="flex-shrink-0 w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-xs sm:text-sm font-bold">2</span>
                   <span className="font-semibold">Maak een AANKOOP ticket aan (GEEN vragen ticket!)</span>
                 </li>
-                <li className="flex gap-3">
-                  <span className="flex-shrink-0 w-6 h-6 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-sm font-bold">3</span>
+                <li className="flex gap-2 sm:gap-3">
+                  <span className="flex-shrink-0 w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-xs sm:text-sm font-bold">3</span>
                   <span>Vul het formulier in met je gegevens</span>
                 </li>
-                <li className="flex gap-3">
-                  <span className="flex-shrink-0 w-6 h-6 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-sm font-bold">4</span>
+                <li className="flex gap-2 sm:gap-3">
+                  <span className="flex-shrink-0 w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-xs sm:text-sm font-bold">4</span>
                   <span>Tag <span className="text-primary font-mono font-semibold">@Mees_079_</span> in het ticket</span>
                 </li>
-                <li className="flex gap-3">
-                  <span className="flex-shrink-0 w-6 h-6 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-sm font-bold">5</span>
+                <li className="flex gap-2 sm:gap-3">
+                  <span className="flex-shrink-0 w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-xs sm:text-sm font-bold">5</span>
                   <span>Wacht op bevestiging en verdere instructies</span>
                 </li>
               </ol>
             </div>
 
-            <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-4">
-              <p className="text-sm text-foreground">
+            <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-3 sm:p-4">
+              <p className="text-xs sm:text-sm text-foreground">
                 <span className="font-bold text-destructive">⚠️ Let op:</span> Maak alleen een AANKOOP ticket aan, geen vragen ticket!
               </p>
             </div>
 
-            <div className="flex gap-3">
+            <div className="flex flex-col sm:flex-row gap-3">
               <Button 
                 variant="outline" 
-                className="flex-1"
+                className="flex-1 text-sm sm:text-base"
                 onClick={() => setInstructionsOpen(false)}
               >
                 Annuleren
               </Button>
               <Button 
                 variant="glow" 
-                className="flex-1"
+                className="flex-1 text-sm sm:text-base"
                 onClick={handleProceedToDiscord}
               >
-                Ga naar Discord <ExternalLink className="ml-2 h-4 w-4" />
+                Ga naar Discord <ExternalLink className="ml-2 h-3 w-3 sm:h-4 sm:w-4" />
               </Button>
             </div>
           </div>

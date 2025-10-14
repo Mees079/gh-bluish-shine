@@ -6,7 +6,7 @@ import { Product } from "@/components/ProductCard";
 import { products } from "@/data/products";
 
 const Index = () => {
-  const [activeCategory, setActiveCategory] = useState<Category>("voertuigen");
+  const [activeCategory, setActiveCategory] = useState<Category>("Aankoop pakketen");
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
 

@@ -20,17 +20,17 @@ interface SidebarProps {
   onCategoryChange: (category: Category) => void;
 }
 
-// Voeg hier nieuwe categorie buttons toe
+// Voeg hier nieuwe categorie buttons toe met emoji's
 const categories = [
-  { id: "Aankoop pakketen" as Category, label: "Aankoop pakketen", icon: Car },
-  { id: "specialisaties" as Category, label: "specialisaties", icon: Sword },
-  { id: "voertuigen" as Category, label: "Voertuigen", icon: Car },
-  { id: "Voertuig pakketen" as Category, label: "Voertuig pakketen", icon: Car },
-  { id: "Wapens" as Category, label: "Wapens", icon: Package },
-  { id: "Wapen pakketen" as Category, label: "Wapen pakketen", icon: Package },
-  { id: "Mystery's" as Category, label: "Mystery's", icon: Crown },
+  { id: "Aankoop pakketen" as Category, label: "📦 Aankoop Pakketen", icon: Package },
+  { id: "specialisaties" as Category, label: "🎯 Specialisaties", icon: Sword },
+  { id: "Voertuigen" as Category, label: "🚗 Voertuigen", icon: Car },
+  { id: "Voertuig pakketen" as Category, label: "🏎️ Voertuig Pakketen", icon: Car },
+  { id: "Wapens" as Category, label: "🔫 Wapens", icon: Sword },
+  { id: "Wapen pakketen" as Category, label: "💣 Wapen Pakketen", icon: Package },
+  { id: "Mystery's" as Category, label: "🎁 Mystery's", icon: Crown },
   // NIEUWE CATEGORIE TOEVOEGEN? Kopieer een regel hierboven en pas aan!
-  // Voorbeeld: { id: "huizen" as Category, label: "Huizen", icon: Home },
+  // Voorbeeld: { id: "huizen" as Category, label: "🏠 Huizen", icon: Home },
 ];
 
 export const Sidebar = ({ activeCategory, onCategoryChange }: SidebarProps) => {
