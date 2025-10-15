@@ -16,7 +16,7 @@ const Index = () => {
   };
 
   return (
-    <div className="flex min-h-screen bg-background">
+    <div className="flex flex-col sm:flex-row min-h-screen bg-background">
       <Sidebar 
         activeCategory={activeCategory} 
         onCategoryChange={setActiveCategory}
@@ -24,11 +24,11 @@ const Index = () => {
       
       <main className="flex-1 p-4 sm:p-6 lg:p-8">
         <div className="max-w-7xl mx-auto">
-          <h2 className="text-2xl sm:text-3xl font-bold mb-6 sm:mb-8 text-foreground capitalize">
+          <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold mb-4 sm:mb-6 lg:mb-8 text-foreground capitalize">
             {activeCategory}
           </h2>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
             {products[activeCategory].map((product) => (
               <ProductCard
                 key={product.id}
