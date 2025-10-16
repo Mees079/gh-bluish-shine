@@ -32,14 +32,10 @@ export const AdminLogin = ({ onSuccess }: AdminLoginProps) => {
       if (error) throw error;
 
       if (data.user) {
-        // Check if user is admin
-        const { data: roleData } = await supabase
-          .from('user_roles')
-          .select('role')
-          .eq('user_id', data.user.id)
-          .single();
+        // Check admin status using backend function (supports admin & super_admin)
+        const { data: isAdmin, error: roleCheckError } = await supabase.rpc('is_admin', { _user_id: data.user.id });
 
-        if (!roleData) {
+        if (roleCheckError || !isAdmin) {
           await supabase.auth.signOut();
           throw new Error("Geen admin toegang");
         }

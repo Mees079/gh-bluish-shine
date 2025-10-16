@@ -39,14 +39,9 @@ export const AdminPanel = () => {
       setUser(session?.user ?? null);
       
       if (session?.user) {
-        // Check if user is admin
-        const { data } = await supabase
-          .from('user_roles')
-          .select('role')
-          .eq('user_id', session.user.id)
-          .single();
-        
-        setIsAdmin(!!data);
+        // Check if user is admin (supports admin & super_admin)
+        const { data: isAdminFlag } = await supabase.rpc('is_admin', { _user_id: session.user.id });
+        setIsAdmin(!!isAdminFlag);
       }
       setLoading(false);
     };
@@ -57,13 +52,11 @@ export const AdminPanel = () => {
       setUser(session?.user ?? null);
       
       if (session?.user) {
-        const { data } = await supabase
-          .from('user_roles')
-          .select('role')
-          .eq('user_id', session.user.id)
-          .single();
-        
-        setIsAdmin(!!data);
+        // Defer backend calls inside auth state change to avoid deadlocks
+        setTimeout(async () => {
+          const { data: isAdminFlag } = await supabase.rpc('is_admin', { _user_id: session.user!.id });
+          setIsAdmin(!!isAdminFlag);
+        }, 0);
       } else {
         setIsAdmin(false);
       }
