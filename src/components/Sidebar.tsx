@@ -1,4 +1,4 @@
-import { Car, Sword, Package, Crown, Users, Target, CarFront, Bomb, Gift } from "lucide-react";
+import { Car, Sword, Package, Crown, Users, Target, CarFront, Bomb, Gift, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 // ===================================================================
@@ -34,6 +34,10 @@ const categories = [
 ];
 
 export const Sidebar = ({ activeCategory, onCategoryChange }: SidebarProps) => {
+  const handleAdminClick = () => {
+    window.dispatchEvent(new Event("open-admin"));
+  };
+
   return (
     <aside className="w-full sm:w-64 min-h-auto sm:min-h-screen bg-card border-b sm:border-r sm:border-b-0 border-border p-4 sm:p-6 flex flex-col gap-2 sm:gap-4">
       <div className="mb-4 sm:mb-8">
@@ -59,6 +63,16 @@ export const Sidebar = ({ activeCategory, onCategoryChange }: SidebarProps) => {
             </Button>
           );
         })}
+
+        {/* Admin login button - alleen zichtbaar op mobiel */}
+        <Button
+          variant="default"
+          className="flex-shrink-0 sm:hidden justify-center gap-2 text-xs h-9 px-3 bg-primary hover:bg-primary/90"
+          onClick={handleAdminClick}
+        >
+          <Lock className="h-3 w-3 flex-shrink-0" />
+          <span className="truncate text-[10px]">Admin</span>
+        </Button>
       </nav>
     </aside>
   );
