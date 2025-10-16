@@ -4,6 +4,7 @@ import { ProductCard } from "@/components/ProductCard";
 import { ProductModal } from "@/components/ProductModal";
 import { Product } from "@/components/ProductCard";
 import { products } from "@/data/products";
+import { FooterLogin } from "@/components/auth/FooterLogin";
 
 const Index = () => {
   const [activeCategory, setActiveCategory] = useState<Category>("Aankoop pakketen");
@@ -39,6 +40,8 @@ const Index = () => {
           </div>
         </div>
       </main>
+
+      <FooterLogin />
 
       <ProductModal
         product={selectedProduct}

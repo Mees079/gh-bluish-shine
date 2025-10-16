@@ -14,7 +14,7 @@ export const AdminPanel = () => {
   const { toast } = useToast();
 
   useEffect(() => {
-    // CTRL + SHIFT + P trigger
+    // CTRL + SHIFT + P trigger + custom event
     const handleKeyPress = (e: KeyboardEvent) => {
       if (e.ctrlKey && e.shiftKey && e.key === 'P') {
         e.preventDefault();
@@ -22,8 +22,14 @@ export const AdminPanel = () => {
       }
     };
 
+    const handleOpenAdmin = () => setOpen(true);
+
     window.addEventListener('keydown', handleKeyPress);
-    return () => window.removeEventListener('keydown', handleKeyPress);
+    window.addEventListener('open-admin', handleOpenAdmin as unknown as EventListener);
+    return () => {
+      window.removeEventListener('keydown', handleKeyPress);
+      window.removeEventListener('open-admin', handleOpenAdmin as unknown as EventListener);
+    };
   }, []);
 
   useEffect(() => {

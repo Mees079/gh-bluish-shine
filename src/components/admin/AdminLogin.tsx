@@ -116,13 +116,8 @@ export const AdminLogin = ({ onSuccess }: AdminLoginProps) => {
         </Button>
       </form>
 
-      <div className="mt-6 p-4 bg-primary/10 rounded-lg text-sm text-center">
-        <p className="text-muted-foreground">
-          <strong>Standaard login:</strong><br />
-          Gebruikersnaam: HDRP<br />
-          Wachtwoord: Mees
-        </p>
-      </div>
+      
+
     </div>
   );
 };
