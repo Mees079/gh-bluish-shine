@@ -1,39 +1,49 @@
-import { Car, Sword, Package, Crown, Users, Target, CarFront, Bomb, Gift, Lock } from "lucide-react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
+import { Lock } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import * as LucideIcons from "lucide-react";
 
-// ===================================================================
-// CATEGORIEËN CONFIGURATIE - Hier voeg je nieuwe kopjes toe!
-// ===================================================================
-// 
-// HOE EEN CATEGORIE TOEVOEGEN:
-// 1. Voeg de naam toe aan de Category type hieronder (bijv. | "huizen")
-// 2. Voeg een button toe in de categories array
-// 3. Voeg producten toe in src/data/products.ts met dezelfde naam
-// 
-// Iconen vind je op: https://lucide.dev/icons
-// ===================================================================
-
-export type Category = "Aankoop pakketen" | "specialisaties" | "Voertuigen" | "Voertuig pakketen"| "Wapens" | "Wapen pakketen" | "Mystery's";
-
-interface SidebarProps {
-  activeCategory: Category;
-  onCategoryChange: (category: Category) => void;
+export interface Category {
+  id: string;
+  name: string;
+  label: string;
+  icon: string;
+  display_order: number;
 }
 
-// Voeg hier nieuwe categorie buttons toe met passende iconen
-const categories = [
-  { id: "Aankoop pakketen" as Category, label: "Aankoop Pakketen", icon: Package },
-  { id: "specialisaties" as Category, label: "Specialisaties", icon: Target },
-  { id: "Voertuigen" as Category, label: "Voertuigen", icon: Car },
-  { id: "Voertuig pakketen" as Category, label: "Voertuig Pakketen", icon: CarFront },
-  { id: "Wapens" as Category, label: "Wapens", icon: Sword },
-  { id: "Wapen pakketen" as Category, label: "Wapen Pakketen", icon: Bomb },
-  { id: "Mystery's" as Category, label: "Mystery's", icon: Gift },
-  // NIEUWE CATEGORIE TOEVOEGEN? Kopieer een regel hierboven en pas aan!
-  // Voorbeeld: { id: "huizen" as Category, label: "Huizen", icon: Home },
-];
+interface SidebarProps {
+  activeCategory: string | null;
+  onCategoryChange: (categoryId: string) => void;
+}
 
 export const Sidebar = ({ activeCategory, onCategoryChange }: SidebarProps) => {
+  const [categories, setCategories] = useState<Category[]>([]);
+
+  useEffect(() => {
+    loadCategories();
+  }, []);
+
+  const loadCategories = async () => {
+    const { data } = await supabase
+      .from('categories')
+      .select('*')
+      .order('display_order');
+    
+    if (data) {
+      setCategories(data);
+      // Set eerste categorie als actief als er nog geen is
+      if (!activeCategory && data.length > 0) {
+        onCategoryChange(data[0].id);
+      }
+    }
+  };
+
+  const getIconComponent = (iconName: string) => {
+    const Icon = (LucideIcons as any)[iconName];
+    return Icon || LucideIcons.Package;
+  };
+
   const handleAdminClick = () => {
     window.dispatchEvent(new Event("open-admin"));
   };
@@ -47,7 +57,7 @@ export const Sidebar = ({ activeCategory, onCategoryChange }: SidebarProps) => {
 
       <nav className="flex flex-row sm:flex-col gap-2 overflow-x-auto sm:overflow-x-visible pb-2 sm:pb-0">
         {categories.map((category) => {
-          const Icon = category.icon;
+          const Icon = getIconComponent(category.icon);
           const isActive = activeCategory === category.id;
           
           return (
