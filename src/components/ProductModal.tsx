@@ -29,6 +29,8 @@ export const ProductModal = ({ product, open, onOpenChange }: ProductModalProps)
   const [instructionsOpen, setInstructionsOpen] = useState(false);
 
   if (!product) return null;
+  
+  const hasImages = product.images && product.images.length > 0;
 
   const handleBuyClick = () => {
     setInstructionsOpen(true);
@@ -53,45 +55,47 @@ export const ProductModal = ({ product, open, onOpenChange }: ProductModalProps)
           
           <div className="space-y-4 sm:space-y-6">
             {/* Afbeeldingen Galerie */}
-            <div className="space-y-3">
-              {/* Hoofd Afbeelding */}
-              <div 
-                className="aspect-video overflow-hidden rounded-lg bg-secondary cursor-pointer hover:opacity-90 transition-opacity"
-                onClick={() => {
-                  setSelectedImage(0);
-                  setLightboxOpen(true);
-                }}
-              >
-                <img
-                  src={product.images[selectedImage]}
-                  alt={`${product.name} - foto ${selectedImage + 1}`}
-                  className="w-full h-full object-cover"
-                />
-              </div>
-
-              {/* Thumbnails */}
-              {product.images.length > 1 && (
-                <div className="grid grid-cols-4 gap-2">
-                  {product.images.map((image, index) => (
-                    <div
-                      key={index}
-                      className={`aspect-video overflow-hidden rounded-md cursor-pointer transition-all ${
-                        selectedImage === index 
-                          ? "ring-2 ring-primary shadow-glow" 
-                          : "hover:ring-2 hover:ring-primary/50"
-                      }`}
-                      onClick={() => setSelectedImage(index)}
-                    >
-                      <img
-                        src={image}
-                        alt={`${product.name} thumbnail ${index + 1}`}
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                  ))}
+            {hasImages && (
+              <div className="space-y-3">
+                {/* Hoofd Afbeelding */}
+                <div 
+                  className="aspect-video overflow-hidden rounded-lg bg-secondary cursor-pointer hover:opacity-90 transition-opacity"
+                  onClick={() => {
+                    setSelectedImage(0);
+                    setLightboxOpen(true);
+                  }}
+                >
+                  <img
+                    src={product.images[selectedImage]}
+                    alt={`${product.name} - foto ${selectedImage + 1}`}
+                    className="w-full h-full object-cover"
+                  />
                 </div>
-              )}
-            </div>
+
+                {/* Thumbnails */}
+                {product.images.length > 1 && (
+                  <div className="grid grid-cols-4 gap-2">
+                    {product.images.map((image, index) => (
+                      <div
+                        key={index}
+                        className={`aspect-video overflow-hidden rounded-md cursor-pointer transition-all ${
+                          selectedImage === index 
+                            ? "ring-2 ring-primary shadow-glow" 
+                            : "hover:ring-2 hover:ring-primary/50"
+                        }`}
+                        onClick={() => setSelectedImage(index)}
+                      >
+                        <img
+                          src={image}
+                          alt={`${product.name} thumbnail ${index + 1}`}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
 
             <div className="space-y-4">
               <div>
@@ -119,40 +123,42 @@ export const ProductModal = ({ product, open, onOpenChange }: ProductModalProps)
       </Dialog>
 
       {/* Lightbox voor grote afbeeldingen */}
-      <Dialog open={lightboxOpen} onOpenChange={setLightboxOpen}>
-        <DialogContent className="max-w-[95vw] max-h-[95vh] bg-black/95 border-primary/20 p-0">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="absolute right-4 top-4 z-50 text-white hover:bg-white/20"
-            onClick={() => setLightboxOpen(false)}
-          >
-            <X className="h-6 w-6" />
-          </Button>
-          
-          <Carousel className="w-full h-full">
-            <CarouselContent>
-              {product.images.map((image, index) => (
-                <CarouselItem key={index}>
-                  <div className="flex items-center justify-center h-[95vh] p-8">
-                    <img
-                      src={image}
-                      alt={`${product.name} - foto ${index + 1}`}
-                      className="max-w-full max-h-full object-contain"
-                    />
-                  </div>
-                </CarouselItem>
-              ))}
-            </CarouselContent>
-            {product.images.length > 1 && (
-              <>
-                <CarouselPrevious className="left-4 bg-white/10 hover:bg-white/20 text-white border-white/20" />
-                <CarouselNext className="right-4 bg-white/10 hover:bg-white/20 text-white border-white/20" />
-              </>
-            )}
-          </Carousel>
-        </DialogContent>
-      </Dialog>
+      {hasImages && (
+        <Dialog open={lightboxOpen} onOpenChange={setLightboxOpen}>
+          <DialogContent className="max-w-[95vw] max-h-[95vh] bg-black/95 border-primary/20 p-0">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="absolute right-4 top-4 z-50 text-white hover:bg-white/20"
+              onClick={() => setLightboxOpen(false)}
+            >
+              <X className="h-6 w-6" />
+            </Button>
+            
+            <Carousel className="w-full h-full">
+              <CarouselContent>
+                {product.images.map((image, index) => (
+                  <CarouselItem key={index}>
+                    <div className="flex items-center justify-center h-[95vh] p-8">
+                      <img
+                        src={image}
+                        alt={`${product.name} - foto ${index + 1}`}
+                        className="max-w-full max-h-full object-contain"
+                      />
+                    </div>
+                  </CarouselItem>
+                ))}
+              </CarouselContent>
+              {product.images.length > 1 && (
+                <>
+                  <CarouselPrevious className="left-4 bg-white/10 hover:bg-white/20 text-white border-white/20" />
+                  <CarouselNext className="right-4 bg-white/10 hover:bg-white/20 text-white border-white/20" />
+                </>
+              )}
+            </Carousel>
+          </DialogContent>
+        </Dialog>
+      )}
 
       {/* Aankoop Instructies Modal */}
       <Dialog open={instructionsOpen} onOpenChange={setInstructionsOpen}>

@@ -1,8 +1,7 @@
 import { useState, useEffect } from "react";
-import { Button } from "@/components/ui/button";
-import { Lock } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
 import * as LucideIcons from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { supabase } from "@/integrations/supabase/client";
 
 export interface Category {
   id: string;
@@ -19,6 +18,7 @@ interface SidebarProps {
 
 export const Sidebar = ({ activeCategory, onCategoryChange }: SidebarProps) => {
   const [categories, setCategories] = useState<Category[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     loadCategories();
@@ -32,14 +32,14 @@ export const Sidebar = ({ activeCategory, onCategoryChange }: SidebarProps) => {
     
     if (data) {
       setCategories(data);
-      // Set eerste categorie als actief als er nog geen is
-      if (!activeCategory && data.length > 0) {
+      if (data.length > 0 && !activeCategory) {
         onCategoryChange(data[0].id);
       }
     }
+    setLoading(false);
   };
 
-  const getIconComponent = (iconName: string) => {
+  const getIcon = (iconName: string) => {
     const Icon = (LucideIcons as any)[iconName];
     return Icon || LucideIcons.Package;
   };
@@ -56,33 +56,39 @@ export const Sidebar = ({ activeCategory, onCategoryChange }: SidebarProps) => {
       </div>
 
       <nav className="flex flex-row sm:flex-col gap-2 overflow-x-auto sm:overflow-x-visible pb-2 sm:pb-0">
-        {categories.map((category) => {
-          const Icon = getIconComponent(category.icon);
-          const isActive = activeCategory === category.id;
-          
-          return (
-            <Button
-              key={category.id}
-              variant={isActive ? "glow" : "outline"}
-              className="flex-shrink-0 sm:flex-shrink sm:w-full justify-center sm:justify-start gap-2 sm:gap-3 text-xs sm:text-sm h-9 sm:h-11 px-3 sm:px-4"
-              onClick={() => onCategoryChange(category.id)}
-            >
-              <Icon className="h-3 w-3 sm:h-4 sm:w-4 lg:h-5 lg:w-5 flex-shrink-0" />
-              <span className="truncate hidden sm:inline">{category.label}</span>
-              <span className="truncate sm:hidden text-[10px]">{category.label.split(' ')[0]}</span>
-            </Button>
-          );
-        })}
+        {loading ? (
+          <div className="text-sm text-muted-foreground">Laden...</div>
+        ) : (
+          <>
+            {categories.map((category) => {
+              const Icon = getIcon(category.icon);
+              const isActive = activeCategory === category.id;
+              
+              return (
+                <Button
+                  key={category.id}
+                  variant={isActive ? "glow" : "outline"}
+                  className="flex-shrink-0 sm:flex-shrink sm:w-full justify-center sm:justify-start gap-2 sm:gap-3 text-xs sm:text-sm h-9 sm:h-11 px-3 sm:px-4"
+                  onClick={() => onCategoryChange(category.id)}
+                >
+                  <Icon className="h-3 w-3 sm:h-4 sm:w-4 lg:h-5 lg:w-5 flex-shrink-0" />
+                  <span className="truncate hidden sm:inline">{category.label}</span>
+                  <span className="truncate sm:hidden text-[10px]">{category.label.split(' ')[0]}</span>
+                </Button>
+              );
+            })}
 
-        {/* Admin login button - alleen zichtbaar op mobiel */}
-        <Button
-          variant="default"
-          className="flex-shrink-0 sm:hidden justify-center gap-2 text-xs h-9 px-3 bg-primary hover:bg-primary/90"
-          onClick={handleAdminClick}
-        >
-          <Lock className="h-3 w-3 flex-shrink-0" />
-          <span className="truncate text-[10px]">Admin</span>
-        </Button>
+            {/* Admin login button - alleen zichtbaar op mobiel */}
+            <Button
+              variant="default"
+              className="flex-shrink-0 sm:hidden justify-center gap-2 text-xs h-9 px-3 bg-primary hover:bg-primary/90"
+              onClick={handleAdminClick}
+            >
+              <LucideIcons.Lock className="h-3 w-3 flex-shrink-0" />
+              <span className="truncate text-[10px]">Admin</span>
+            </Button>
+          </>
+        )}
       </nav>
     </aside>
   );
