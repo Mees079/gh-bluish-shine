@@ -36,41 +36,11 @@ export const ProductCard = ({ product, onClick }: ProductCardProps) => {
               <p className="text-primary font-bold text-lg px-4 text-center">Binnenkort Beschikbaar</p>
             </div>
           ) : hasImages ? (
-            hasMultipleImages ? (
-              <div className="flex flex-col gap-1 h-full w-full">
-                {/* Hoofdafbeelding - Bovenaan, groot */}
-                <div className="flex-[2] overflow-hidden">
-                  <img
-                    src={product.images[0]}
-                    alt={product.name}
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-                {/* Thumbnails - Eronder in grid van 3 kolommen */}
-                <div className="flex-1 grid grid-cols-3 gap-1">
-                  {product.images.slice(1, 7).map((image, index) => (
-                    <div key={index} className="overflow-hidden bg-secondary/80">
-                      <img
-                        src={image}
-                        alt={`${product.name} ${index + 2}`}
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                  ))}
-                  {product.images.length > 7 && (
-                    <div className="overflow-hidden bg-secondary/90 flex items-center justify-center">
-                      <p className="text-xs text-muted-foreground font-semibold">+{product.images.length - 7}</p>
-                    </div>
-                  )}
-                </div>
-              </div>
-            ) : (
-              <img
-                src={product.images[0]}
-                alt={product.name}
-                className="w-full h-full object-cover"
-              />
-            )
+            <img
+              src={product.images[0]}
+              alt={product.name}
+              className="w-full h-full object-cover"
+            />
           ) : (
             <img
               src={placeholderImage}
