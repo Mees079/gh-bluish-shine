@@ -44,6 +44,42 @@ export type Database = {
         }
         Relationships: []
       }
+      code_products: {
+        Row: {
+          code_id: string
+          created_at: string
+          id: string
+          product_id: string
+        }
+        Insert: {
+          code_id: string
+          created_at?: string
+          id?: string
+          product_id: string
+        }
+        Update: {
+          code_id?: string
+          created_at?: string
+          id?: string
+          product_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "code_products_code_id_fkey"
+            columns: ["code_id"]
+            isOneToOne: false
+            referencedRelation: "redemption_codes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "code_products_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       discounts: {
         Row: {
           active: boolean | null
@@ -185,6 +221,39 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      redemption_codes: {
+        Row: {
+          active: boolean
+          claimed_at: string | null
+          claimed_by_username: string | null
+          code: string
+          created_at: string
+          created_by: string | null
+          id: string
+          notes: string | null
+        }
+        Insert: {
+          active?: boolean
+          claimed_at?: string | null
+          claimed_by_username?: string | null
+          code: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          notes?: string | null
+        }
+        Update: {
+          active?: boolean
+          claimed_at?: string | null
+          claimed_by_username?: string | null
+          code?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          notes?: string | null
+        }
+        Relationships: []
       }
       user_roles: {
         Row: {

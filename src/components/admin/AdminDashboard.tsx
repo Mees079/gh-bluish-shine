@@ -7,6 +7,7 @@ import { ProductsManager } from "./ProductsManager";
 import { CategoriesManager } from "./CategoriesManagerDnd";
 import { DiscountsManager } from "./DiscountsManager";
 import { AccountManager } from "./AccountManager";
+import { CodesManager } from "./CodesManager";
 
 interface AdminDashboardProps {
   user: User;
@@ -29,28 +30,41 @@ export const AdminDashboard = ({ user, onLogout }: AdminDashboardProps) => {
         </Button>
       </div>
 
-      <Tabs defaultValue="products" className="w-full">
-        <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="products">Producten</TabsTrigger>
-          <TabsTrigger value="categories">Categorieën</TabsTrigger>
-          <TabsTrigger value="discounts">Kortingen</TabsTrigger>
-          <TabsTrigger value="account">Account</TabsTrigger>
+      <Tabs defaultValue="codes" className="w-full">
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="codes">Codes</TabsTrigger>
+          <TabsTrigger value="site">Site Bewerken</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="products" className="mt-6">
-          <ProductsManager />
+        <TabsContent value="codes" className="mt-6">
+          <CodesManager />
         </TabsContent>
 
-        <TabsContent value="categories" className="mt-6">
-          <CategoriesManager />
-        </TabsContent>
+        <TabsContent value="site" className="mt-6">
+          <Tabs defaultValue="products" className="w-full">
+            <TabsList className="grid w-full grid-cols-4">
+              <TabsTrigger value="products">Producten</TabsTrigger>
+              <TabsTrigger value="categories">Categorieën</TabsTrigger>
+              <TabsTrigger value="discounts">Kortingen</TabsTrigger>
+              <TabsTrigger value="account">Account</TabsTrigger>
+            </TabsList>
 
-        <TabsContent value="discounts" className="mt-6">
-          <DiscountsManager />
-        </TabsContent>
+            <TabsContent value="products" className="mt-6">
+              <ProductsManager />
+            </TabsContent>
 
-        <TabsContent value="account" className="mt-6">
-          <AccountManager user={user} />
+            <TabsContent value="categories" className="mt-6">
+              <CategoriesManager />
+            </TabsContent>
+
+            <TabsContent value="discounts" className="mt-6">
+              <DiscountsManager />
+            </TabsContent>
+
+            <TabsContent value="account" className="mt-6">
+              <AccountManager user={user} />
+            </TabsContent>
+          </Tabs>
         </TabsContent>
       </Tabs>
     </div>
