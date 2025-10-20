@@ -148,9 +148,10 @@ const Index = () => {
                       </Button>
                     </DialogTrigger>
                     <DialogContent className="sm:max-w-md">
-                      <DialogHeader>
-                        <DialogTitle>Zoek producten</DialogTitle>
-                      </DialogHeader>
+                    <DialogHeader>
+                      <DialogTitle>Zoek producten</DialogTitle>
+                      <p className="text-sm text-muted-foreground">Zoek op naam of beschrijving</p>
+                    </DialogHeader>
                       <div className="space-y-4">
                         <Input
                           placeholder="Zoek producten..."

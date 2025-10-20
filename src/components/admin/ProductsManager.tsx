@@ -63,7 +63,7 @@ export const ProductsManager = () => {
       description: formData.get('description') as string,
       details: formData.get('details') as string,
       active: formData.get('active') === 'true',
-      coming_soon: formData.get('coming_soon') === 'true',
+      coming_soon: formData.get('coming_soon') !== null,
     };
 
     // Validate input
