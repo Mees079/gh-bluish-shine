@@ -6,8 +6,11 @@ import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
-import { Search } from "lucide-react";
+import { Search, Filter } from "lucide-react";
 import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 
 const Index = () => {
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
@@ -17,9 +20,11 @@ const Index = () => {
   const [categoryLabel, setCategoryLabel] = useState<string>("");
   const [loading, setLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [searchOpen, setSearchOpen] = useState(false);
   const [sortBy, setSortBy] = useState<string>("price-asc");
   const [maxPrice, setMaxPrice] = useState<number>(1000);
   const [priceFilter, setPriceFilter] = useState<number>(1000);
+  const [filterOpen, setFilterOpen] = useState(false);
 
   useEffect(() => {
     if (activeCategory) {
@@ -134,43 +139,73 @@ const Index = () => {
               <div className="mb-6 space-y-4">
                 <h2 className="text-2xl sm:text-3xl font-bold text-foreground">{categoryLabel}</h2>
                 
-                <div className="border rounded-lg p-4 space-y-4 bg-card/50">
-                  <h3 className="text-sm font-semibold text-foreground">Filters</h3>
-                  
-                  <div className="flex flex-col sm:flex-row gap-4">
-                    <div className="relative flex-1">
-                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                      <Input
-                        placeholder="Zoek producten..."
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        className="pl-9"
-                      />
-                    </div>
-                    <Select value={sortBy} onValueChange={setSortBy}>
-                      <SelectTrigger className="w-full sm:w-[200px]">
-                        <SelectValue placeholder="Sorteer op" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="price-asc">Prijs: Laag - Hoog</SelectItem>
-                        <SelectItem value="price-desc">Prijs: Hoog - Laag</SelectItem>
-                        <SelectItem value="name-asc">Naam: A - Z</SelectItem>
-                        <SelectItem value="name-desc">Naam: Z - A</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
+                <div className="flex gap-2">
+                  {/* Zoek knop met dialog */}
+                  <Dialog open={searchOpen} onOpenChange={setSearchOpen}>
+                    <DialogTrigger asChild>
+                      <Button variant="outline" size="icon">
+                        <Search className="h-4 w-4" />
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="sm:max-w-md">
+                      <DialogHeader>
+                        <DialogTitle>Zoek producten</DialogTitle>
+                      </DialogHeader>
+                      <div className="space-y-4">
+                        <Input
+                          placeholder="Zoek producten..."
+                          value={searchQuery}
+                          onChange={(e) => setSearchQuery(e.target.value)}
+                          autoFocus
+                        />
+                        <Button onClick={() => setSearchOpen(false)} className="w-full">
+                          Zoeken
+                        </Button>
+                      </div>
+                    </DialogContent>
+                  </Dialog>
 
-                  <div className="space-y-1.5">
-                    <Label className="text-sm text-muted-foreground">Max. Prijs: €{priceFilter}</Label>
-                    <Slider
-                      value={[priceFilter]}
-                      onValueChange={(value) => setPriceFilter(value[0])}
-                      max={maxPrice}
-                      min={0}
-                      step={1}
-                      className="w-full"
-                    />
-                  </div>
+                  {/* Sorteer dropdown */}
+                  <Select value={sortBy} onValueChange={setSortBy}>
+                    <SelectTrigger className="w-[200px]">
+                      <SelectValue placeholder="Sorteer op" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="price-asc">Prijs: Laag - Hoog</SelectItem>
+                      <SelectItem value="price-desc">Prijs: Hoog - Laag</SelectItem>
+                      <SelectItem value="name-asc">Naam: A - Z</SelectItem>
+                      <SelectItem value="name-desc">Naam: Z - A</SelectItem>
+                    </SelectContent>
+                  </Select>
+
+                  {/* Filter popover */}
+                  <Popover open={filterOpen} onOpenChange={setFilterOpen}>
+                    <PopoverTrigger asChild>
+                      <Button variant="outline">
+                        <Filter className="h-4 w-4 mr-2" />
+                        Filter
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-80">
+                      <div className="space-y-4">
+                        <h4 className="font-medium leading-none">Max. Prijs</h4>
+                        <div className="space-y-2">
+                          <Label className="text-sm text-muted-foreground">€{priceFilter}</Label>
+                          <Slider
+                            value={[priceFilter]}
+                            onValueChange={(value) => setPriceFilter(value[0])}
+                            max={maxPrice}
+                            min={0}
+                            step={1}
+                            className="w-full"
+                          />
+                        </div>
+                        <Button onClick={() => setFilterOpen(false)} className="w-full">
+                          Toepassen
+                        </Button>
+                      </div>
+                    </PopoverContent>
+                  </Popover>
                 </div>
               </div>
               
