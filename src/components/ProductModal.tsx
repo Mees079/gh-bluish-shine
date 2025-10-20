@@ -109,7 +109,9 @@ export const ProductModal = ({ product, open, onOpenChange }: ProductModalProps)
               {product.details && (
                 <div>
                   <h3 className="font-semibold mb-2">Details</h3>
-                  <p className="text-muted-foreground whitespace-pre-line">{product.details}</p>
+                  <div className="max-h-[300px] overflow-y-auto custom-scrollbar pr-2">
+                    <p className="text-muted-foreground whitespace-pre-line">{product.details}</p>
+                  </div>
                 </div>
               )}
               <div className="pt-4 border-t">

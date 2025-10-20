@@ -28,6 +28,13 @@ export const ProductsManager = () => {
     loadData();
   }, []);
 
+  // Set roundToNinetyNine to true by default when opening dialog
+  useEffect(() => {
+    if (dialogOpen && !editingProduct) {
+      setRoundToNinetyNine(true);
+    }
+  }, [dialogOpen, editingProduct]);
+
   const loadData = async () => {
     setLoading(true);
     const [productsRes, categoriesRes] = await Promise.all([
@@ -46,7 +53,7 @@ export const ProductsManager = () => {
     
     let price = parseFloat(formData.get('price') as string);
     if (roundToNinetyNine) {
-      price = Math.floor(price) + 0.99;
+      price = Math.ceil(price) - 0.01;
     }
 
     const productData = {

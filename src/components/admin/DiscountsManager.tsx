@@ -39,15 +39,18 @@ export const DiscountsManager = () => {
     const formData = new FormData(e.currentTarget);
     
     const percentage = formData.get('percentage') ? parseInt(formData.get('percentage') as string) : null;
+    const fixedAmount = formData.get('fixed_amount') ? parseFloat(formData.get('fixed_amount') as string) : null;
+    const expiresAt = formData.get('expires_at') ? formData.get('expires_at') as string : null;
     
     const discountData: any = {
       code: formData.get('code') as string,
       percentage: percentage,
-      fixed_amount: formData.get('fixed_amount') ? parseFloat(formData.get('fixed_amount') as string) : null,
+      fixed_amount: fixedAmount,
       active: formData.get('active') === 'true',
       applies_to: applyTo,
       product_id: applyTo === 'product' ? (formData.get('product_id') as string || null) : null,
       category_id: applyTo === 'category' ? (formData.get('category_id') as string || null) : null,
+      expires_at: expiresAt,
     };
 
     // Validate input
@@ -63,13 +66,20 @@ export const DiscountsManager = () => {
     }
 
     // Apply discount to all products if shop-wide
-    if (applyTo === 'shop' && percentage) {
+    if (applyTo === 'shop') {
       try {
         const { data: allProducts } = await supabase.from('products').select('id, price');
         if (allProducts) {
           for (const prod of allProducts) {
-            const discountedPrice = prod.price * (1 - percentage / 100);
-            await supabase.from('products').update({ discounted_price: discountedPrice }).eq('id', prod.id);
+            let discountedPrice;
+            if (percentage) {
+              discountedPrice = prod.price * (1 - percentage / 100);
+            } else if (fixedAmount) {
+              discountedPrice = Math.max(0, prod.price - fixedAmount);
+            }
+            if (discountedPrice !== undefined) {
+              await supabase.from('products').update({ discounted_price: discountedPrice }).eq('id', prod.id);
+            }
           }
         }
       } catch (error) {
@@ -78,7 +88,7 @@ export const DiscountsManager = () => {
     }
 
     // Apply discount to category products
-    if (applyTo === 'category' && percentage && discountData.category_id) {
+    if (applyTo === 'category' && discountData.category_id) {
       try {
         const { data: categoryProducts } = await supabase
           .from('products')
@@ -87,8 +97,15 @@ export const DiscountsManager = () => {
         
         if (categoryProducts) {
           for (const prod of categoryProducts) {
-            const discountedPrice = prod.price * (1 - percentage / 100);
-            await supabase.from('products').update({ discounted_price: discountedPrice }).eq('id', prod.id);
+            let discountedPrice;
+            if (percentage) {
+              discountedPrice = prod.price * (1 - percentage / 100);
+            } else if (fixedAmount) {
+              discountedPrice = Math.max(0, prod.price - fixedAmount);
+            }
+            if (discountedPrice !== undefined) {
+              await supabase.from('products').update({ discounted_price: discountedPrice }).eq('id', prod.id);
+            }
           }
         }
       } catch (error) {
@@ -97,7 +114,7 @@ export const DiscountsManager = () => {
     }
 
     // Apply discount to specific product
-    if (applyTo === 'product' && percentage && discountData.product_id) {
+    if (applyTo === 'product' && discountData.product_id) {
       try {
         const { data: product } = await supabase
           .from('products')
@@ -106,8 +123,15 @@ export const DiscountsManager = () => {
           .single();
         
         if (product) {
-          const discountedPrice = product.price * (1 - percentage / 100);
-          await supabase.from('products').update({ discounted_price: discountedPrice }).eq('id', discountData.product_id);
+          let discountedPrice;
+          if (percentage) {
+            discountedPrice = product.price * (1 - percentage / 100);
+          } else if (fixedAmount) {
+            discountedPrice = Math.max(0, product.price - fixedAmount);
+          }
+          if (discountedPrice !== undefined) {
+            await supabase.from('products').update({ discounted_price: discountedPrice }).eq('id', discountData.product_id);
+          }
         }
       } catch (error) {
         console.error('Error applying product discount:', error);
@@ -189,14 +213,17 @@ export const DiscountsManager = () => {
             </DialogHeader>
             <form onSubmit={handleSave} className="space-y-4">
               <div>
-                <Label htmlFor="code">Naam/Code</Label>
+                <Label htmlFor="code">Kortingsnaam</Label>
                 <Input
                   id="code"
                   name="code"
-                  placeholder="bijv: ZOMER2025"
+                  placeholder="bijv: Zomerkorting 2025"
                   defaultValue={editingDiscount?.code}
                   required
                 />
+                <p className="text-xs text-muted-foreground mt-1">
+                  Alleen voor intern gebruik, niet zichtbaar voor klanten
+                </p>
               </div>
               <div>
                 <Label htmlFor="applies_to">Toepassen op</Label>
@@ -246,7 +273,7 @@ export const DiscountsManager = () => {
                 </div>
               )}
               <div>
-                <Label htmlFor="percentage">Percentage (%)</Label>
+                <Label htmlFor="percentage">Kortingspercentage (%)</Label>
                 <Input
                   id="percentage"
                   name="percentage"
@@ -255,8 +282,37 @@ export const DiscountsManager = () => {
                   max="100"
                   placeholder="bijv: 20"
                   defaultValue={editingDiscount?.percentage}
-                  required
                 />
+                <p className="text-xs text-muted-foreground mt-1">
+                  Laat leeg voor vast bedrag korting
+                </p>
+              </div>
+              <div>
+                <Label htmlFor="fixed_amount">Vast bedrag korting (€)</Label>
+                <Input
+                  id="fixed_amount"
+                  name="fixed_amount"
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  placeholder="bijv: 50.00"
+                  defaultValue={editingDiscount?.fixed_amount}
+                />
+                <p className="text-xs text-muted-foreground mt-1">
+                  Laat leeg voor percentage korting
+                </p>
+              </div>
+              <div>
+                <Label htmlFor="expires_at">Vervaldatum (optioneel)</Label>
+                <Input
+                  id="expires_at"
+                  name="expires_at"
+                  type="datetime-local"
+                  defaultValue={editingDiscount?.expires_at ? new Date(editingDiscount.expires_at).toISOString().slice(0, 16) : ''}
+                />
+                <p className="text-xs text-muted-foreground mt-1">
+                  Laat leeg voor onbeperkte duur
+                </p>
               </div>
               <div>
                 <Label htmlFor="active">Status</Label>
@@ -282,7 +338,8 @@ export const DiscountsManager = () => {
             <div>
               <h4 className="font-semibold">{discount.code}</h4>
               <p className="text-sm text-muted-foreground">
-                {discount.percentage}% korting
+                {discount.percentage && `${discount.percentage}% korting`}
+                {discount.fixed_amount && `€${discount.fixed_amount} korting`}
               </p>
               <p className="text-sm text-muted-foreground">
                 Toepassen op: {
@@ -291,6 +348,11 @@ export const DiscountsManager = () => {
                   `Product: ${discount.product?.name || 'Onbekend'}`
                 }
               </p>
+              {discount.expires_at && (
+                <p className="text-sm text-muted-foreground">
+                  Verloopt: {new Date(discount.expires_at).toLocaleString('nl-NL')}
+                </p>
+              )}
               <p className="text-sm text-muted-foreground">
                 Status: {discount.active ? 'Actief' : 'Inactief'}
               </p>
@@ -301,6 +363,7 @@ export const DiscountsManager = () => {
                 variant="outline"
                 onClick={() => {
                   setEditingDiscount(discount);
+                  setApplyTo(discount.applies_to || 'product');
                   setDialogOpen(true);
                 }}
               >

@@ -28,7 +28,11 @@ export const ProductCard = ({ product, onClick }: ProductCardProps) => {
     >
       <CardContent className="p-0">
         <div className="aspect-[4/3] overflow-hidden bg-secondary flex items-center justify-center relative">
-          {hasImages ? (
+          {product.coming_soon ? (
+            <div className="w-full h-full flex items-center justify-center bg-primary/10">
+              <p className="text-primary font-bold text-lg px-4 text-center">Binnenkort Beschikbaar</p>
+            </div>
+          ) : hasImages ? (
             <img
               src={product.images[0]}
               alt={product.name}
@@ -37,15 +41,12 @@ export const ProductCard = ({ product, onClick }: ProductCardProps) => {
           ) : (
             <div className="text-muted-foreground text-sm">Geen afbeelding</div>
           )}
-          {product.coming_soon && (
-            <Badge className="absolute top-2 right-2 bg-primary text-primary-foreground">
-              Binnenkort
-            </Badge>
-          )}
         </div>
         <div className="p-3">
           <h3 className="font-semibold text-base text-foreground mb-1">{product.name}</h3>
-          {hasDiscount ? (
+          {product.coming_soon ? (
+            <p className="text-primary font-bold">Binnenkort Beschikbaar</p>
+          ) : hasDiscount ? (
             <div className="flex items-center gap-2">
               <p className="text-muted-foreground line-through text-sm">{product.price}</p>
               <p className="text-primary font-bold">{product.discounted_price}</p>
