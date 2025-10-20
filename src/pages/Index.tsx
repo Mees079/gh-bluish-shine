@@ -10,7 +10,7 @@ import { Search, Filter } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from "@/components/ui/dialog";
 
 const Index = () => {
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
@@ -30,6 +30,23 @@ const Index = () => {
     if (activeCategory) {
       loadProducts();
     }
+  }, [activeCategory]);
+
+  // Realtime: update prijzen direct bij wijzigingen
+  useEffect(() => {
+    if (!activeCategory) return;
+    const channel = supabase
+      .channel('products-realtime')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'products' }, (payload) => {
+        // Alleen reloaden voor huidige categorie of voor brede updates
+        // payload.new/payload.old kunnen ontbreken bij DELETE/INSERT; fallback naar reload
+        loadProducts();
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, [activeCategory]);
 
   const loadProducts = async () => {
@@ -150,7 +167,7 @@ const Index = () => {
                     <DialogContent className="sm:max-w-md">
                     <DialogHeader>
                       <DialogTitle>Zoek producten</DialogTitle>
-                      <p className="text-sm text-muted-foreground">Zoek op naam of beschrijving</p>
+                      <DialogDescription>Zoek op naam of beschrijving</DialogDescription>
                     </DialogHeader>
                       <div className="space-y-4">
                         <Input
