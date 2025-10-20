@@ -16,6 +16,7 @@ import {
   CarouselPrevious,
 } from "@/components/ui/carousel";
 import { X, ExternalLink } from "lucide-react";
+import placeholderImage from "@/assets/placeholder.png";
 
 interface ProductModalProps {
   product: Product | null;
@@ -62,25 +63,27 @@ export const ProductModal = ({ product, open, onOpenChange }: ProductModalProps)
                   <p className="text-muted-foreground">Dit product komt binnenkort beschikbaar in onze shop</p>
                 </div>
               </div>
-            ) : hasImages && (
+            ) : (
               <div className="space-y-3">
                 {/* Hoofd Afbeelding */}
                 <div 
                   className="aspect-video overflow-hidden rounded-lg bg-secondary cursor-pointer hover:opacity-90 transition-opacity"
                   onClick={() => {
-                    setSelectedImage(0);
-                    setLightboxOpen(true);
+                    if (hasImages) {
+                      setSelectedImage(0);
+                      setLightboxOpen(true);
+                    }
                   }}
                 >
                   <img
-                    src={product.images[selectedImage]}
+                    src={hasImages ? product.images[selectedImage] : placeholderImage}
                     alt={`${product.name} - foto ${selectedImage + 1}`}
                     className="w-full h-full object-cover"
                   />
                 </div>
 
                 {/* Thumbnails */}
-                {product.images.length > 1 && (
+                {hasImages && product.images.length > 1 && (
                   <div className="grid grid-cols-4 gap-2">
                     {product.images.map((image, index) => (
                       <div

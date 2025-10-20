@@ -1,5 +1,6 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import placeholderImage from "@/assets/placeholder.png";
 
 export interface Product {
   id: string;
@@ -71,7 +72,11 @@ export const ProductCard = ({ product, onClick }: ProductCardProps) => {
               />
             )
           ) : (
-            <div className="text-muted-foreground text-sm">Geen afbeelding</div>
+            <img
+              src={placeholderImage}
+              alt="Placeholder"
+              className="w-full h-full object-cover"
+            />
           )}
         </div>
         <div className="p-3">
