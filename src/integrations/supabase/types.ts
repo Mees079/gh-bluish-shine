@@ -47,6 +47,7 @@ export type Database = {
       discounts: {
         Row: {
           active: boolean | null
+          applies_to: string | null
           category_id: string | null
           code: string
           created_at: string | null
@@ -59,6 +60,7 @@ export type Database = {
         }
         Insert: {
           active?: boolean | null
+          applies_to?: string | null
           category_id?: string | null
           code: string
           created_at?: string | null
@@ -71,6 +73,7 @@ export type Database = {
         }
         Update: {
           active?: boolean | null
+          applies_to?: string | null
           category_id?: string | null
           code?: string
           created_at?: string | null
@@ -134,9 +137,11 @@ export type Database = {
         Row: {
           active: boolean | null
           category_id: string
+          coming_soon: boolean | null
           created_at: string | null
           description: string | null
           details: string | null
+          discounted_price: number | null
           display_order: number
           id: string
           name: string
@@ -146,9 +151,11 @@ export type Database = {
         Insert: {
           active?: boolean | null
           category_id: string
+          coming_soon?: boolean | null
           created_at?: string | null
           description?: string | null
           details?: string | null
+          discounted_price?: number | null
           display_order?: number
           id?: string
           name: string
@@ -158,9 +165,11 @@ export type Database = {
         Update: {
           active?: boolean | null
           category_id?: string
+          coming_soon?: boolean | null
           created_at?: string | null
           description?: string | null
           details?: string | null
+          discounted_price?: number | null
           display_order?: number
           id?: string
           name?: string
@@ -203,6 +212,13 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
       is_admin: {
         Args: { _user_id: string }
         Returns: boolean

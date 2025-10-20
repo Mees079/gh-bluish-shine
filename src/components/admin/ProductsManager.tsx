@@ -5,9 +5,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Edit, Trash2, Upload } from "lucide-react";
+import { Plus, Edit, Trash2, Upload, X, Search } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export const ProductsManager = () => {
   const [products, setProducts] = useState<any[]>([]);
@@ -15,6 +17,10 @@ export const ProductsManager = () => {
   const [loading, setLoading] = useState(true);
   const [editingProduct, setEditingProduct] = useState<any>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [roundToNinetyNine, setRoundToNinetyNine] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [activeTab, setActiveTab] = useState<string>("all");
+  const [uploadingImages, setUploadingImages] = useState<FileList | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -37,16 +43,24 @@ export const ProductsManager = () => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
     
+    let price = parseFloat(formData.get('price') as string);
+    if (roundToNinetyNine) {
+      price = Math.floor(price) + 0.99;
+    }
+
     const productData = {
       name: formData.get('name') as string,
       category_id: formData.get('category_id') as string,
-      price: parseFloat(formData.get('price') as string),
+      price: price,
       description: formData.get('description') as string,
       details: formData.get('details') as string,
       active: formData.get('active') === 'true',
+      coming_soon: formData.get('coming_soon') === 'true',
     };
 
     try {
+      let productId = editingProduct?.id;
+      
       if (editingProduct) {
         const { error } = await supabase
           .from('products')
@@ -54,10 +68,18 @@ export const ProductsManager = () => {
           .eq('id', editingProduct.id);
         if (error) throw error;
       } else {
-        const { error } = await supabase
+        const { data, error } = await supabase
           .from('products')
-          .insert(productData);
+          .insert(productData)
+          .select()
+          .single();
         if (error) throw error;
+        productId = data.id;
+      }
+
+      // Upload images if any
+      if (uploadingImages && uploadingImages.length > 0 && productId) {
+        await handleImageUpload(productId, uploadingImages);
       }
 
       toast({
@@ -66,6 +88,8 @@ export const ProductsManager = () => {
       });
       setDialogOpen(false);
       setEditingProduct(null);
+      setUploadingImages(null);
+      setRoundToNinetyNine(false);
       loadData();
     } catch (error: any) {
       toast({
@@ -135,13 +159,72 @@ export const ProductsManager = () => {
     }
   };
 
+  const handleImageDelete = async (imageId: string, imageUrl: string) => {
+    try {
+      // Extract filename from URL
+      const urlParts = imageUrl.split('/');
+      const fileName = urlParts.slice(-2).join('/');
+
+      // Delete from storage
+      const { error: storageError } = await supabase.storage
+        .from('product-images')
+        .remove([fileName]);
+
+      if (storageError) throw storageError;
+
+      // Delete from database
+      const { error: dbError } = await supabase
+        .from('product_images')
+        .delete()
+        .eq('id', imageId);
+
+      if (dbError) throw dbError;
+
+      toast({
+        title: "Foto verwijderd",
+      });
+      loadData();
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "Fout",
+        description: error.message,
+      });
+    }
+  };
+
+  const filteredProducts = products.filter(product => {
+    const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                         product.description?.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesCategory = activeTab === "all" || product.category_id === activeTab;
+    return matchesSearch && matchesCategory;
+  });
+
   return (
     <div className="space-y-4">
-      <div className="flex justify-between items-center">
+      <div className="flex justify-between items-center flex-wrap gap-4">
         <h3 className="text-xl font-semibold">Producten Beheer</h3>
-        <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+        <div className="flex gap-2 flex-1 max-w-md">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Zoek producten..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-9"
+            />
+          </div>
+        </div>
+        <Dialog open={dialogOpen} onOpenChange={(open) => {
+          setDialogOpen(open);
+          if (!open) {
+            setEditingProduct(null);
+            setUploadingImages(null);
+            setRoundToNinetyNine(false);
+          }
+        }}>
           <DialogTrigger asChild>
-            <Button onClick={() => setEditingProduct(null)}>
+            <Button>
               <Plus className="h-4 w-4 mr-2" />
               Product Toevoegen
             </Button>
@@ -187,6 +270,19 @@ export const ProductsManager = () => {
                   defaultValue={editingProduct?.price}
                   required
                 />
+                <div className="flex items-center space-x-2 mt-2">
+                  <Checkbox
+                    id="roundPrice"
+                    checked={roundToNinetyNine}
+                    onCheckedChange={(checked) => setRoundToNinetyNine(checked as boolean)}
+                  />
+                  <label
+                    htmlFor="roundPrice"
+                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                  >
+                    Prijs afronden naar €X,99
+                  </label>
+                </div>
               </div>
               <div>
                 <Label htmlFor="description">Korte Beschrijving</Label>
@@ -218,14 +314,48 @@ export const ProductsManager = () => {
                   </SelectContent>
                 </Select>
               </div>
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="coming_soon"
+                  name="coming_soon"
+                  defaultChecked={editingProduct?.coming_soon}
+                />
+                <Label htmlFor="coming_soon" className="font-normal">
+                  Binnenkort beschikbaar
+                </Label>
+              </div>
+              <div>
+                <Label htmlFor="images">Foto's toevoegen</Label>
+                <Input
+                  id="images"
+                  type="file"
+                  multiple
+                  accept="image/*"
+                  onChange={(e) => setUploadingImages(e.target.files)}
+                />
+                <p className="text-xs text-muted-foreground mt-1">
+                  {uploadingImages ? `${uploadingImages.length} foto('s) geselecteerd` : 'Selecteer één of meerdere foto\'s'}
+                </p>
+              </div>
               <Button type="submit" className="w-full">Opslaan</Button>
             </form>
           </DialogContent>
         </Dialog>
       </div>
 
-      <div className="grid gap-4">
-        {products.map((product) => (
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+        <TabsList className="w-full justify-start overflow-x-auto flex-wrap h-auto">
+          <TabsTrigger value="all">Alle Producten</TabsTrigger>
+          {categories.map((cat) => (
+            <TabsTrigger key={cat.id} value={cat.id}>
+              {cat.label}
+            </TabsTrigger>
+          ))}
+        </TabsList>
+
+        <TabsContent value={activeTab} className="mt-4">
+          <div className="grid gap-4">
+            {filteredProducts.map((product) => (
           <div key={product.id} className="border rounded-lg p-4 space-y-3">
             <div className="flex justify-between items-start">
               <div>
@@ -272,18 +402,28 @@ export const ProductsManager = () => {
               />
               <div className="flex gap-2 mt-2 flex-wrap">
                 {product.images?.map((img: any) => (
-                  <img
-                    key={img.id}
-                    src={img.image_url}
-                    alt="Product"
-                    className="w-20 h-20 object-cover rounded"
-                  />
+                  <div key={img.id} className="relative group">
+                    <img
+                      src={img.image_url}
+                      alt="Product"
+                      className="w-20 h-20 object-cover rounded"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => handleImageDelete(img.id, img.image_url)}
+                      className="absolute top-1 right-1 bg-destructive text-destructive-foreground rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  </div>
                 ))}
               </div>
             </div>
+            </div>
+          ))}
           </div>
-        ))}
-      </div>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };

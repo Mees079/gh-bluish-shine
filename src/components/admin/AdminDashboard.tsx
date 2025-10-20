@@ -4,7 +4,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { LogOut } from "lucide-react";
 import { ProductsManager } from "./ProductsManager";
-import { CategoriesManager } from "./CategoriesManager";
+import { CategoriesManager } from "./CategoriesManagerDnd";
 import { DiscountsManager } from "./DiscountsManager";
 import { AccountManager } from "./AccountManager";
 

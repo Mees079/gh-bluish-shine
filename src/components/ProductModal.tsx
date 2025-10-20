@@ -26,31 +26,30 @@ interface ProductModalProps {
 export const ProductModal = ({ product, open, onOpenChange }: ProductModalProps) => {
   const [selectedImage, setSelectedImage] = useState(0);
   const [lightboxOpen, setLightboxOpen] = useState(false);
-  const [instructionsOpen, setInstructionsOpen] = useState(false);
+  const [showPurchaseModal, setShowPurchaseModal] = useState(false);
 
   if (!product) return null;
   
   const hasImages = product.images && product.images.length > 0;
-
-  const handleBuyClick = () => {
-    setInstructionsOpen(true);
-  };
+  const hasDiscount = product.discounted_price && parseFloat(product.discounted_price) > 0;
 
   const handleProceedToDiscord = () => {
     window.open("https://discord.com/channels/1032679994285109349/1302354288395419679", "_blank");
-    setInstructionsOpen(false);
+    setShowPurchaseModal(false);
     onOpenChange(false);
   };
 
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="max-w-3xl bg-card border-border max-h-[90vh] overflow-y-auto custom-scrollbar sm:max-w-[90vw]">
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle className="text-xl sm:text-2xl text-foreground">{product.name}</DialogTitle>
-            <DialogDescription className="text-sm sm:text-base text-muted-foreground">
-              {product.description}
-            </DialogDescription>
+            <DialogTitle className="text-2xl flex items-center gap-2">
+              {product.name}
+              {product.coming_soon && (
+                <span className="text-sm font-normal text-muted-foreground">(Binnenkort beschikbaar)</span>
+              )}
+            </DialogTitle>
           </DialogHeader>
           
           <div className="space-y-4 sm:space-y-6">
@@ -98,23 +97,37 @@ export const ProductModal = ({ product, open, onOpenChange }: ProductModalProps)
             )}
 
             <div className="space-y-4">
-              <div>
-                <h4 className="font-semibold text-base sm:text-lg text-foreground mb-2">Beschrijving</h4>
-                <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">{product.details}</p>
-              </div>
-
-              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pt-4 border-t border-border">
-                <div>
-                  <p className="text-xs sm:text-sm text-muted-foreground mb-1">Prijs</p>
-                  <p className="text-xl sm:text-2xl font-bold text-primary">{product.price}</p>
+              {product.coming_soon && (
+                <div className="bg-primary/10 border border-primary/20 rounded-lg p-4">
+                  <p className="text-primary font-semibold">Dit product is binnenkort beschikbaar!</p>
                 </div>
+              )}
+              <div>
+                <h3 className="font-semibold mb-2">Beschrijving</h3>
+                <p className="text-muted-foreground">{product.description}</p>
+              </div>
+              {product.details && (
+                <div>
+                  <h3 className="font-semibold mb-2">Details</h3>
+                  <p className="text-muted-foreground whitespace-pre-line">{product.details}</p>
+                </div>
+              )}
+              <div className="pt-4 border-t">
+                {hasDiscount ? (
+                  <div className="mb-4">
+                    <p className="text-xl text-muted-foreground line-through">{product.price}</p>
+                    <p className="text-3xl font-bold text-primary">{product.discounted_price}</p>
+                  </div>
+                ) : (
+                  <p className="text-3xl font-bold text-primary mb-4">{product.price}</p>
+                )}
                 <Button 
-                  variant="glow" 
-                  size="lg" 
-                  className="rounded-full px-6 sm:px-8 w-full sm:w-auto text-sm sm:text-base"
-                  onClick={handleBuyClick}
+                  onClick={() => setShowPurchaseModal(true)} 
+                  className="w-full" 
+                  size="lg"
+                  disabled={product.coming_soon}
                 >
-                  Koop Nu
+                  {product.coming_soon ? 'Binnenkort Beschikbaar' : 'Koop Nu'}
                 </Button>
               </div>
             </div>
@@ -161,7 +174,7 @@ export const ProductModal = ({ product, open, onOpenChange }: ProductModalProps)
       )}
 
       {/* Aankoop Instructies Modal */}
-      <Dialog open={instructionsOpen} onOpenChange={setInstructionsOpen}>
+      <Dialog open={showPurchaseModal} onOpenChange={setShowPurchaseModal}>
         <DialogContent className="max-w-lg bg-card border-primary/30 sm:max-w-[90vw] custom-scrollbar">
           <DialogHeader>
             <DialogTitle className="text-xl sm:text-2xl text-primary flex items-center gap-2">
@@ -208,7 +221,7 @@ export const ProductModal = ({ product, open, onOpenChange }: ProductModalProps)
               <Button 
                 variant="outline" 
                 className="flex-1 text-sm sm:text-base"
-                onClick={() => setInstructionsOpen(false)}
+                onClick={() => setShowPurchaseModal(false)}
               >
                 Annuleren
               </Button>

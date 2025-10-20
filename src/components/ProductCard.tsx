@@ -1,12 +1,15 @@
 import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 
 export interface Product {
   id: string;
   name: string;
-  images: string[]; // Changed to array for multiple images
+  images: string[];
   price: string;
   description: string;
   details: string;
+  coming_soon?: boolean;
+  discounted_price?: string;
 }
 
 interface ProductCardProps {
@@ -16,6 +19,7 @@ interface ProductCardProps {
 
 export const ProductCard = ({ product, onClick }: ProductCardProps) => {
   const hasImages = product.images && product.images.length > 0;
+  const hasDiscount = product.discounted_price && parseFloat(product.discounted_price) > 0;
   
   return (
     <Card
@@ -23,7 +27,7 @@ export const ProductCard = ({ product, onClick }: ProductCardProps) => {
       onClick={onClick}
     >
       <CardContent className="p-0">
-        <div className="aspect-video overflow-hidden bg-secondary flex items-center justify-center">
+        <div className="aspect-video overflow-hidden bg-secondary flex items-center justify-center relative">
           {hasImages ? (
             <img
               src={product.images[0]}
@@ -33,10 +37,22 @@ export const ProductCard = ({ product, onClick }: ProductCardProps) => {
           ) : (
             <div className="text-muted-foreground text-sm">Geen afbeelding</div>
           )}
+          {product.coming_soon && (
+            <Badge className="absolute top-2 right-2 bg-primary text-primary-foreground">
+              Binnenkort
+            </Badge>
+          )}
         </div>
         <div className="p-4">
           <h3 className="font-semibold text-lg text-foreground mb-1">{product.name}</h3>
-          <p className="text-primary font-bold">{product.price}</p>
+          {hasDiscount ? (
+            <div className="flex items-center gap-2">
+              <p className="text-muted-foreground line-through text-sm">{product.price}</p>
+              <p className="text-primary font-bold">{product.discounted_price}</p>
+            </div>
+          ) : (
+            <p className="text-primary font-bold">{product.price}</p>
+          )}
         </div>
       </CardContent>
     </Card>
