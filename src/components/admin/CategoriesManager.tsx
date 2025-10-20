@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { Plus, Edit, Trash2 } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { categorySchema } from "@/lib/validation";
 
 export const CategoriesManager = () => {
   const [categories, setCategories] = useState<any[]>([]);
@@ -35,6 +36,18 @@ export const CategoriesManager = () => {
       label: formData.get('label') as string,
       icon: formData.get('icon') as string,
     };
+
+    // Validate input
+    try {
+      categorySchema.parse(categoryData);
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "Validatiefout",
+        description: error.errors?.[0]?.message || "Controleer de invoer",
+      });
+      return;
+    }
 
     try {
       if (editingCategory) {

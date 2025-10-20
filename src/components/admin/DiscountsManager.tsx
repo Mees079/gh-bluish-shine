@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useToast } from "@/hooks/use-toast";
 import { Plus, Edit, Trash2 } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { discountSchema } from "@/lib/validation";
 
 export const DiscountsManager = () => {
   const [discounts, setDiscounts] = useState<any[]>([]);
@@ -48,6 +49,18 @@ export const DiscountsManager = () => {
       product_id: applyTo === 'product' ? (formData.get('product_id') as string || null) : null,
       category_id: applyTo === 'category' ? (formData.get('category_id') as string || null) : null,
     };
+
+    // Validate input
+    try {
+      discountSchema.parse(discountData);
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "Validatiefout",
+        description: error.errors?.[0]?.message || "Controleer de invoer",
+      });
+      return;
+    }
 
     // Apply discount to all products if shop-wide
     if (applyTo === 'shop' && percentage) {

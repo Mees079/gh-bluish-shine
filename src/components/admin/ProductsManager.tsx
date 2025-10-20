@@ -10,6 +10,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Plus, Edit, Trash2, Upload, X, Search } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { productSchema } from "@/lib/validation";
 
 export const ProductsManager = () => {
   const [products, setProducts] = useState<any[]>([]);
@@ -57,6 +58,18 @@ export const ProductsManager = () => {
       active: formData.get('active') === 'true',
       coming_soon: formData.get('coming_soon') === 'true',
     };
+
+    // Validate input
+    try {
+      productSchema.parse(productData);
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "Validatiefout",
+        description: error.errors?.[0]?.message || "Controleer de invoer",
+      });
+      return;
+    }
 
     try {
       let productId = editingProduct?.id;

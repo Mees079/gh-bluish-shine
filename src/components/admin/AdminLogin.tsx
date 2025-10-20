@@ -77,7 +77,7 @@ export const AdminLogin = ({ onSuccess }: AdminLoginProps) => {
             <Input
               id="username"
               type="text"
-              placeholder="HDRP"
+              placeholder="Gebruikersnaam"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               className="pl-10"

@@ -18,8 +18,9 @@ serve(async (req) => {
     )
 
     // Ensure default admin user and role
-    const email = 'HDRP@hdrp.local'
-    const password = 'Mees'
+    // SECURITY: Use environment variables instead of hardcoded credentials
+    const email = Deno.env.get('DEFAULT_ADMIN_EMAIL') ?? 'admin@example.local'
+    const password = Deno.env.get('DEFAULT_ADMIN_PASSWORD') ?? crypto.randomUUID()
 
     const { data: usersList, error: listError } = await supabase.auth.admin.listUsers()
     if (listError) throw listError

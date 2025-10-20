@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { Key, UserPlus } from "lucide-react";
+import { accountSchema } from "@/lib/validation";
 
 interface AccountManagerProps {
   user: User;
@@ -45,6 +46,21 @@ export const AccountManager = ({ user }: AccountManagerProps) => {
 
   const handleCreateUser = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Validate input
+    try {
+      accountSchema.parse({
+        username: newUsername,
+        password: newUserPassword,
+      });
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "Validatiefout",
+        description: error.errors?.[0]?.message || "Controleer de invoer",
+      });
+      return;
+    }
 
     try {
       const email = `${newUsername}@hdrp.local`;
