@@ -27,7 +27,7 @@ export const ProductCard = ({ product, onClick }: ProductCardProps) => {
       onClick={onClick}
     >
       <CardContent className="p-0">
-        <div className="aspect-video overflow-hidden bg-secondary flex items-center justify-center relative">
+        <div className="aspect-[4/3] overflow-hidden bg-secondary flex items-center justify-center relative">
           {hasImages ? (
             <img
               src={product.images[0]}
@@ -43,8 +43,8 @@ export const ProductCard = ({ product, onClick }: ProductCardProps) => {
             </Badge>
           )}
         </div>
-        <div className="p-4">
-          <h3 className="font-semibold text-lg text-foreground mb-1">{product.name}</h3>
+        <div className="p-3">
+          <h3 className="font-semibold text-base text-foreground mb-1">{product.name}</h3>
           {hasDiscount ? (
             <div className="flex items-center gap-2">
               <p className="text-muted-foreground line-through text-sm">{product.price}</p>

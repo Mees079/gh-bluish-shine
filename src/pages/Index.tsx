@@ -134,39 +134,43 @@ const Index = () => {
               <div className="mb-6 space-y-4">
                 <h2 className="text-2xl sm:text-3xl font-bold text-foreground">{categoryLabel}</h2>
                 
-                <div className="flex flex-col sm:flex-row gap-4">
-                  <div className="relative flex-1">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    <Input
-                      placeholder="Zoek producten..."
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      className="pl-9"
+                <div className="border rounded-lg p-4 space-y-4 bg-card/50">
+                  <h3 className="text-sm font-semibold text-foreground">Filters</h3>
+                  
+                  <div className="flex flex-col sm:flex-row gap-4">
+                    <div className="relative flex-1">
+                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                      <Input
+                        placeholder="Zoek producten..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="pl-9"
+                      />
+                    </div>
+                    <Select value={sortBy} onValueChange={setSortBy}>
+                      <SelectTrigger className="w-full sm:w-[200px]">
+                        <SelectValue placeholder="Sorteer op" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="price-asc">Prijs: Laag - Hoog</SelectItem>
+                        <SelectItem value="price-desc">Prijs: Hoog - Laag</SelectItem>
+                        <SelectItem value="name-asc">Naam: A - Z</SelectItem>
+                        <SelectItem value="name-desc">Naam: Z - A</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <Label className="text-sm text-muted-foreground">Max. Prijs: €{priceFilter}</Label>
+                    <Slider
+                      value={[priceFilter]}
+                      onValueChange={(value) => setPriceFilter(value[0])}
+                      max={maxPrice}
+                      min={0}
+                      step={1}
+                      className="w-full"
                     />
                   </div>
-                  <Select value={sortBy} onValueChange={setSortBy}>
-                    <SelectTrigger className="w-full sm:w-[200px]">
-                      <SelectValue placeholder="Sorteer op" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="price-asc">Prijs: Laag - Hoog</SelectItem>
-                      <SelectItem value="price-desc">Prijs: Hoog - Laag</SelectItem>
-                      <SelectItem value="name-asc">Naam: A - Z</SelectItem>
-                      <SelectItem value="name-desc">Naam: Z - A</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="space-y-2">
-                  <Label>Max. Prijs: €{priceFilter}</Label>
-                  <Slider
-                    value={[priceFilter]}
-                    onValueChange={(value) => setPriceFilter(value[0])}
-                    max={maxPrice}
-                    min={0}
-                    step={1}
-                    className="w-full"
-                  />
                 </div>
               </div>
               
