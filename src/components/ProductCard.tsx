@@ -36,19 +36,19 @@ export const ProductCard = ({ product, onClick }: ProductCardProps) => {
             </div>
           ) : hasImages ? (
             hasMultipleImages ? (
-              <div className="flex gap-1 h-full w-full">
-                {/* Hoofdafbeelding - Links, groot */}
-                <div className="flex-[3] overflow-hidden">
+              <div className="flex flex-col gap-1 h-full w-full">
+                {/* Hoofdafbeelding - Bovenaan, groot */}
+                <div className="flex-[2] overflow-hidden">
                   <img
                     src={product.images[0]}
                     alt={product.name}
                     className="w-full h-full object-cover"
                   />
                 </div>
-                {/* Thumbnails - Rechts en Eronder */}
-                <div className="flex-1 flex flex-col gap-1">
-                  {product.images.slice(1, 4).map((image, index) => (
-                    <div key={index} className="flex-1 overflow-hidden bg-secondary/80">
+                {/* Thumbnails - Eronder in grid van 3 kolommen */}
+                <div className="flex-1 grid grid-cols-3 gap-1">
+                  {product.images.slice(1, 7).map((image, index) => (
+                    <div key={index} className="overflow-hidden bg-secondary/80">
                       <img
                         src={image}
                         alt={`${product.name} ${index + 2}`}
@@ -56,9 +56,9 @@ export const ProductCard = ({ product, onClick }: ProductCardProps) => {
                       />
                     </div>
                   ))}
-                  {product.images.length > 4 && (
-                    <div className="flex-1 overflow-hidden bg-secondary/90 flex items-center justify-center">
-                      <p className="text-xs text-muted-foreground font-semibold">+{product.images.length - 4}</p>
+                  {product.images.length > 7 && (
+                    <div className="overflow-hidden bg-secondary/90 flex items-center justify-center">
+                      <p className="text-xs text-muted-foreground font-semibold">+{product.images.length - 7}</p>
                     </div>
                   )}
                 </div>
