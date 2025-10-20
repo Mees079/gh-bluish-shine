@@ -19,6 +19,7 @@ interface ProductCardProps {
 
 export const ProductCard = ({ product, onClick }: ProductCardProps) => {
   const hasImages = product.images && product.images.length > 0;
+  const hasMultipleImages = product.images && product.images.length > 1;
   const parsePrice = (s: string) => parseFloat(s.replace('€', '').replace(',', '.'));
   const hasDiscount = !!product.discounted_price && parsePrice(product.discounted_price) < parsePrice(product.price);
   
@@ -34,11 +35,41 @@ export const ProductCard = ({ product, onClick }: ProductCardProps) => {
               <p className="text-primary font-bold text-lg px-4 text-center">Binnenkort Beschikbaar</p>
             </div>
           ) : hasImages ? (
-            <img
-              src={product.images[0]}
-              alt={product.name}
-              className="w-full h-full object-cover"
-            />
+            hasMultipleImages ? (
+              <div className="flex gap-1 h-full w-full">
+                {/* Hoofdafbeelding - Links, groot */}
+                <div className="flex-[3] overflow-hidden">
+                  <img
+                    src={product.images[0]}
+                    alt={product.name}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                {/* Thumbnails - Rechts en Eronder */}
+                <div className="flex-1 flex flex-col gap-1">
+                  {product.images.slice(1, 4).map((image, index) => (
+                    <div key={index} className="flex-1 overflow-hidden bg-secondary/80">
+                      <img
+                        src={image}
+                        alt={`${product.name} ${index + 2}`}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                  ))}
+                  {product.images.length > 4 && (
+                    <div className="flex-1 overflow-hidden bg-secondary/90 flex items-center justify-center">
+                      <p className="text-xs text-muted-foreground font-semibold">+{product.images.length - 4}</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            ) : (
+              <img
+                src={product.images[0]}
+                alt={product.name}
+                className="w-full h-full object-cover"
+              />
+            )
           ) : (
             <div className="text-muted-foreground text-sm">Geen afbeelding</div>
           )}

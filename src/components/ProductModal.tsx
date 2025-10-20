@@ -63,10 +63,10 @@ export const ProductModal = ({ product, open, onOpenChange }: ProductModalProps)
                 </div>
               </div>
             ) : hasImages && (
-              <div className="flex flex-col sm:flex-row gap-3">
-                {/* Hoofd Afbeelding - Links */}
+              <div className="space-y-3">
+                {/* Hoofd Afbeelding */}
                 <div 
-                  className="flex-1 aspect-video overflow-hidden rounded-lg bg-secondary cursor-pointer hover:opacity-90 transition-opacity"
+                  className="aspect-video overflow-hidden rounded-lg bg-secondary cursor-pointer hover:opacity-90 transition-opacity"
                   onClick={() => {
                     setSelectedImage(0);
                     setLightboxOpen(true);
@@ -79,9 +79,9 @@ export const ProductModal = ({ product, open, onOpenChange }: ProductModalProps)
                   />
                 </div>
 
-                {/* Thumbnails - Rechts en Eronder */}
+                {/* Thumbnails */}
                 {product.images.length > 1 && (
-                  <div className="w-full sm:w-40 grid grid-cols-2 sm:grid-cols-1 gap-2">
+                  <div className="grid grid-cols-4 gap-2">
                     {product.images.map((image, index) => (
                       <div
                         key={index}
