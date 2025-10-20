@@ -19,7 +19,8 @@ interface ProductCardProps {
 
 export const ProductCard = ({ product, onClick }: ProductCardProps) => {
   const hasImages = product.images && product.images.length > 0;
-  const hasDiscount = product.discounted_price && product.discounted_price.length > 0;
+  const parsePrice = (s: string) => parseFloat(s.replace('€', '').replace(',', '.'));
+  const hasDiscount = !!product.discounted_price && parsePrice(product.discounted_price) < parsePrice(product.price);
   
   return (
     <Card

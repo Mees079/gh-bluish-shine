@@ -31,7 +31,8 @@ export const ProductModal = ({ product, open, onOpenChange }: ProductModalProps)
   if (!product) return null;
   
   const hasImages = product.images && product.images.length > 0;
-  const hasDiscount = product.discounted_price && product.discounted_price.length > 0;
+  const parsePrice = (s: string) => parseFloat(s.replace('€', '').replace(',', '.'));
+  const hasDiscount = !!product.discounted_price && parsePrice(product.discounted_price) < parsePrice(product.price);
 
   const handleProceedToDiscord = () => {
     window.open("https://discord.com/channels/1032679994285109349/1302354288395419679", "_blank");
