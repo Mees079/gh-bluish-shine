@@ -232,6 +232,7 @@ export type Database = {
           created_by: string | null
           id: string
           notes: string | null
+          scheduled_start: string | null
         }
         Insert: {
           active?: boolean
@@ -242,6 +243,7 @@ export type Database = {
           created_by?: string | null
           id?: string
           notes?: string | null
+          scheduled_start?: string | null
         }
         Update: {
           active?: boolean
@@ -252,6 +254,7 @@ export type Database = {
           created_by?: string | null
           id?: string
           notes?: string | null
+          scheduled_start?: string | null
         }
         Relationships: []
       }

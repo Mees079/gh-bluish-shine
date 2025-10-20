@@ -4,11 +4,22 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Copy, Check } from "lucide-react";
+import { Loader2, Copy, Check, Trash2, Calendar, User, Clock } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 import { format } from "date-fns";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface Product {
   id: string;
@@ -23,6 +34,9 @@ interface RedemptionCode {
   claimed_at: string | null;
   claimed_by_username: string | null;
   active: boolean;
+  scheduled_start: string;
+  created_by: string | null;
+  creator_email?: string | undefined;
   products: { name: string }[];
 }
 
@@ -31,9 +45,12 @@ export const CodesManager = () => {
   const [activeCodes, setActiveCodes] = useState<RedemptionCode[]>([]);
   const [claimedCodes, setClaimedCodes] = useState<RedemptionCode[]>([]);
   const [selectedProducts, setSelectedProducts] = useState<string[]>([]);
+  const [scheduledStart, setScheduledStart] = useState<string>("");
   const [loading, setLoading] = useState(false);
   const [generating, setGenerating] = useState(false);
   const [copiedCode, setCopiedCode] = useState<string | null>(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [codeToDelete, setCodeToDelete] = useState<string | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -77,6 +94,8 @@ export const CodesManager = () => {
           claimed_at,
           claimed_by_username,
           active,
+          scheduled_start,
+          created_by,
           code_products (
             products (name)
           )
@@ -85,8 +104,20 @@ export const CodesManager = () => {
 
       if (codesError) throw codesError;
 
+      // Get creator emails
+      const { data: usersData } = await supabase.auth.admin.listUsers();
+      const userEmails = new Map<string, string>();
+      if (usersData?.users) {
+        usersData.users.forEach((u: any) => {
+          if (u.id && u.email) {
+            userEmails.set(u.id, u.email);
+          }
+        });
+      }
+
       const formattedCodes = (codesData || []).map(code => ({
         ...code,
+        creator_email: code.created_by ? (userEmails.get(code.created_by) || undefined) : undefined,
         products: code.code_products.map((cp: any) => ({ name: cp.products.name }))
       }));
 
@@ -127,6 +158,12 @@ export const CodesManager = () => {
     setGenerating(true);
     try {
       const newCode = generateCode();
+      const { data: { user } } = await supabase.auth.getUser();
+
+      // Prepare scheduled start time
+      const startTime = scheduledStart 
+        ? new Date(scheduledStart).toISOString() 
+        : new Date().toISOString();
 
       // Insert code
       const { data: codeData, error: codeError } = await supabase
@@ -134,6 +171,8 @@ export const CodesManager = () => {
         .insert({
           code: newCode,
           active: true,
+          scheduled_start: startTime,
+          created_by: user?.id,
         })
         .select()
         .single();
@@ -152,12 +191,17 @@ export const CodesManager = () => {
 
       if (productsError) throw productsError;
 
+      const scheduleMsg = scheduledStart 
+        ? ` Actief vanaf ${format(new Date(scheduledStart), 'dd-MM-yyyy HH:mm')}`
+        : '';
+
       toast({
         title: "Code aangemaakt",
-        description: `Code ${newCode} is succesvol aangemaakt`,
+        description: `Code ${newCode} is succesvol aangemaakt.${scheduleMsg}`,
       });
 
       setSelectedProducts([]);
+      setScheduledStart("");
       await loadCodes();
     } catch (error: any) {
       toast({
@@ -168,6 +212,40 @@ export const CodesManager = () => {
     } finally {
       setGenerating(false);
     }
+  };
+
+  const handleDeleteCode = async () => {
+    if (!codeToDelete) return;
+
+    try {
+      const { error } = await supabase
+        .from('redemption_codes')
+        .delete()
+        .eq('id', codeToDelete);
+
+      if (error) throw error;
+
+      toast({
+        title: "Code verwijderd",
+        description: "De code is succesvol verwijderd",
+      });
+
+      await loadCodes();
+    } catch (error: any) {
+      toast({
+        title: "Fout bij verwijderen",
+        description: error.message,
+        variant: "destructive",
+      });
+    } finally {
+      setDeleteDialogOpen(false);
+      setCodeToDelete(null);
+    }
+  };
+
+  const confirmDelete = (codeId: string) => {
+    setCodeToDelete(codeId);
+    setDeleteDialogOpen(true);
   };
 
   const copyToClipboard = (code: string) => {
@@ -197,6 +275,7 @@ export const CodesManager = () => {
   }
 
   return (
+    <>
     <Tabs defaultValue="create" className="w-full">
       <TabsList className="grid w-full grid-cols-3">
         <TabsTrigger value="create">Code Aanmaken</TabsTrigger>
@@ -213,11 +292,12 @@ export const CodesManager = () => {
           <CardHeader>
             <CardTitle>Nieuwe Code Aanmaken</CardTitle>
             <CardDescription>
-              Selecteer de producten die je wilt toevoegen aan de code
+              Selecteer de producten en optioneel een starttijd
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-3">
+              <Label className="text-sm font-medium">Producten</Label>
               {products.map((product) => (
                 <div key={product.id} className="flex items-center space-x-2">
                   <Checkbox
@@ -233,6 +313,23 @@ export const CodesManager = () => {
                   </Label>
                 </div>
               ))}
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="scheduled-start" className="text-sm font-medium flex items-center gap-2">
+                <Calendar className="h-4 w-4" />
+                Starttijd (optioneel)
+              </Label>
+              <Input
+                id="scheduled-start"
+                type="datetime-local"
+                value={scheduledStart}
+                onChange={(e) => setScheduledStart(e.target.value)}
+                className="w-full"
+              />
+              <p className="text-xs text-muted-foreground">
+                Laat leeg voor direct actief. Code is pas claimbaar na deze datum/tijd.
+              </p>
             </div>
 
             <Button
@@ -264,40 +361,73 @@ export const CodesManager = () => {
             </CardContent>
           </Card>
         ) : (
-          activeCodes.map((code) => (
-            <Card key={code.id}>
-              <CardContent className="pt-6">
-                <div className="flex items-start justify-between">
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-2">
-                      <code className="text-lg font-mono font-bold">{code.code}</code>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => copyToClipboard(code.code)}
-                      >
-                        {copiedCode === code.code ? (
-                          <Check className="h-4 w-4 text-green-500" />
-                        ) : (
-                          <Copy className="h-4 w-4" />
+          activeCodes.map((code) => {
+            const isScheduled = new Date(code.scheduled_start) > new Date();
+            return (
+              <Card key={code.id}>
+                <CardContent className="pt-6">
+                  <div className="flex items-start justify-between">
+                    <div className="space-y-2 flex-1">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <code className="text-lg font-mono font-bold">{code.code}</code>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => copyToClipboard(code.code)}
+                        >
+                          {copiedCode === code.code ? (
+                            <Check className="h-4 w-4 text-green-500" />
+                          ) : (
+                            <Copy className="h-4 w-4" />
+                          )}
+                        </Button>
+                        {isScheduled && (
+                          <Badge variant="secondary" className="flex items-center gap-1">
+                            <Clock className="h-3 w-3" />
+                            Gepland
+                          </Badge>
                         )}
-                      </Button>
+                      </div>
+                      
+                      <div className="space-y-1 text-sm text-muted-foreground">
+                        <div className="flex items-center gap-2">
+                          <User className="h-3 w-3" />
+                          Aangemaakt door: {code.creator_email || 'Onbekend'}
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Calendar className="h-3 w-3" />
+                          Aangemaakt: {format(new Date(code.created_at), 'dd-MM-yyyy HH:mm')}
+                        </div>
+                        {isScheduled && (
+                          <div className="flex items-center gap-2 text-orange-600 dark:text-orange-400">
+                            <Clock className="h-3 w-3" />
+                            Actief vanaf: {format(new Date(code.scheduled_start), 'dd-MM-yyyy HH:mm')}
+                          </div>
+                        )}
+                      </div>
+                      
+                      <div className="flex flex-wrap gap-1">
+                        {code.products.map((product, idx) => (
+                          <Badge key={idx} variant="outline">
+                            {product.name}
+                          </Badge>
+                        ))}
+                      </div>
                     </div>
-                    <div className="text-sm text-muted-foreground">
-                      Aangemaakt: {format(new Date(code.created_at), 'dd-MM-yyyy HH:mm')}
-                    </div>
-                    <div className="flex flex-wrap gap-1">
-                      {code.products.map((product, idx) => (
-                        <Badge key={idx} variant="outline">
-                          {product.name}
-                        </Badge>
-                      ))}
-                    </div>
+                    
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => confirmDelete(code.id)}
+                      className="text-destructive hover:text-destructive"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))
+                </CardContent>
+              </Card>
+            );
+          })
         )}
       </TabsContent>
 
@@ -315,18 +445,32 @@ export const CodesManager = () => {
             <Card key={code.id}>
               <CardContent className="pt-6">
                 <div className="space-y-2">
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 flex-wrap">
                     <code className="text-lg font-mono font-bold text-muted-foreground line-through">
                       {code.code}
                     </code>
                     <Badge variant="secondary">Geclaimed</Badge>
                   </div>
-                  <div className="text-sm text-muted-foreground">
-                    Geclaimed door: <span className="font-medium">{code.claimed_by_username}</span>
+                  
+                  <div className="space-y-1 text-sm text-muted-foreground">
+                    <div className="flex items-center gap-2">
+                      <User className="h-3 w-3" />
+                      Aangemaakt door: {code.creator_email || 'Onbekend'}
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Calendar className="h-3 w-3" />
+                      Aangemaakt: {format(new Date(code.created_at), 'dd-MM-yyyy HH:mm')}
+                    </div>
+                    <div className="flex items-center gap-2 text-green-600 dark:text-green-400">
+                      <User className="h-3 w-3" />
+                      Geclaimed door: <span className="font-medium">{code.claimed_by_username}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Clock className="h-3 w-3" />
+                      Geclaimed op: {format(new Date(code.claimed_at!), 'dd-MM-yyyy HH:mm')}
+                    </div>
                   </div>
-                  <div className="text-sm text-muted-foreground">
-                    Geclaimed op: {format(new Date(code.claimed_at!), 'dd-MM-yyyy HH:mm')}
-                  </div>
+                  
                   <div className="flex flex-wrap gap-1">
                     {code.products.map((product, idx) => (
                       <Badge key={idx} variant="outline">
@@ -341,5 +485,23 @@ export const CodesManager = () => {
         )}
       </TabsContent>
     </Tabs>
+
+    <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Code Verwijderen</AlertDialogTitle>
+          <AlertDialogDescription>
+            Weet je zeker dat je deze code wilt verwijderen? Deze actie kan niet ongedaan worden gemaakt.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>Annuleren</AlertDialogCancel>
+          <AlertDialogAction onClick={handleDeleteCode} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+            Verwijderen
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+    </>
   );
 };

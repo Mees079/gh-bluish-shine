@@ -51,6 +51,34 @@ Deno.serve(async (req) => {
       )
     }
 
+    // Get full code details including scheduled_start
+    const { data: fullCode, error: fullCodeError } = await supabaseAdmin
+      .from('redemption_codes')
+      .select('scheduled_start')
+      .eq('id', redemptionCode.id)
+      .single()
+
+    if (fullCodeError || !fullCode) {
+      console.error('Error fetching full code:', fullCodeError)
+      return new Response(
+        JSON.stringify({ success: false, error: 'Fout bij ophalen code details' }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+
+    // Check if code is scheduled for future
+    const now = new Date()
+    const scheduledStart = new Date(fullCode.scheduled_start)
+    if (scheduledStart > now) {
+      return new Response(
+        JSON.stringify({ 
+          success: false, 
+          error: `Code is nog niet actief. Beschikbaar vanaf ${scheduledStart.toLocaleString('nl-NL')}` 
+        }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+
     // Check if code is already claimed
     if (redemptionCode.claimed_at) {
       return new Response(
