@@ -31,7 +31,7 @@ export const ProductModal = ({ product, open, onOpenChange }: ProductModalProps)
   if (!product) return null;
   
   const hasImages = product.images && product.images.length > 0;
-  const hasDiscount = product.discounted_price && parseFloat(product.discounted_price) > 0;
+  const hasDiscount = product.discounted_price && product.discounted_price.length > 0;
 
   const handleProceedToDiscord = () => {
     window.open("https://discord.com/channels/1032679994285109349/1302354288395419679", "_blank");
@@ -42,7 +42,7 @@ export const ProductModal = ({ product, open, onOpenChange }: ProductModalProps)
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto custom-scrollbar">
           <DialogHeader>
             <DialogTitle className="text-2xl flex items-center gap-2">
               {product.name}
@@ -54,7 +54,14 @@ export const ProductModal = ({ product, open, onOpenChange }: ProductModalProps)
           
           <div className="space-y-4 sm:space-y-6">
             {/* Afbeeldingen Galerie */}
-            {hasImages && (
+            {product.coming_soon ? (
+              <div className="aspect-video overflow-hidden rounded-lg bg-primary/10 flex items-center justify-center">
+                <div className="text-center p-8">
+                  <p className="text-primary font-bold text-2xl mb-2">Binnenkort Beschikbaar</p>
+                  <p className="text-muted-foreground">Dit product komt binnenkort beschikbaar in onze shop</p>
+                </div>
+              </div>
+            ) : hasImages && (
               <div className="space-y-3">
                 {/* Hoofd Afbeelding */}
                 <div 
