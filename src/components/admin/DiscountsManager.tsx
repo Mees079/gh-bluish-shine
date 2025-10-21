@@ -35,8 +35,8 @@ export const DiscountsManager = () => {
   };
 
   const reapplyAllDiscounts = async () => {
-    // First clear all discounted prices
-    await supabase.from('products').update({ discounted_price: null }).neq('discounted_price', null);
+    // First clear all discounted prices for all products
+    await supabase.from('products').update({ discounted_price: null });
 
     // Get all active discounts
     const { data: activeDiscounts } = await supabase
