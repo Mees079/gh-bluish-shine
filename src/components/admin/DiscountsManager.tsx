@@ -20,6 +20,7 @@ export const DiscountsManager = () => {
 
   useEffect(() => {
     loadData();
+    reapplyAllDiscounts();
   }, []);
 
   const loadData = async () => {
