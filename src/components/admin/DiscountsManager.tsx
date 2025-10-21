@@ -208,6 +208,75 @@ export const DiscountsManager = () => {
             await supabase.from('products').update({ discounted_price: null }).eq('id', d.product_id);
           }
         }
+
+        // Re-apply any remaining active discounts
+        const { data: remainingDiscounts } = await supabase
+          .from('discounts')
+          .select('*')
+          .eq('active', true);
+
+        if (remainingDiscounts) {
+          const now = new Date();
+          for (const discount of remainingDiscounts) {
+            // Check if discount is not expired
+            const isActive = !discount.expires_at || new Date(discount.expires_at) > now;
+            if (!isActive) continue;
+
+            if (discount.applies_to === 'shop') {
+              const { data: allProducts } = await supabase.from('products').select('id, price');
+              if (allProducts) {
+                for (const prod of allProducts) {
+                  let discountedPrice;
+                  if (discount.percentage != null) {
+                    discountedPrice = prod.price * (1 - discount.percentage / 100);
+                  } else if (discount.fixed_amount != null) {
+                    discountedPrice = Math.max(0, prod.price - discount.fixed_amount);
+                  }
+                  if (discountedPrice !== undefined) {
+                    await supabase.from('products').update({ discounted_price: discountedPrice }).eq('id', prod.id);
+                  }
+                }
+              }
+            } else if (discount.applies_to === 'category' && discount.category_id) {
+              const { data: categoryProducts } = await supabase
+                .from('products')
+                .select('id, price')
+                .eq('category_id', discount.category_id);
+              
+              if (categoryProducts) {
+                for (const prod of categoryProducts) {
+                  let discountedPrice;
+                  if (discount.percentage != null) {
+                    discountedPrice = prod.price * (1 - discount.percentage / 100);
+                  } else if (discount.fixed_amount != null) {
+                    discountedPrice = Math.max(0, prod.price - discount.fixed_amount);
+                  }
+                  if (discountedPrice !== undefined) {
+                    await supabase.from('products').update({ discounted_price: discountedPrice }).eq('id', prod.id);
+                  }
+                }
+              }
+            } else if (discount.applies_to === 'product' && discount.product_id) {
+              const { data: product } = await supabase
+                .from('products')
+                .select('price')
+                .eq('id', discount.product_id)
+                .maybeSingle();
+              
+              if (product) {
+                let discountedPrice;
+                if (discount.percentage != null) {
+                  discountedPrice = product.price * (1 - discount.percentage / 100);
+                } else if (discount.fixed_amount != null) {
+                  discountedPrice = Math.max(0, product.price - discount.fixed_amount);
+                }
+                if (discountedPrice !== undefined) {
+                  await supabase.from('products').update({ discounted_price: discountedPrice }).eq('id', discount.product_id);
+                }
+              }
+            }
+          }
+        }
       } catch (e) {
         console.error('Error clearing discounted prices after delete:', e);
       }
