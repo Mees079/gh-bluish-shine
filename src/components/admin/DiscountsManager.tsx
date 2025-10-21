@@ -34,6 +34,81 @@ export const DiscountsManager = () => {
     if (categoriesRes.data) setCategories(categoriesRes.data);
   };
 
+  const reapplyAllDiscounts = async () => {
+    // First clear all discounted prices
+    await supabase.from('products').update({ discounted_price: null }).neq('discounted_price', null);
+
+    // Get all active discounts
+    const { data: activeDiscounts } = await supabase
+      .from('discounts')
+      .select('*')
+      .eq('active', true);
+
+    if (!activeDiscounts) return;
+
+    const now = new Date();
+    
+    for (const discount of activeDiscounts) {
+      // Check if discount is not expired
+      const isActive = !discount.expires_at || new Date(discount.expires_at) > now;
+      if (!isActive) continue;
+
+      if (discount.applies_to === 'shop') {
+        const { data: allProducts } = await supabase.from('products').select('id, price');
+        if (allProducts) {
+          for (const prod of allProducts) {
+            let discountedPrice;
+            if (discount.percentage != null) {
+              discountedPrice = prod.price * (1 - discount.percentage / 100);
+            } else if (discount.fixed_amount != null) {
+              discountedPrice = Math.max(0, prod.price - discount.fixed_amount);
+            }
+            if (discountedPrice !== undefined) {
+              await supabase.from('products').update({ discounted_price: discountedPrice }).eq('id', prod.id);
+            }
+          }
+        }
+      } else if (discount.applies_to === 'category' && discount.category_id) {
+        const { data: categoryProducts } = await supabase
+          .from('products')
+          .select('id, price')
+          .eq('category_id', discount.category_id);
+        
+        if (categoryProducts) {
+          for (const prod of categoryProducts) {
+            let discountedPrice;
+            if (discount.percentage != null) {
+              discountedPrice = prod.price * (1 - discount.percentage / 100);
+            } else if (discount.fixed_amount != null) {
+              discountedPrice = Math.max(0, prod.price - discount.fixed_amount);
+            }
+            if (discountedPrice !== undefined) {
+              await supabase.from('products').update({ discounted_price: discountedPrice }).eq('id', prod.id);
+            }
+          }
+        }
+      } else if (discount.applies_to === 'product' && discount.product_id) {
+        const { data: product } = await supabase
+          .from('products')
+          .select('price')
+          .eq('id', discount.product_id)
+          .maybeSingle();
+        
+        if (product) {
+          let discountedPrice;
+          if (discount.percentage != null) {
+            discountedPrice = product.price * (1 - discount.percentage / 100);
+          } else if (discount.fixed_amount != null) {
+            discountedPrice = Math.max(0, product.price - discount.fixed_amount);
+          }
+          if (discountedPrice !== undefined) {
+            await supabase.from('products').update({ discounted_price: discountedPrice }).eq('id', discount.product_id);
+          }
+        }
+      }
+    }
+  };
+
   const handleSave = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
@@ -64,93 +139,6 @@ export const DiscountsManager = () => {
       });
       return;
     }
-    const isActiveEffective = discountData.active && (!discountData.expires_at || new Date(discountData.expires_at as string) > new Date());
-
-    // Apply or clear discount for whole shop
-    if (applyTo === 'shop') {
-      try {
-        if (isActiveEffective) {
-          const { data: allProducts } = await supabase.from('products').select('id, price');
-          if (allProducts) {
-            for (const prod of allProducts) {
-              let discountedPrice;
-              if (percentage != null) {
-                discountedPrice = prod.price * (1 - percentage / 100);
-              } else if (fixedAmount != null) {
-                discountedPrice = Math.max(0, prod.price - fixedAmount);
-              }
-              if (discountedPrice !== undefined) {
-                await supabase.from('products').update({ discounted_price: discountedPrice }).eq('id', prod.id);
-              }
-            }
-          }
-        } else {
-          // Clear discounts when inactive or expired
-          await supabase.from('products').update({ discounted_price: null }).neq('discounted_price', null);
-        }
-      } catch (error) {
-        console.error('Error applying/clearing shop-wide discount:', error);
-      }
-    }
-
-    // Apply or clear discount to category products
-    if (applyTo === 'category' && discountData.category_id) {
-      try {
-        if (isActiveEffective) {
-          const { data: categoryProducts } = await supabase
-            .from('products')
-            .select('id, price')
-            .eq('category_id', discountData.category_id);
-          
-        if (categoryProducts) {
-            for (const prod of categoryProducts) {
-              let discountedPrice;
-              if (percentage != null) {
-                discountedPrice = prod.price * (1 - percentage / 100);
-              } else if (fixedAmount != null) {
-                discountedPrice = Math.max(0, prod.price - fixedAmount);
-              }
-              if (discountedPrice !== undefined) {
-                await supabase.from('products').update({ discounted_price: discountedPrice }).eq('id', prod.id);
-              }
-            }
-          }
-        } else {
-          await supabase.from('products').update({ discounted_price: null }).eq('category_id', discountData.category_id);
-        }
-      } catch (error) {
-        console.error('Error applying/clearing category discount:', error);
-      }
-    }
-
-    // Apply or clear discount to specific product
-    if (applyTo === 'product' && discountData.product_id) {
-      try {
-        if (isActiveEffective) {
-          const { data: product } = await supabase
-            .from('products')
-            .select('price')
-            .eq('id', discountData.product_id)
-            .maybeSingle();
-          
-          if (product) {
-            let discountedPrice;
-            if (percentage != null) {
-              discountedPrice = product.price * (1 - percentage / 100);
-            } else if (fixedAmount != null) {
-              discountedPrice = Math.max(0, product.price - fixedAmount);
-            }
-            if (discountedPrice !== undefined) {
-              await supabase.from('products').update({ discounted_price: discountedPrice }).eq('id', discountData.product_id);
-            }
-          }
-        } else {
-          await supabase.from('products').update({ discounted_price: null }).eq('id', discountData.product_id);
-        }
-      } catch (error) {
-        console.error('Error applying/clearing product discount:', error);
-      }
-    }
 
     try {
       if (editingDiscount) {
@@ -165,6 +153,9 @@ export const DiscountsManager = () => {
           .insert(discountData);
         if (error) throw error;
       }
+
+      // Reapply all discounts after save
+      await reapplyAllDiscounts();
 
       toast({
         title: "Opgeslagen!",
@@ -186,9 +177,6 @@ export const DiscountsManager = () => {
   const handleDelete = async (id: string) => {
     if (!confirm('Weet je zeker dat je deze korting wilt verwijderen?')) return;
 
-    // Find discount details locally to know the scope
-    const d = discounts.find((x) => x.id === id);
-
     const { error } = await supabase.from('discounts').delete().eq('id', id);
     if (error) {
       toast({
@@ -197,89 +185,8 @@ export const DiscountsManager = () => {
         description: error.message,
       });
     } else {
-      // Clear discounted prices for the affected scope
-      try {
-        if (d) {
-          if (d.applies_to === 'shop') {
-            await supabase.from('products').update({ discounted_price: null }).neq('discounted_price', null);
-          } else if (d.applies_to === 'category' && d.category_id) {
-            await supabase.from('products').update({ discounted_price: null }).eq('category_id', d.category_id);
-          } else if (d.applies_to === 'product' && d.product_id) {
-            await supabase.from('products').update({ discounted_price: null }).eq('id', d.product_id);
-          }
-        }
-
-        // Re-apply any remaining active discounts
-        const { data: remainingDiscounts } = await supabase
-          .from('discounts')
-          .select('*')
-          .eq('active', true);
-
-        if (remainingDiscounts) {
-          const now = new Date();
-          for (const discount of remainingDiscounts) {
-            // Check if discount is not expired
-            const isActive = !discount.expires_at || new Date(discount.expires_at) > now;
-            if (!isActive) continue;
-
-            if (discount.applies_to === 'shop') {
-              const { data: allProducts } = await supabase.from('products').select('id, price');
-              if (allProducts) {
-                for (const prod of allProducts) {
-                  let discountedPrice;
-                  if (discount.percentage != null) {
-                    discountedPrice = prod.price * (1 - discount.percentage / 100);
-                  } else if (discount.fixed_amount != null) {
-                    discountedPrice = Math.max(0, prod.price - discount.fixed_amount);
-                  }
-                  if (discountedPrice !== undefined) {
-                    await supabase.from('products').update({ discounted_price: discountedPrice }).eq('id', prod.id);
-                  }
-                }
-              }
-            } else if (discount.applies_to === 'category' && discount.category_id) {
-              const { data: categoryProducts } = await supabase
-                .from('products')
-                .select('id, price')
-                .eq('category_id', discount.category_id);
-              
-              if (categoryProducts) {
-                for (const prod of categoryProducts) {
-                  let discountedPrice;
-                  if (discount.percentage != null) {
-                    discountedPrice = prod.price * (1 - discount.percentage / 100);
-                  } else if (discount.fixed_amount != null) {
-                    discountedPrice = Math.max(0, prod.price - discount.fixed_amount);
-                  }
-                  if (discountedPrice !== undefined) {
-                    await supabase.from('products').update({ discounted_price: discountedPrice }).eq('id', prod.id);
-                  }
-                }
-              }
-            } else if (discount.applies_to === 'product' && discount.product_id) {
-              const { data: product } = await supabase
-                .from('products')
-                .select('price')
-                .eq('id', discount.product_id)
-                .maybeSingle();
-              
-              if (product) {
-                let discountedPrice;
-                if (discount.percentage != null) {
-                  discountedPrice = product.price * (1 - discount.percentage / 100);
-                } else if (discount.fixed_amount != null) {
-                  discountedPrice = Math.max(0, product.price - discount.fixed_amount);
-                }
-                if (discountedPrice !== undefined) {
-                  await supabase.from('products').update({ discounted_price: discountedPrice }).eq('id', discount.product_id);
-                }
-              }
-            }
-          }
-        }
-      } catch (e) {
-        console.error('Error clearing discounted prices after delete:', e);
-      }
+      // Reapply all remaining discounts after delete
+      await reapplyAllDiscounts();
 
       toast({
         title: "Verwijderd",
