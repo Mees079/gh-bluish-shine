@@ -80,18 +80,42 @@ const Index = () => {
       .order('display_order');
 
     if (productsData) {
-      const formattedProducts: Product[] = productsData.map((p: any) => ({
-        id: p.id,
-        name: p.name,
-        images: p.product_images
-          .sort((a: any, b: any) => a.display_order - b.display_order)
-          .map((img: any) => img.image_url),
-        price: `€${parseFloat(p.price).toFixed(2).replace('.', ',')}`,
-        discounted_price: p.discounted_price ? `€${parseFloat(p.discounted_price).toFixed(2).replace('.', ',')}` : undefined,
-        description: p.description || '',
-        details: p.details || '',
-        coming_soon: p.coming_soon || false,
-      }));
+      // Haal actieve, niet-verlopen kortingen op
+      const { data: discountsData } = await supabase
+        .from('discounts')
+        .select('applies_to, category_id, product_id, percentage, fixed_amount, expires_at, active')
+        .eq('active', true);
+
+      const now = new Date();
+      const activeDiscounts = (discountsData || []).filter((d: any) => !d.expires_at || new Date(d.expires_at) > now);
+
+      const isProductDiscounted = (p: any) => {
+        return activeDiscounts.some((d: any) => {
+          if (d.applies_to === 'shop') return true;
+          if (d.applies_to === 'category' && d.category_id === p.category_id) return true;
+          if (d.applies_to === 'product' && d.product_id === p.id) return true;
+          return false;
+        });
+      };
+
+      const formattedProducts: Product[] = productsData.map((p: any) => {
+        const applies = isProductDiscounted(p);
+        return {
+          id: p.id,
+          name: p.name,
+          images: p.product_images
+            .sort((a: any, b: any) => a.display_order - b.display_order)
+            .map((img: any) => img.image_url),
+          price: `€${parseFloat(p.price).toFixed(2).replace('.', ',')}`,
+          discounted_price: applies && p.discounted_price != null
+            ? `€${parseFloat(p.discounted_price).toFixed(2).replace('.', ',')}`
+            : undefined,
+          description: p.description || '',
+          details: p.details || '',
+          coming_soon: p.coming_soon || false,
+        };
+      });
+
       setProducts(formattedProducts);
       
       // Set max price based on products
