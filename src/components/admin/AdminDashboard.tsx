@@ -34,16 +34,12 @@ export const AdminDashboard = ({ user, onLogout }: AdminDashboardProps) => {
       <Tabs defaultValue="codes" className="w-full">
         <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="codes">Codes</TabsTrigger>
-          <TabsTrigger value="statistics">Statistieken</TabsTrigger>
           <TabsTrigger value="site">Site Bewerken</TabsTrigger>
+          <TabsTrigger value="statistics">Statistieken</TabsTrigger>
         </TabsList>
 
         <TabsContent value="codes" className="mt-6">
           <CodesManager />
-        </TabsContent>
-
-        <TabsContent value="statistics" className="mt-6">
-          <StatisticsManager />
         </TabsContent>
 
         <TabsContent value="site" className="mt-6">
@@ -71,6 +67,10 @@ export const AdminDashboard = ({ user, onLogout }: AdminDashboardProps) => {
               <AccountManager user={user} />
             </TabsContent>
           </Tabs>
+        </TabsContent>
+
+        <TabsContent value="statistics" className="mt-6">
+          <StatisticsManager />
         </TabsContent>
       </Tabs>
     </div>

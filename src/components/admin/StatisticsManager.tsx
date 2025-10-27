@@ -121,78 +121,88 @@ export const StatisticsManager = () => {
   }
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h2 className="text-3xl font-bold tracking-tight">Statistieken</h2>
-        <p className="text-muted-foreground">Inzicht in je verkopen en claims</p>
+    <div className="min-h-screen space-y-8 pb-20">
+      <div className="sticky top-0 z-10 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b pb-4">
+        <h2 className="text-4xl font-bold tracking-tight">Statistieken Dashboard</h2>
+        <p className="text-lg text-muted-foreground">Compleet overzicht van je verkopen en claims</p>
       </div>
 
       {/* Date Filter */}
-      <div className="flex gap-2">
-        <Badge 
-          variant={dateFilter === 'all' ? 'default' : 'outline'} 
-          className="cursor-pointer"
-          onClick={() => setDateFilter('all')}
-        >
-          Alles
-        </Badge>
-        <Badge 
-          variant={dateFilter === 'today' ? 'default' : 'outline'} 
-          className="cursor-pointer"
-          onClick={() => setDateFilter('today')}
-        >
-          Vandaag
-        </Badge>
-        <Badge 
-          variant={dateFilter === 'week' ? 'default' : 'outline'} 
-          className="cursor-pointer"
-          onClick={() => setDateFilter('week')}
-        >
-          Laatste 7 dagen
-        </Badge>
-        <Badge 
-          variant={dateFilter === 'month' ? 'default' : 'outline'} 
-          className="cursor-pointer"
-          onClick={() => setDateFilter('month')}
-        >
-          Laatste 30 dagen
-        </Badge>
-      </div>
+      <Card className="border-2">
+        <CardContent className="pt-6">
+          <div className="flex items-center justify-between flex-wrap gap-4">
+            <div className="space-y-1">
+              <h3 className="text-lg font-semibold">Periode Filter</h3>
+              <p className="text-sm text-muted-foreground">Selecteer de periode die je wilt bekijken</p>
+            </div>
+            <div className="flex gap-2 flex-wrap">
+              <Badge 
+                variant={dateFilter === 'all' ? 'default' : 'outline'} 
+                className="cursor-pointer text-base py-2 px-4"
+                onClick={() => setDateFilter('all')}
+              >
+                Alles
+              </Badge>
+              <Badge 
+                variant={dateFilter === 'today' ? 'default' : 'outline'} 
+                className="cursor-pointer text-base py-2 px-4"
+                onClick={() => setDateFilter('today')}
+              >
+                Vandaag
+              </Badge>
+              <Badge 
+                variant={dateFilter === 'week' ? 'default' : 'outline'} 
+                className="cursor-pointer text-base py-2 px-4"
+                onClick={() => setDateFilter('week')}
+              >
+                Laatste 7 dagen
+              </Badge>
+              <Badge 
+                variant={dateFilter === 'month' ? 'default' : 'outline'} 
+                className="cursor-pointer text-base py-2 px-4"
+                onClick={() => setDateFilter('month')}
+              >
+                Laatste 30 dagen
+              </Badge>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Stats Grid */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         <StatCard
-          title="Totale Omzet"
+          title="💰 Totale Omzet"
           value={formatCurrency(stats.totalRevenue)}
           icon={Euro}
           description="Totaal verdiend bedrag (na korting)"
         />
         <StatCard
-          title="Totale Korting Gegeven"
+          title="🎁 Totale Korting Gegeven"
           value={formatCurrency(stats.totalDiscount)}
           icon={TrendingUp}
           description="Totaal bedrag aan korting"
         />
         <StatCard
-          title="Aantal Claims"
+          title="📊 Aantal Claims"
           value={stats.totalClaims}
           icon={BarChart3}
           description="Totaal aantal geclaime codes"
         />
         <StatCard
-          title="Unieke Gebruikers"
+          title="👥 Unieke Gebruikers"
           value={stats.uniqueUsers}
           icon={Users}
           description="Aantal verschillende gebruikers"
         />
         <StatCard
-          title="Gemiddelde Orderwaarde"
+          title="📈 Gemiddelde Orderwaarde"
           value={formatCurrency(stats.averageOrderValue)}
           icon={TrendingUp}
           description="Gemiddelde waarde per claim"
         />
         <StatCard
-          title="Totaal Producten"
+          title="📦 Totaal Producten"
           value={stats.totalProducts}
           icon={Package}
           description="Totaal aantal geleverde producten"
@@ -201,19 +211,20 @@ export const StatisticsManager = () => {
 
       {/* Detailed Tables */}
       <Tabs defaultValue="claims" className="w-full">
-        <TabsList>
-          <TabsTrigger value="claims">Alle Claims</TabsTrigger>
-          <TabsTrigger value="products">Producten Details</TabsTrigger>
-          <TabsTrigger value="users">Gebruikers</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-3">
+          <TabsTrigger value="claims" className="text-base">📋 Alle Claims</TabsTrigger>
+          <TabsTrigger value="products" className="text-base">📦 Producten Details</TabsTrigger>
+          <TabsTrigger value="users" className="text-base">👤 Gebruikers</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="claims" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Claims Overzicht</CardTitle>
-              <CardDescription>Alle geclaime codes met financiële details</CardDescription>
+        <TabsContent value="claims" className="space-y-4 mt-6">
+          <Card className="border-2">
+            <CardHeader className="bg-muted/50">
+              <CardTitle className="text-2xl">Claims Overzicht</CardTitle>
+              <CardDescription className="text-base">Alle geclaime codes met financiële details</CardDescription>
             </CardHeader>
-            <CardContent>
+            <CardContent className="pt-6">
+              <div className="overflow-x-auto">
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -255,17 +266,19 @@ export const StatisticsManager = () => {
                   )}
                 </TableBody>
               </Table>
+              </div>
             </CardContent>
           </Card>
         </TabsContent>
 
-        <TabsContent value="products" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Producten Details</CardTitle>
-              <CardDescription>Overzicht van alle geleverde producten</CardDescription>
+        <TabsContent value="products" className="space-y-4 mt-6">
+          <Card className="border-2">
+            <CardHeader className="bg-muted/50">
+              <CardTitle className="text-2xl">Producten Details</CardTitle>
+              <CardDescription className="text-base">Overzicht van alle geleverde producten</CardDescription>
             </CardHeader>
-            <CardContent>
+            <CardContent className="pt-6">
+              <div className="overflow-x-auto">
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -306,17 +319,19 @@ export const StatisticsManager = () => {
                   )}
                 </TableBody>
               </Table>
+              </div>
             </CardContent>
           </Card>
         </TabsContent>
 
-        <TabsContent value="users" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Gebruikers Overzicht</CardTitle>
-              <CardDescription>Statistieken per gebruiker</CardDescription>
+        <TabsContent value="users" className="space-y-4 mt-6">
+          <Card className="border-2">
+            <CardHeader className="bg-muted/50">
+              <CardTitle className="text-2xl">Gebruikers Overzicht</CardTitle>
+              <CardDescription className="text-base">Statistieken per gebruiker</CardDescription>
             </CardHeader>
-            <CardContent>
+            <CardContent className="pt-6">
+              <div className="overflow-x-auto">
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -352,6 +367,7 @@ export const StatisticsManager = () => {
                   )}
                 </TableBody>
               </Table>
+              </div>
             </CardContent>
           </Card>
         </TabsContent>
