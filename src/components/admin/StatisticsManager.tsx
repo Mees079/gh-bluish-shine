@@ -4,9 +4,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Calendar, TrendingUp, Euro, Package, Users, BarChart3 } from "lucide-react";
-import { format } from "date-fns";
+import { Calendar, TrendingUp, Euro, Package, Users, BarChart3, LineChart as LineChartIcon, PieChart as PieChartIcon } from "lucide-react";
+import { format, parseISO, startOfDay } from "date-fns";
 import { nl } from "date-fns/locale";
+import { LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
 
 interface CodeClaim {
   id: string;
@@ -29,6 +30,14 @@ interface Statistics {
   totalProducts: number;
 }
 
+interface ChartData {
+  dailyRevenue: Array<{ date: string; revenue: number; claims: number }>;
+  topProducts: Array<{ name: string; count: number; revenue: number }>;
+  userStats: Array<{ username: string; total: number }>;
+}
+
+const COLORS = ['#8b5cf6', '#ec4899', '#f59e0b', '#10b981', '#3b82f6', '#ef4444'];
+
 export const StatisticsManager = () => {
   const [claims, setClaims] = useState<CodeClaim[]>([]);
   const [stats, setStats] = useState<Statistics>({
@@ -38,6 +47,11 @@ export const StatisticsManager = () => {
     uniqueUsers: 0,
     averageOrderValue: 0,
     totalProducts: 0,
+  });
+  const [chartData, setChartData] = useState<ChartData>({
+    dailyRevenue: [],
+    topProducts: [],
+    userStats: [],
   });
   const [loading, setLoading] = useState(true);
   const [dateFilter, setDateFilter] = useState<'all' | 'today' | 'week' | 'month'>('all');
@@ -92,11 +106,59 @@ export const StatisticsManager = () => {
         averageOrderValue: claimsData.length > 0 ? totalRevenue / claimsData.length : 0,
         totalProducts,
       });
+
+      // Calculate chart data
+      calculateChartData(claimsData);
     } catch (error) {
       console.error('Error loading statistics:', error);
     } finally {
       setLoading(false);
     }
+  };
+
+  const calculateChartData = (claimsData: CodeClaim[]) => {
+    // Daily revenue
+    const dailyMap = new Map<string, { revenue: number; claims: number }>();
+    claimsData.forEach(claim => {
+      const date = format(startOfDay(parseISO(claim.claimed_at)), 'dd MMM');
+      const existing = dailyMap.get(date) || { revenue: 0, claims: 0 };
+      dailyMap.set(date, {
+        revenue: existing.revenue + parseFloat(claim.final_amount.toString()),
+        claims: existing.claims + 1
+      });
+    });
+    const dailyRevenue = Array.from(dailyMap.entries())
+      .map(([date, data]) => ({ date, ...data }))
+      .sort((a, b) => a.date.localeCompare(b.date));
+
+    // Top products
+    const productMap = new Map<string, { count: number; revenue: number }>();
+    claimsData.forEach(claim => {
+      claim.products_data.forEach((product: any) => {
+        const existing = productMap.get(product.name) || { count: 0, revenue: 0 };
+        productMap.set(product.name, {
+          count: existing.count + 1,
+          revenue: existing.revenue + parseFloat(product.final_price)
+        });
+      });
+    });
+    const topProducts = Array.from(productMap.entries())
+      .map(([name, data]) => ({ name, ...data }))
+      .sort((a, b) => b.revenue - a.revenue)
+      .slice(0, 6);
+
+    // User stats
+    const userMap = new Map<string, number>();
+    claimsData.forEach(claim => {
+      const existing = userMap.get(claim.claimed_by_username) || 0;
+      userMap.set(claim.claimed_by_username, existing + parseFloat(claim.final_amount.toString()));
+    });
+    const userStats = Array.from(userMap.entries())
+      .map(([username, total]) => ({ username, total }))
+      .sort((a, b) => b.total - a.total)
+      .slice(0, 10);
+
+    setChartData({ dailyRevenue, topProducts, userStats });
   };
 
   const formatCurrency = (amount: number) => {
@@ -121,11 +183,14 @@ export const StatisticsManager = () => {
   }
 
   return (
-    <div className="min-h-screen space-y-8 pb-20">
-      <div className="sticky top-0 z-10 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b pb-4">
-        <h2 className="text-4xl font-bold tracking-tight">Statistieken Dashboard</h2>
-        <p className="text-lg text-muted-foreground">Compleet overzicht van je verkopen en claims</p>
-      </div>
+    <div className="fixed inset-0 overflow-auto bg-background">
+      <div className="container max-w-full p-6 space-y-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-4xl font-bold tracking-tight">📊 Statistieken Dashboard</h2>
+            <p className="text-lg text-muted-foreground">Compleet overzicht van je verkopen en claims</p>
+          </div>
+        </div>
 
       {/* Date Filter */}
       <Card className="border-2">
@@ -169,53 +234,134 @@ export const StatisticsManager = () => {
         </CardContent>
       </Card>
 
-      {/* Stats Grid */}
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        <StatCard
-          title="💰 Totale Omzet"
-          value={formatCurrency(stats.totalRevenue)}
-          icon={Euro}
-          description="Totaal verdiend bedrag (na korting)"
-        />
-        <StatCard
-          title="🎁 Totale Korting Gegeven"
-          value={formatCurrency(stats.totalDiscount)}
-          icon={TrendingUp}
-          description="Totaal bedrag aan korting"
-        />
-        <StatCard
-          title="📊 Aantal Claims"
-          value={stats.totalClaims}
-          icon={BarChart3}
-          description="Totaal aantal geclaime codes"
-        />
-        <StatCard
-          title="👥 Unieke Gebruikers"
-          value={stats.uniqueUsers}
-          icon={Users}
-          description="Aantal verschillende gebruikers"
-        />
-        <StatCard
-          title="📈 Gemiddelde Orderwaarde"
-          value={formatCurrency(stats.averageOrderValue)}
-          icon={TrendingUp}
-          description="Gemiddelde waarde per claim"
-        />
-        <StatCard
-          title="📦 Totaal Producten"
-          value={stats.totalProducts}
-          icon={Package}
-          description="Totaal aantal geleverde producten"
-        />
-      </div>
+        {/* Stats Grid */}
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+          <StatCard
+            title="💰 Totale Omzet"
+            value={formatCurrency(stats.totalRevenue)}
+            icon={Euro}
+            description="Totaal verdiend bedrag (na korting)"
+          />
+          <StatCard
+            title="🎁 Totale Korting Gegeven"
+            value={formatCurrency(stats.totalDiscount)}
+            icon={TrendingUp}
+            description="Totaal bedrag aan korting"
+          />
+          <StatCard
+            title="📊 Aantal Claims"
+            value={stats.totalClaims}
+            icon={BarChart3}
+            description="Totaal aantal geclaime codes"
+          />
+          <StatCard
+            title="👥 Unieke Gebruikers"
+            value={stats.uniqueUsers}
+            icon={Users}
+            description="Aantal verschillende gebruikers"
+          />
+          <StatCard
+            title="📈 Gemiddelde Orderwaarde"
+            value={formatCurrency(stats.averageOrderValue)}
+            icon={TrendingUp}
+            description="Gemiddelde waarde per claim"
+          />
+          <StatCard
+            title="📦 Totaal Producten"
+            value={stats.totalProducts}
+            icon={Package}
+            description="Totaal aantal geleverde producten"
+          />
+        </div>
 
-      {/* Detailed Tables */}
-      <Tabs defaultValue="claims" className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="claims" className="text-base">📋 Alle Claims</TabsTrigger>
-          <TabsTrigger value="products" className="text-base">📦 Producten Details</TabsTrigger>
-          <TabsTrigger value="users" className="text-base">👤 Gebruikers</TabsTrigger>
-        </TabsList>
+        {/* Charts */}
+        <div className="grid gap-6 md:grid-cols-2">
+          <Card className="border-2">
+            <CardHeader className="bg-muted/50">
+              <CardTitle className="flex items-center gap-2">
+                <LineChartIcon className="h-5 w-5" />
+                Omzet Per Dag
+              </CardTitle>
+              <CardDescription>Dagelijkse omzet en aantal claims</CardDescription>
+            </CardHeader>
+            <CardContent className="pt-6">
+              <ResponsiveContainer width="100%" height={300}>
+                <LineChart data={chartData.dailyRevenue}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="date" />
+                  <YAxis yAxisId="left" />
+                  <YAxis yAxisId="right" orientation="right" />
+                  <Tooltip />
+                  <Legend />
+                  <Line yAxisId="left" type="monotone" dataKey="revenue" stroke="#8b5cf6" strokeWidth={2} name="Omzet (€)" />
+                  <Line yAxisId="right" type="monotone" dataKey="claims" stroke="#ec4899" strokeWidth={2} name="Aantal Claims" />
+                </LineChart>
+              </ResponsiveContainer>
+            </CardContent>
+          </Card>
+
+          <Card className="border-2">
+            <CardHeader className="bg-muted/50">
+              <CardTitle className="flex items-center gap-2">
+                <BarChart3 className="h-5 w-5" />
+                Top 6 Producten
+              </CardTitle>
+              <CardDescription>Meest verkochte producten (omzet)</CardDescription>
+            </CardHeader>
+            <CardContent className="pt-6">
+              <ResponsiveContainer width="100%" height={300}>
+                <BarChart data={chartData.topProducts}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="name" angle={-45} textAnchor="end" height={100} />
+                  <YAxis />
+                  <Tooltip />
+                  <Legend />
+                  <Bar dataKey="revenue" fill="#8b5cf6" name="Omzet (€)" />
+                  <Bar dataKey="count" fill="#ec4899" name="Aantal Verkocht" />
+                </BarChart>
+              </ResponsiveContainer>
+            </CardContent>
+          </Card>
+        </div>
+
+        <Card className="border-2">
+          <CardHeader className="bg-muted/50">
+            <CardTitle className="flex items-center gap-2">
+              <PieChartIcon className="h-5 w-5" />
+              Top 10 Gebruikers (Omzet)
+            </CardTitle>
+            <CardDescription>Gebruikers met de hoogste totale omzet</CardDescription>
+          </CardHeader>
+          <CardContent className="pt-6">
+            <ResponsiveContainer width="100%" height={400}>
+              <PieChart>
+                <Pie
+                  data={chartData.userStats}
+                  cx="50%"
+                  cy="50%"
+                  labelLine={false}
+                  label={({ username, total }) => `${username}: ${formatCurrency(total)}`}
+                  outerRadius={150}
+                  fill="#8884d8"
+                  dataKey="total"
+                >
+                  {chartData.userStats.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                  ))}
+                </Pie>
+                <Tooltip formatter={(value: number) => formatCurrency(value)} />
+              </PieChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
+
+        {/* Detailed Tables */}
+        <Tabs defaultValue="claims" className="w-full">
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="claims" className="text-base">📋 Alle Claims</TabsTrigger>
+            <TabsTrigger value="products" className="text-base">📦 Producten Details</TabsTrigger>
+            <TabsTrigger value="users" className="text-base">👤 Gebruikers</TabsTrigger>
+          </TabsList>
 
         <TabsContent value="claims" className="space-y-4 mt-6">
           <Card className="border-2">
@@ -370,8 +516,9 @@ export const StatisticsManager = () => {
               </div>
             </CardContent>
           </Card>
-        </TabsContent>
-      </Tabs>
+          </TabsContent>
+        </Tabs>
+      </div>
     </div>
   );
 };
