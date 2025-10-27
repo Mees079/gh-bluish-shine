@@ -183,48 +183,47 @@ export const StatisticsManager = () => {
   }
 
   return (
-    <div className="fixed inset-0 overflow-auto bg-background">
-      <div className="container max-w-full p-6 space-y-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h2 className="text-4xl font-bold tracking-tight">📊 Statistieken Dashboard</h2>
-            <p className="text-lg text-muted-foreground">Compleet overzicht van je verkopen en claims</p>
-          </div>
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-3xl font-bold">📊 Statistieken</h2>
+          <p className="text-muted-foreground">Bekijk al je verkoop en claim data</p>
         </div>
+      </div>
 
       {/* Date Filter */}
-      <Card className="border-2">
+      <Card>
         <CardContent className="pt-6">
           <div className="flex items-center justify-between flex-wrap gap-4">
             <div className="space-y-1">
-              <h3 className="text-lg font-semibold">Periode Filter</h3>
-              <p className="text-sm text-muted-foreground">Selecteer de periode die je wilt bekijken</p>
+              <h3 className="font-semibold">📅 Periode Filter</h3>
+              <p className="text-sm text-muted-foreground">Selecteer de periode</p>
             </div>
             <div className="flex gap-2 flex-wrap">
               <Badge 
                 variant={dateFilter === 'all' ? 'default' : 'outline'} 
-                className="cursor-pointer text-base py-2 px-4"
+                className="cursor-pointer"
                 onClick={() => setDateFilter('all')}
               >
                 Alles
               </Badge>
               <Badge 
                 variant={dateFilter === 'today' ? 'default' : 'outline'} 
-                className="cursor-pointer text-base py-2 px-4"
+                className="cursor-pointer"
                 onClick={() => setDateFilter('today')}
               >
                 Vandaag
               </Badge>
               <Badge 
                 variant={dateFilter === 'week' ? 'default' : 'outline'} 
-                className="cursor-pointer text-base py-2 px-4"
+                className="cursor-pointer"
                 onClick={() => setDateFilter('week')}
               >
                 Laatste 7 dagen
               </Badge>
               <Badge 
                 variant={dateFilter === 'month' ? 'default' : 'outline'} 
-                className="cursor-pointer text-base py-2 px-4"
+                className="cursor-pointer"
                 onClick={() => setDateFilter('month')}
               >
                 Laatste 30 dagen
@@ -276,11 +275,11 @@ export const StatisticsManager = () => {
 
         {/* Charts */}
         <div className="grid gap-6 md:grid-cols-2">
-          <Card className="border-2">
-            <CardHeader className="bg-muted/50">
+          <Card>
+            <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <LineChartIcon className="h-5 w-5" />
-                Omzet Per Dag
+                📈 Omzet Per Dag
               </CardTitle>
               <CardDescription>Dagelijkse omzet en aantal claims</CardDescription>
             </CardHeader>
@@ -300,11 +299,11 @@ export const StatisticsManager = () => {
             </CardContent>
           </Card>
 
-          <Card className="border-2">
-            <CardHeader className="bg-muted/50">
+          <Card>
+            <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <BarChart3 className="h-5 w-5" />
-                Top 6 Producten
+                📦 Top 6 Producten
               </CardTitle>
               <CardDescription>Meest verkochte producten (omzet)</CardDescription>
             </CardHeader>
@@ -324,11 +323,11 @@ export const StatisticsManager = () => {
           </Card>
         </div>
 
-        <Card className="border-2">
-          <CardHeader className="bg-muted/50">
+        <Card>
+          <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <PieChartIcon className="h-5 w-5" />
-              Top 10 Gebruikers (Omzet)
+              👥 Top 10 Gebruikers (Omzet)
             </CardTitle>
             <CardDescription>Gebruikers met de hoogste totale omzet</CardDescription>
           </CardHeader>
@@ -358,16 +357,16 @@ export const StatisticsManager = () => {
         {/* Detailed Tables */}
         <Tabs defaultValue="claims" className="w-full">
           <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="claims" className="text-base">📋 Alle Claims</TabsTrigger>
-            <TabsTrigger value="products" className="text-base">📦 Producten Details</TabsTrigger>
-            <TabsTrigger value="users" className="text-base">👤 Gebruikers</TabsTrigger>
+            <TabsTrigger value="claims">📋 Alle Claims</TabsTrigger>
+            <TabsTrigger value="products">📦 Producten Details</TabsTrigger>
+            <TabsTrigger value="users">👤 Gebruikers</TabsTrigger>
           </TabsList>
 
-        <TabsContent value="claims" className="space-y-4 mt-6">
-          <Card className="border-2">
-            <CardHeader className="bg-muted/50">
-              <CardTitle className="text-2xl">Claims Overzicht</CardTitle>
-              <CardDescription className="text-base">Alle geclaime codes met financiële details</CardDescription>
+        <TabsContent value="claims" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Claims Overzicht</CardTitle>
+              <CardDescription>Alle geclaime codes met financiële details</CardDescription>
             </CardHeader>
             <CardContent className="pt-6">
               <div className="overflow-x-auto">
@@ -417,11 +416,11 @@ export const StatisticsManager = () => {
           </Card>
         </TabsContent>
 
-        <TabsContent value="products" className="space-y-4 mt-6">
-          <Card className="border-2">
-            <CardHeader className="bg-muted/50">
-              <CardTitle className="text-2xl">Producten Details</CardTitle>
-              <CardDescription className="text-base">Overzicht van alle geleverde producten</CardDescription>
+        <TabsContent value="products" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Producten Details</CardTitle>
+              <CardDescription>Overzicht van alle geleverde producten</CardDescription>
             </CardHeader>
             <CardContent className="pt-6">
               <div className="overflow-x-auto">
@@ -470,11 +469,11 @@ export const StatisticsManager = () => {
           </Card>
         </TabsContent>
 
-        <TabsContent value="users" className="space-y-4 mt-6">
-          <Card className="border-2">
-            <CardHeader className="bg-muted/50">
-              <CardTitle className="text-2xl">Gebruikers Overzicht</CardTitle>
-              <CardDescription className="text-base">Statistieken per gebruiker</CardDescription>
+        <TabsContent value="users" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Gebruikers Overzicht</CardTitle>
+              <CardDescription>Statistieken per gebruiker</CardDescription>
             </CardHeader>
             <CardContent className="pt-6">
               <div className="overflow-x-auto">
@@ -516,9 +515,8 @@ export const StatisticsManager = () => {
               </div>
             </CardContent>
           </Card>
-          </TabsContent>
-        </Tabs>
-      </div>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };
