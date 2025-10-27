@@ -8,6 +8,7 @@ import { CategoriesManager } from "./CategoriesManagerDnd";
 import { DiscountsManager } from "./DiscountsManager";
 import { AccountManager } from "./AccountManager";
 import { CodesManager } from "./CodesManager";
+import { StatisticsManager } from "./StatisticsManager";
 
 interface AdminDashboardProps {
   user: User;
@@ -31,13 +32,18 @@ export const AdminDashboard = ({ user, onLogout }: AdminDashboardProps) => {
       </div>
 
       <Tabs defaultValue="codes" className="w-full">
-        <TabsList className="grid w-full grid-cols-2">
+        <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="codes">Codes</TabsTrigger>
+          <TabsTrigger value="statistics">Statistieken</TabsTrigger>
           <TabsTrigger value="site">Site Bewerken</TabsTrigger>
         </TabsList>
 
         <TabsContent value="codes" className="mt-6">
           <CodesManager />
+        </TabsContent>
+
+        <TabsContent value="statistics" className="mt-6">
+          <StatisticsManager />
         </TabsContent>
 
         <TabsContent value="site" className="mt-6">

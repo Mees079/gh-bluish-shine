@@ -31,7 +31,7 @@ Deno.serve(async (req) => {
     // Find the code
     const { data: redemptionCode, error: codeError } = await supabaseAdmin
       .from('redemption_codes')
-      .select('id, code, active, claimed_at, claimed_by_username')
+      .select('id, code, active, claimed_at, claimed_by_username, is_test_code')
       .eq('code', code.toUpperCase())
       .single()
 
@@ -90,7 +90,7 @@ Deno.serve(async (req) => {
       )
     }
 
-    // Get products associated with this code
+    // Get products associated with this code with full details including prices
     const { data: codeProducts, error: productsError } = await supabaseAdmin
       .from('code_products')
       .select(`
@@ -99,7 +99,9 @@ Deno.serve(async (req) => {
           id,
           name,
           description,
-          details
+          details,
+          price,
+          discounted_price
         )
       `)
       .eq('code_id', redemptionCode.id)
@@ -111,6 +113,29 @@ Deno.serve(async (req) => {
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
+
+    // Calculate total amounts
+    let totalAmount = 0
+    let finalAmount = 0
+    const productsWithPrices = codeProducts.map((cp: any) => {
+      const price = parseFloat(cp.products.price)
+      const discountedPrice = cp.products.discounted_price ? parseFloat(cp.products.discounted_price) : null
+      const actualPrice = discountedPrice ?? price
+      
+      totalAmount += price
+      finalAmount += actualPrice
+      
+      return {
+        id: cp.products.id,
+        name: cp.products.name,
+        description: cp.products.description,
+        details: cp.products.details,
+        original_price: price,
+        final_price: actualPrice
+      }
+    })
+
+    const totalDiscount = totalAmount - finalAmount
 
     // Mark code as claimed
     const { error: updateError } = await supabaseAdmin
@@ -129,15 +154,34 @@ Deno.serve(async (req) => {
       )
     }
 
+    // Track claim in statistics (only if not a test code)
+    const { error: claimError } = await supabaseAdmin
+      .from('code_claims')
+      .insert({
+        code_id: redemptionCode.id,
+        code: redemptionCode.code,
+        claimed_by_username: roblox_username,
+        total_amount: totalAmount,
+        total_discount: totalDiscount,
+        final_amount: finalAmount,
+        products_data: productsWithPrices,
+        is_test_claim: redemptionCode.is_test_code
+      })
+
+    if (claimError) {
+      console.error('Error tracking claim:', claimError)
+      // Don't fail the claim if tracking fails, just log it
+    }
+
     // Return products
-    const products = codeProducts.map((cp: any) => ({
-      id: cp.products.id,
-      name: cp.products.name,
-      description: cp.products.description,
-      details: cp.products.details
+    const products = productsWithPrices.map((p: any) => ({
+      id: p.id,
+      name: p.name,
+      description: p.description,
+      details: p.details
     }))
 
-    console.log(`Code ${code} successfully claimed by ${roblox_username}`)
+    console.log(`Code ${code} successfully claimed by ${roblox_username}. Total: €${finalAmount.toFixed(2)} (Discount: €${totalDiscount.toFixed(2)})`)
 
     return new Response(
       JSON.stringify({ 

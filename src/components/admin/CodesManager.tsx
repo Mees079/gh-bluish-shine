@@ -37,6 +37,7 @@ interface RedemptionCode {
   scheduled_start: string;
   created_by: string | null;
   creator_email?: string | undefined;
+  is_test_code: boolean;
   products: { name: string }[];
 }
 
@@ -46,6 +47,7 @@ export const CodesManager = () => {
   const [claimedCodes, setClaimedCodes] = useState<RedemptionCode[]>([]);
   const [selectedProducts, setSelectedProducts] = useState<string[]>([]);
   const [scheduledStart, setScheduledStart] = useState<string>("");
+  const [isTestCode, setIsTestCode] = useState(false);
   const [loading, setLoading] = useState(false);
   const [generating, setGenerating] = useState(false);
   const [copiedCode, setCopiedCode] = useState<string | null>(null);
@@ -96,6 +98,7 @@ export const CodesManager = () => {
           active,
           scheduled_start,
           created_by,
+          is_test_code,
           code_products (
             products (name)
           )
@@ -173,6 +176,7 @@ export const CodesManager = () => {
           active: true,
           scheduled_start: startTime,
           created_by: user?.id,
+          is_test_code: isTestCode,
         })
         .select()
         .single();
@@ -195,13 +199,15 @@ export const CodesManager = () => {
         ? ` Actief vanaf ${format(new Date(scheduledStart), 'dd-MM-yyyy HH:mm')}`
         : '';
 
+      const testMsg = isTestCode ? ' (Test Code - telt niet mee in statistieken)' : '';
       toast({
         title: "Code aangemaakt",
-        description: `Code ${newCode} is succesvol aangemaakt.${scheduleMsg}`,
+        description: `Code ${newCode} is succesvol aangemaakt.${scheduleMsg}${testMsg}`,
       });
 
       setSelectedProducts([]);
       setScheduledStart("");
+      setIsTestCode(false);
       await loadCodes();
     } catch (error: any) {
       toast({
@@ -332,6 +338,20 @@ export const CodesManager = () => {
               </p>
             </div>
 
+            <div className="flex items-center space-x-2 p-4 rounded-lg bg-muted/50 border">
+              <Checkbox
+                id="test-code"
+                checked={isTestCode}
+                onCheckedChange={(checked) => setIsTestCode(checked === true)}
+              />
+              <Label
+                htmlFor="test-code"
+                className="text-sm font-medium cursor-pointer flex-1"
+              >
+                Test Code (telt niet mee in statistieken)
+              </Label>
+            </div>
+
             <Button
               onClick={handleGenerateCode}
               disabled={generating || selectedProducts.length === 0}
@@ -381,6 +401,11 @@ export const CodesManager = () => {
                             <Copy className="h-4 w-4" />
                           )}
                         </Button>
+                        {code.is_test_code && (
+                          <Badge variant="outline" className="border-orange-500 text-orange-500">
+                            Test
+                          </Badge>
+                        )}
                         {isScheduled && (
                           <Badge variant="secondary" className="flex items-center gap-1">
                             <Clock className="h-3 w-3" />
@@ -450,6 +475,11 @@ export const CodesManager = () => {
                       {code.code}
                     </code>
                     <Badge variant="secondary">Geclaimed</Badge>
+                    {code.is_test_code && (
+                      <Badge variant="outline" className="border-orange-500 text-orange-500">
+                        Test
+                      </Badge>
+                    )}
                   </div>
                   
                   <div className="space-y-1 text-sm text-muted-foreground">

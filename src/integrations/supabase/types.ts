@@ -44,6 +44,56 @@ export type Database = {
         }
         Relationships: []
       }
+      code_claims: {
+        Row: {
+          claimed_at: string
+          claimed_by_username: string
+          code: string
+          code_id: string
+          created_at: string
+          final_amount: number
+          id: string
+          is_test_claim: boolean
+          products_data: Json
+          total_amount: number
+          total_discount: number
+        }
+        Insert: {
+          claimed_at?: string
+          claimed_by_username: string
+          code: string
+          code_id: string
+          created_at?: string
+          final_amount: number
+          id?: string
+          is_test_claim?: boolean
+          products_data: Json
+          total_amount: number
+          total_discount?: number
+        }
+        Update: {
+          claimed_at?: string
+          claimed_by_username?: string
+          code?: string
+          code_id?: string
+          created_at?: string
+          final_amount?: number
+          id?: string
+          is_test_claim?: boolean
+          products_data?: Json
+          total_amount?: number
+          total_discount?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "code_claims_code_id_fkey"
+            columns: ["code_id"]
+            isOneToOne: false
+            referencedRelation: "redemption_codes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       code_products: {
         Row: {
           code_id: string
@@ -231,6 +281,7 @@ export type Database = {
           created_at: string
           created_by: string | null
           id: string
+          is_test_code: boolean
           notes: string | null
           scheduled_start: string | null
         }
@@ -242,6 +293,7 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           id?: string
+          is_test_code?: boolean
           notes?: string | null
           scheduled_start?: string | null
         }
@@ -253,6 +305,7 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           id?: string
+          is_test_code?: boolean
           notes?: string | null
           scheduled_start?: string | null
         }
@@ -291,10 +344,7 @@ export type Database = {
         }
         Returns: boolean
       }
-      is_admin: {
-        Args: { _user_id: string }
-        Returns: boolean
-      }
+      is_admin: { Args: { _user_id: string }; Returns: boolean }
     }
     Enums: {
       app_role: "admin" | "super_admin"
