@@ -4,10 +4,14 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Button } from "@/components/ui/button";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import { Calendar, TrendingUp, Euro, Package, Users, BarChart3, LineChart as LineChartIcon, PieChart as PieChartIcon } from "lucide-react";
 import { format, parseISO, startOfDay } from "date-fns";
 import { nl } from "date-fns/locale";
 import { LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
+import { DateRange } from "react-day-picker";
 
 interface CodeClaim {
   id: string;
@@ -54,7 +58,8 @@ export const StatisticsManager = () => {
     userStats: [],
   });
   const [loading, setLoading] = useState(true);
-  const [dateFilter, setDateFilter] = useState<'all' | 'today' | 'week' | 'month'>('all');
+  const [dateFilter, setDateFilter] = useState<'all' | 'today' | 'week' | 'month' | 'custom'>('all');
+  const [customDateRange, setCustomDateRange] = useState<DateRange | undefined>(undefined);
 
   useEffect(() => {
     loadData();
@@ -71,18 +76,30 @@ export const StatisticsManager = () => {
 
       // Apply date filter
       if (dateFilter !== 'all') {
-        const now = new Date();
-        let startDate = new Date();
-        
-        if (dateFilter === 'today') {
+        if (dateFilter === 'custom' && customDateRange?.from) {
+          const startDate = new Date(customDateRange.from);
           startDate.setHours(0, 0, 0, 0);
-        } else if (dateFilter === 'week') {
-          startDate.setDate(now.getDate() - 7);
-        } else if (dateFilter === 'month') {
-          startDate.setMonth(now.getMonth() - 1);
+          query = query.gte('claimed_at', startDate.toISOString());
+          
+          if (customDateRange.to) {
+            const endDate = new Date(customDateRange.to);
+            endDate.setHours(23, 59, 59, 999);
+            query = query.lte('claimed_at', endDate.toISOString());
+          }
+        } else {
+          const now = new Date();
+          let startDate = new Date();
+          
+          if (dateFilter === 'today') {
+            startDate.setHours(0, 0, 0, 0);
+          } else if (dateFilter === 'week') {
+            startDate.setDate(now.getDate() - 7);
+          } else if (dateFilter === 'month') {
+            startDate.setMonth(now.getMonth() - 1);
+          }
+          
+          query = query.gte('claimed_at', startDate.toISOString());
         }
-        
-        query = query.gte('claimed_at', startDate.toISOString());
       }
 
       const { data, error } = await query;
@@ -199,7 +216,7 @@ export const StatisticsManager = () => {
               <h3 className="font-semibold">📅 Periode Filter</h3>
               <p className="text-sm text-muted-foreground">Selecteer de periode</p>
             </div>
-            <div className="flex gap-2 flex-wrap">
+            <div className="flex gap-2 flex-wrap items-center">
               <Badge 
                 variant={dateFilter === 'all' ? 'default' : 'outline'} 
                 className="cursor-pointer"
@@ -228,25 +245,63 @@ export const StatisticsManager = () => {
               >
                 Laatste 30 dagen
               </Badge>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant={dateFilter === 'custom' ? 'default' : 'outline'}
+                    className="h-7 text-xs"
+                  >
+                    <Calendar className="mr-2 h-3 w-3" />
+                    {customDateRange?.from ? (
+                      customDateRange.to ? (
+                        <>
+                          {format(customDateRange.from, "dd MMM", { locale: nl })} -{" "}
+                          {format(customDateRange.to, "dd MMM yyyy", { locale: nl })}
+                        </>
+                      ) : (
+                        format(customDateRange.from, "dd MMM yyyy", { locale: nl })
+                      )
+                    ) : (
+                      "Custom periode"
+                    )}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="end">
+                  <CalendarComponent
+                    mode="range"
+                    selected={customDateRange}
+                    onSelect={(range) => {
+                      setCustomDateRange(range);
+                      if (range?.from) {
+                        setDateFilter('custom');
+                      }
+                    }}
+                    numberOfMonths={2}
+                    locale={nl}
+                  />
+                </PopoverContent>
+              </Popover>
             </div>
           </div>
         </CardContent>
       </Card>
 
         {/* Stats Grid */}
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
           <StatCard
             title="💰 Totale Omzet"
             value={formatCurrency(stats.totalRevenue)}
             icon={Euro}
             description="Totaal verdiend bedrag (na korting)"
           />
-          <StatCard
-            title="🎁 Totale Korting Gegeven"
-            value={formatCurrency(stats.totalDiscount)}
-            icon={TrendingUp}
-            description="Totaal bedrag aan korting"
-          />
+          {stats.totalDiscount > 0 && (
+            <StatCard
+              title="🎁 Totale Korting Gegeven"
+              value={formatCurrency(stats.totalDiscount)}
+              icon={TrendingUp}
+              description="Totaal bedrag aan korting"
+            />
+          )}
           <StatCard
             title="📊 Aantal Claims"
             value={stats.totalClaims}
