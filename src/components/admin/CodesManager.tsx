@@ -21,6 +21,12 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 
+interface Category {
+  id: string;
+  name: string;
+  label: string;
+}
+
 interface Product {
   id: string;
   name: string;
@@ -43,6 +49,9 @@ interface RedemptionCode {
 
 export const CodesManager = () => {
   const [products, setProducts] = useState<Product[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState<string>("all");
+  const [searchQuery, setSearchQuery] = useState("");
   const [activeCodes, setActiveCodes] = useState<RedemptionCode[]>([]);
   const [claimedCodes, setClaimedCodes] = useState<RedemptionCode[]>([]);
   const [selectedProducts, setSelectedProducts] = useState<string[]>([]);
@@ -62,6 +71,15 @@ export const CodesManager = () => {
   const loadData = async () => {
     setLoading(true);
     try {
+      // Load categories
+      const { data: categoriesData, error: categoriesError } = await supabase
+        .from('categories')
+        .select('id, name, label')
+        .order('display_order');
+
+      if (categoriesError) throw categoriesError;
+      setCategories(categoriesData || []);
+
       // Load products
       const { data: productsData, error: productsError } = await supabase
         .from('products')
@@ -272,6 +290,12 @@ export const CodesManager = () => {
     );
   };
 
+  const filteredProducts = products.filter(product => {
+    const matchesCategory = selectedCategory === "all" || product.category_id === selectedCategory;
+    const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase());
+    return matchesCategory && matchesSearch;
+  });
+
   if (loading) {
     return (
       <div className="flex items-center justify-center p-8">
@@ -303,22 +327,64 @@ export const CodesManager = () => {
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-3">
-              <Label className="text-sm font-medium">Producten</Label>
-              {products.map((product) => (
-                <div key={product.id} className="flex items-center space-x-2">
-                  <Checkbox
-                    id={product.id}
-                    checked={selectedProducts.includes(product.id)}
-                    onCheckedChange={() => toggleProductSelection(product.id)}
-                  />
-                  <Label
-                    htmlFor={product.id}
-                    className="text-sm font-normal cursor-pointer"
+              <Label className="text-sm font-medium">Zoek Product</Label>
+              <Input
+                type="text"
+                placeholder="Zoek producten..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full"
+              />
+            </div>
+
+            <div className="space-y-3">
+              <Label className="text-sm font-medium">Categorieën</Label>
+              <div className="flex flex-wrap gap-2">
+                <Button
+                  type="button"
+                  variant={selectedCategory === "all" ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setSelectedCategory("all")}
+                >
+                  Alle
+                </Button>
+                {categories.map((category) => (
+                  <Button
+                    key={category.id}
+                    type="button"
+                    variant={selectedCategory === category.id ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => setSelectedCategory(category.id)}
                   >
-                    {product.name}
-                  </Label>
-                </div>
-              ))}
+                    {category.label}
+                  </Button>
+                ))}
+              </div>
+            </div>
+
+            <div className="space-y-3">
+              <Label className="text-sm font-medium">Producten ({filteredProducts.length})</Label>
+              <div className="max-h-[300px] overflow-y-auto space-y-2 pr-2">
+                {filteredProducts.length === 0 ? (
+                  <p className="text-sm text-muted-foreground">Geen producten gevonden</p>
+                ) : (
+                  filteredProducts.map((product) => (
+                    <div key={product.id} className="flex items-center space-x-2">
+                      <Checkbox
+                        id={product.id}
+                        checked={selectedProducts.includes(product.id)}
+                        onCheckedChange={() => toggleProductSelection(product.id)}
+                      />
+                      <Label
+                        htmlFor={product.id}
+                        className="text-sm font-normal cursor-pointer"
+                      >
+                        {product.name}
+                      </Label>
+                    </div>
+                  ))
+                )}
+              </div>
             </div>
 
             <div className="space-y-2">
