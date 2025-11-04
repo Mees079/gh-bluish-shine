@@ -101,7 +101,7 @@ Deno.serve(async (req) => {
           description,
           details,
           price,
-          discounted_price
+          category_id
         )
       `)
       .eq('code_id', redemptionCode.id)
@@ -114,28 +114,78 @@ Deno.serve(async (req) => {
       )
     }
 
-    // Calculate total amounts
+    // Get active discounts
+    const { data: activeDiscounts, error: discountsError } = await supabaseAdmin
+      .from('discounts')
+      .select('applies_to, product_id, category_id, percentage, fixed_amount, expires_at')
+      .eq('active', true)
+
+    if (discountsError) {
+      console.error('Error fetching discounts:', discountsError)
+    }
+
+    // Function to calculate discounted price for a product
+    const getDiscountedPrice = (product: any) => {
+      const basePrice = parseFloat(product.price)
+      if (!activeDiscounts || activeDiscounts.length === 0) return basePrice
+
+      const relevantDiscounts = activeDiscounts.filter((d: any) => {
+        // Check if discount is expired
+        if (d.expires_at && new Date(d.expires_at) < now) return false
+        
+        // Check if discount applies to this product
+        if (d.applies_to === 'product' && d.product_id === product.id) return true
+        if (d.applies_to === 'category' && d.category_id === product.category_id) return true
+        
+        return false
+      })
+
+      if (relevantDiscounts.length === 0) return basePrice
+
+      // Apply all matching discounts and return the lowest price
+      let bestPrice = basePrice
+      relevantDiscounts.forEach((discount: any) => {
+        let discountedPrice = basePrice
+        
+        if (discount.percentage) {
+          discountedPrice = basePrice * (1 - discount.percentage / 100)
+        }
+        
+        if (discount.fixed_amount) {
+          discountedPrice = Math.max(discountedPrice - parseFloat(discount.fixed_amount), 0)
+        }
+        
+        if (discountedPrice < bestPrice) {
+          bestPrice = discountedPrice
+        }
+      })
+
+      return bestPrice
+    }
+
+    // Calculate total amounts with real-time discounts
     let totalAmount = 0
     let finalAmount = 0
     const productsWithPrices = codeProducts.map((cp: any) => {
-      const price = parseFloat(cp.products.price)
-      const discountedPrice = cp.products.discounted_price ? parseFloat(cp.products.discounted_price) : null
-      const actualPrice = discountedPrice ?? price
+      const originalPrice = parseFloat(cp.products.price)
+      const discountedPrice = getDiscountedPrice(cp.products)
       
-      totalAmount += price
-      finalAmount += actualPrice
+      totalAmount += originalPrice
+      finalAmount += discountedPrice
       
       return {
         id: cp.products.id,
         name: cp.products.name,
         description: cp.products.description,
         details: cp.products.details,
-        original_price: price,
-        final_price: actualPrice
+        original_price: originalPrice,
+        final_price: discountedPrice
       }
     })
 
     const totalDiscount = totalAmount - finalAmount
+
+    console.log(`Price calculation: Original=€${totalAmount.toFixed(2)}, Discount=€${totalDiscount.toFixed(2)}, Final=€${finalAmount.toFixed(2)}`)
 
     // Mark code as claimed
     const { error: updateError } = await supabaseAdmin
