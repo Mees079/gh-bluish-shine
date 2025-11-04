@@ -35,6 +35,16 @@ interface Product {
   discounted_price: number | null;
 }
 
+interface Discount {
+  applies_to: 'product' | 'category';
+  product_id: string | null;
+  category_id: string | null;
+  percentage: number | null;
+  fixed_amount: number | null;
+  expires_at: string | null;
+  active: boolean | null;
+}
+
 interface RedemptionCode {
   id: string;
   code: string;
@@ -64,6 +74,7 @@ export const CodesManager = () => {
   const [copiedCode, setCopiedCode] = useState<string | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [codeToDelete, setCodeToDelete] = useState<string | null>(null);
+  const [discounts, setDiscounts] = useState<Discount[]>([]);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -91,6 +102,23 @@ export const CodesManager = () => {
 
       if (productsError) throw productsError;
       setProducts(productsData || []);
+
+      // Load active discounts
+      const { data: discountsData, error: discountsError } = await supabase
+        .from('discounts')
+        .select('applies_to, product_id, category_id, percentage, fixed_amount, expires_at, active')
+        .eq('active', true);
+
+      if (discountsError) throw discountsError;
+      setDiscounts((discountsData || []).map((d: any) => ({
+        applies_to: (d.applies_to === 'product' || d.applies_to === 'category') ? d.applies_to : 'product',
+        product_id: d.product_id ?? null,
+        category_id: d.category_id ?? null,
+        percentage: d.percentage ?? null,
+        fixed_amount: d.fixed_amount ?? null,
+        expires_at: d.expires_at ?? null,
+        active: d.active ?? true,
+      })));
 
       // Load codes
       await loadCodes();
@@ -298,21 +326,50 @@ export const CodesManager = () => {
     return matchesCategory && matchesSearch;
   });
 
-  // Calculate price breakdown
+  // Calculate price breakdown (use active discounts table, ignore product.discounted_price)
   const calculatePriceBreakdown = () => {
     const selectedProductsData = products.filter(p => selectedProducts.includes(p.id));
-    
+    const now = new Date();
+
+    const getDiscountedPrice = (product: Product) => {
+      const base = Number(product.price);
+      const matching = discounts
+        .filter(d =>
+          ((d.applies_to === 'product' && d.product_id === product.id) ||
+           (d.applies_to === 'category' && d.category_id === product.category_id)) &&
+          (!d.expires_at || new Date(d.expires_at) > now)
+        );
+
+      if (matching.length === 0) return base;
+
+      let best = base;
+      matching.forEach(d => {
+        let discounted = base;
+        if (d.percentage != null) {
+          discounted = base * (1 - d.percentage / 100);
+        }
+        if (d.fixed_amount != null) {
+          discounted = Math.max(discounted - Number(d.fixed_amount), 0);
+        }
+        if (discounted < best) best = discounted;
+      });
+
+      return best;
+    };
+
     let totalOriginalPrice = 0;
     let totalDiscountedPrice = 0;
-    
+
     selectedProductsData.forEach(product => {
-      totalOriginalPrice += Number(product.price);
-      totalDiscountedPrice += Number(product.discounted_price || product.price);
+      const base = Number(product.price);
+      const discounted = getDiscountedPrice(product);
+      totalOriginalPrice += base;
+      totalDiscountedPrice += discounted;
     });
-    
+
     const totalDiscount = totalOriginalPrice - totalDiscountedPrice;
     const hasDiscount = totalDiscount > 0;
-    
+
     return {
       totalOriginalPrice,
       totalDiscountedPrice,
