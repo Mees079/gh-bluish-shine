@@ -36,77 +36,49 @@ export const DiscountsManager = () => {
   };
 
   const reapplyAllDiscounts = async () => {
-    // First clear all discounted prices for all products
+    // Reset alle kortingen
     await supabase.from('products').update({ discounted_price: null });
 
-    // Get all active discounts
-    const { data: activeDiscounts } = await supabase
+    // Haal alle actieve en niet-verlopen kortingen op
+    const { data: discountsData } = await supabase
       .from('discounts')
-      .select('*')
+      .select('applies_to, product_id, category_id, percentage, fixed_amount, expires_at, active')
       .eq('active', true);
 
-    if (!activeDiscounts) return;
-
     const now = new Date();
-    
-    for (const discount of activeDiscounts) {
-      // Check if discount is not expired
-      const isActive = !discount.expires_at || new Date(discount.expires_at) > now;
-      if (!isActive) continue;
+    const activeDiscounts = (discountsData || []).filter((d: any) => !d.expires_at || new Date(d.expires_at) > now);
 
-      if (discount.applies_to === 'shop') {
-        const { data: allProducts } = await supabase.from('products').select('id, price');
-        if (allProducts) {
-          for (const prod of allProducts) {
-            let discountedPrice;
-            if (discount.percentage != null) {
-              discountedPrice = prod.price * (1 - discount.percentage / 100);
-            } else if (discount.fixed_amount != null) {
-              discountedPrice = Math.max(0, prod.price - discount.fixed_amount);
-            }
-            if (discountedPrice !== undefined) {
-              await supabase.from('products').update({ discounted_price: discountedPrice }).eq('id', prod.id);
-            }
-          }
+    // Haal alle producten op
+    const { data: productsData } = await supabase
+      .from('products')
+      .select('id, price, category_id');
+
+    if (!productsData) return;
+
+    for (const prod of productsData) {
+      const base = Number(prod.price);
+      let best = base;
+
+      activeDiscounts.forEach((d: any) => {
+        const applies = (
+          d.applies_to === 'shop' ||
+          (d.applies_to === 'category' && d.category_id === prod.category_id) ||
+          (d.applies_to === 'product' && d.product_id === prod.id)
+        );
+        if (!applies) return;
+
+        let discounted = base;
+        if (d.percentage != null) {
+          discounted = base * (1 - Number(d.percentage) / 100);
         }
-      } else if (discount.applies_to === 'category' && discount.category_id) {
-        const { data: categoryProducts } = await supabase
-          .from('products')
-          .select('id, price')
-          .eq('category_id', discount.category_id);
-        
-        if (categoryProducts) {
-          for (const prod of categoryProducts) {
-            let discountedPrice;
-            if (discount.percentage != null) {
-              discountedPrice = prod.price * (1 - discount.percentage / 100);
-            } else if (discount.fixed_amount != null) {
-              discountedPrice = Math.max(0, prod.price - discount.fixed_amount);
-            }
-            if (discountedPrice !== undefined) {
-              await supabase.from('products').update({ discounted_price: discountedPrice }).eq('id', prod.id);
-            }
-          }
+        if (d.fixed_amount != null) {
+          discounted = Math.max(discounted - Number(d.fixed_amount), 0);
         }
-      } else if (discount.applies_to === 'product' && discount.product_id) {
-        const { data: product } = await supabase
-          .from('products')
-          .select('price')
-          .eq('id', discount.product_id)
-          .maybeSingle();
-        
-        if (product) {
-          let discountedPrice;
-          if (discount.percentage != null) {
-            discountedPrice = product.price * (1 - discount.percentage / 100);
-          } else if (discount.fixed_amount != null) {
-            discountedPrice = Math.max(0, product.price - discount.fixed_amount);
-          }
-          if (discountedPrice !== undefined) {
-            await supabase.from('products').update({ discounted_price: discountedPrice }).eq('id', discount.product_id);
-          }
-        }
-      }
+        if (discounted < best) best = discounted;
+      });
+
+      const newValue = best < base ? best : null;
+      await supabase.from('products').update({ discounted_price: newValue }).eq('id', prod.id);
     }
   };
 

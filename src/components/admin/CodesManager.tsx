@@ -335,8 +335,11 @@ export const CodesManager = () => {
       const base = Number(product.price);
       const matching = discounts
         .filter(d =>
-          ((d.applies_to === 'product' && d.product_id === product.id) ||
-           (d.applies_to === 'category' && d.category_id === product.category_id)) &&
+          (
+            d.applies_to === 'shop' ||
+            (d.applies_to === 'product' && d.product_id === product.id) ||
+            (d.applies_to === 'category' && d.category_id === product.category_id)
+          ) &&
           (!d.expires_at || new Date(d.expires_at) > now)
         );
 

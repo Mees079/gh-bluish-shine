@@ -56,6 +56,7 @@ export const ProductsManager = () => {
 
     const relevantDiscounts = discounts.filter((d: any) => {
       if (d.expires_at && new Date(d.expires_at) < now) return false;
+      if (d.applies_to === 'shop') return true;
       if (d.applies_to === 'product' && d.product_id === product.id) return true;
       if (d.applies_to === 'category' && d.category_id === product.category_id) return true;
       return false;
