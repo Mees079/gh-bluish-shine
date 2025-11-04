@@ -15,6 +15,7 @@ import { productSchema } from "@/lib/validation";
 export const ProductsManager = () => {
   const [products, setProducts] = useState<any[]>([]);
   const [categories, setCategories] = useState<any[]>([]);
+  const [discounts, setDiscounts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [editingProduct, setEditingProduct] = useState<any>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -37,14 +38,49 @@ export const ProductsManager = () => {
 
   const loadData = async () => {
     setLoading(true);
-    const [productsRes, categoriesRes] = await Promise.all([
+    const [productsRes, categoriesRes, discountsRes] = await Promise.all([
       supabase.from('products').select('*, category:categories(*), images:product_images(*)').order('display_order'),
-      supabase.from('categories').select('*').order('display_order')
+      supabase.from('categories').select('*').order('display_order'),
+      supabase.from('discounts').select('*').eq('active', true)
     ]);
 
     if (productsRes.data) setProducts(productsRes.data);
     if (categoriesRes.data) setCategories(categoriesRes.data);
+    if (discountsRes.data) setDiscounts(discountsRes.data);
     setLoading(false);
+  };
+
+  const getDiscountedPrice = (product: any) => {
+    const basePrice = parseFloat(product.price);
+    const now = new Date();
+
+    const relevantDiscounts = discounts.filter((d: any) => {
+      if (d.expires_at && new Date(d.expires_at) < now) return false;
+      if (d.applies_to === 'product' && d.product_id === product.id) return true;
+      if (d.applies_to === 'category' && d.category_id === product.category_id) return true;
+      return false;
+    });
+
+    if (relevantDiscounts.length === 0) return null;
+
+    let bestPrice = basePrice;
+    relevantDiscounts.forEach((discount: any) => {
+      let discountedPrice = basePrice;
+      
+      if (discount.percentage) {
+        discountedPrice = basePrice * (1 - discount.percentage / 100);
+      }
+      
+      if (discount.fixed_amount) {
+        discountedPrice = Math.max(discountedPrice - parseFloat(discount.fixed_amount), 0);
+      }
+      
+      if (discountedPrice < bestPrice) {
+        bestPrice = discountedPrice;
+      }
+    });
+
+    return bestPrice === basePrice ? null : bestPrice;
   };
 
   const handleSave = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -381,7 +417,22 @@ export const ProductsManager = () => {
               <div>
                 <h4 className="font-semibold">{product.name}</h4>
                 <p className="text-sm text-muted-foreground">{product.category?.label}</p>
-                <p className="text-primary font-bold">€{product.price}</p>
+                {(() => {
+                  const discountedPrice = getDiscountedPrice(product);
+                  const basePrice = parseFloat(product.price);
+                  if (discountedPrice) {
+                    return (
+                      <div className="flex items-center gap-2">
+                        <p className="text-muted-foreground line-through text-sm">€{basePrice.toFixed(2)}</p>
+                        <p className="text-primary font-bold">€{discountedPrice.toFixed(2)}</p>
+                        <span className="text-xs bg-green-500/10 text-green-600 dark:text-green-400 px-2 py-0.5 rounded">
+                          -{((basePrice - discountedPrice) / basePrice * 100).toFixed(0)}%
+                        </span>
+                      </div>
+                    );
+                  }
+                  return <p className="text-primary font-bold">€{basePrice.toFixed(2)}</p>;
+                })()}
               </div>
               <div className="flex gap-2">
                 <Button
