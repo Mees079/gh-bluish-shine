@@ -31,6 +31,8 @@ interface Product {
   id: string;
   name: string;
   category_id: string;
+  price: number;
+  discounted_price: number | null;
 }
 
 interface RedemptionCode {
@@ -83,7 +85,7 @@ export const CodesManager = () => {
       // Load products
       const { data: productsData, error: productsError } = await supabase
         .from('products')
-        .select('id, name, category_id')
+        .select('id, name, category_id, price, discounted_price')
         .eq('active', true)
         .order('name');
 
@@ -296,6 +298,31 @@ export const CodesManager = () => {
     return matchesCategory && matchesSearch;
   });
 
+  // Calculate price breakdown
+  const calculatePriceBreakdown = () => {
+    const selectedProductsData = products.filter(p => selectedProducts.includes(p.id));
+    
+    let totalOriginalPrice = 0;
+    let totalDiscountedPrice = 0;
+    
+    selectedProductsData.forEach(product => {
+      totalOriginalPrice += Number(product.price);
+      totalDiscountedPrice += Number(product.discounted_price || product.price);
+    });
+    
+    const totalDiscount = totalOriginalPrice - totalDiscountedPrice;
+    const hasDiscount = totalDiscount > 0;
+    
+    return {
+      totalOriginalPrice,
+      totalDiscountedPrice,
+      totalDiscount,
+      hasDiscount
+    };
+  };
+
+  const priceBreakdown = calculatePriceBreakdown();
+
   if (loading) {
     return (
       <div className="flex items-center justify-center p-8">
@@ -403,6 +430,35 @@ export const CodesManager = () => {
                 Laat leeg voor direct actief. Code is pas claimbaar na deze datum/tijd.
               </p>
             </div>
+
+            {selectedProducts.length > 0 && (
+              <Card className="bg-muted/30">
+                <CardContent className="pt-6 space-y-2">
+                  <h3 className="font-semibold text-sm">Prijs Overzicht</h3>
+                  {priceBreakdown.hasDiscount ? (
+                    <>
+                      <div className="flex justify-between text-sm">
+                        <span className="text-muted-foreground">Originele Prijs:</span>
+                        <span className="line-through">€{priceBreakdown.totalOriginalPrice.toFixed(2)}</span>
+                      </div>
+                      <div className="flex justify-between text-sm text-green-600 dark:text-green-400">
+                        <span>Korting:</span>
+                        <span>-€{priceBreakdown.totalDiscount.toFixed(2)}</span>
+                      </div>
+                      <div className="flex justify-between text-lg font-bold border-t pt-2">
+                        <span>Totaal:</span>
+                        <span>€{priceBreakdown.totalDiscountedPrice.toFixed(2)}</span>
+                      </div>
+                    </>
+                  ) : (
+                    <div className="flex justify-between text-lg font-bold">
+                      <span>Totaal:</span>
+                      <span>€{priceBreakdown.totalOriginalPrice.toFixed(2)}</span>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            )}
 
             <div className="flex items-center space-x-2 p-4 rounded-lg bg-muted/50 border">
               <Checkbox
