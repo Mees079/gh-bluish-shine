@@ -7,10 +7,13 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Edit, Trash2, Upload, X, Search } from "lucide-react";
+import { Plus, Edit, Trash2, Upload, X, Search, GripVertical } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { productSchema } from "@/lib/validation";
+import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core';
+import { arrayMove, SortableContext, sortableKeyboardCoordinates, useSortable, horizontalListSortingStrategy } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 
 export const ProductsManager = () => {
   const [products, setProducts] = useState<any[]>([]);
@@ -250,6 +253,45 @@ export const ProductsManager = () => {
     }
   };
 
+  const handleImageReorder = async (productId: string, images: any[], event: DragEndEvent) => {
+    const { active, over } = event;
+    
+    if (!over || active.id === over.id) return;
+
+    const oldIndex = images.findIndex((img) => img.id === active.id);
+    const newIndex = images.findIndex((img) => img.id === over.id);
+
+    const reorderedImages = arrayMove(images, oldIndex, newIndex);
+
+    try {
+      // Update display_order for all images
+      for (let i = 0; i < reorderedImages.length; i++) {
+        await supabase
+          .from('product_images')
+          .update({ display_order: i })
+          .eq('id', reorderedImages[i].id);
+      }
+
+      toast({
+        title: "Volgorde bijgewerkt",
+      });
+      loadData();
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "Fout",
+        description: error.message,
+      });
+    }
+  };
+
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
+
   const filteredProducts = products.filter(product => {
     const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
                          product.description?.toLowerCase().includes(searchQuery.toLowerCase());
@@ -472,30 +514,75 @@ export const ProductsManager = () => {
                 className="hidden"
                 onChange={(e) => handleImageUpload(product.id, e.target.files)}
               />
-              <div className="flex gap-2 mt-2 flex-wrap">
-                {product.images?.map((img: any) => (
-                  <div key={img.id} className="relative group">
-                    <img
-                      src={img.image_url}
-                      alt="Product"
-                      className="w-20 h-20 object-cover rounded"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => handleImageDelete(img.id, img.image_url)}
-                      className="absolute top-1 right-1 bg-destructive text-destructive-foreground rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
-                    >
-                      <X className="h-3 w-3" />
-                    </button>
+              <DndContext
+                sensors={sensors}
+                collisionDetection={closestCenter}
+                onDragEnd={(event) => handleImageReorder(product.id, product.images || [], event)}
+              >
+                <SortableContext
+                  items={product.images?.map((img: any) => img.id) || []}
+                  strategy={horizontalListSortingStrategy}
+                >
+                  <div className="flex gap-2 mt-2 flex-wrap">
+                    {product.images?.map((img: any) => (
+                      <SortableImage
+                        key={img.id}
+                        image={img}
+                        onDelete={() => handleImageDelete(img.id, img.image_url)}
+                      />
+                    ))}
                   </div>
-                ))}
-              </div>
+                </SortableContext>
+              </DndContext>
             </div>
             </div>
           ))}
           </div>
         </TabsContent>
       </Tabs>
+    </div>
+  );
+};
+
+const SortableImage = ({ image, onDelete }: { image: any; onDelete: () => void }) => {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+  } = useSortable({ id: image.id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+  };
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      className="relative group"
+    >
+      <div
+        {...attributes}
+        {...listeners}
+        className="cursor-grab active:cursor-grabbing absolute top-1 left-1 bg-background/80 rounded p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+      >
+        <GripVertical className="h-3 w-3" />
+      </div>
+      <img
+        src={image.image_url}
+        alt="Product"
+        className="w-20 h-20 object-cover rounded"
+      />
+      <button
+        type="button"
+        onClick={onDelete}
+        className="absolute top-1 right-1 bg-destructive text-destructive-foreground rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+      >
+        <X className="h-3 w-3" />
+      </button>
     </div>
   );
 };

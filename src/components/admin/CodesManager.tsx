@@ -36,7 +36,7 @@ interface Product {
 }
 
 interface Discount {
-  applies_to: 'product' | 'category';
+  applies_to: 'product' | 'category' | 'shop';
   product_id: string | null;
   category_id: string | null;
   percentage: number | null;
