@@ -96,6 +96,9 @@ export const ProductsManager = () => {
       price = Math.ceil(price) - 0.01;
     }
 
+    const limitedStartDate = formData.get('limited_start_date') as string;
+    const limitedEndDate = formData.get('limited_end_date') as string;
+
     const productData = {
       name: formData.get('name') as string,
       category_id: formData.get('category_id') as string,
@@ -104,6 +107,10 @@ export const ProductsManager = () => {
       details: formData.get('details') as string,
       active: formData.get('active') === 'true',
       coming_soon: formData.get('coming_soon') !== null,
+      limited: formData.get('limited') !== null,
+      limited_start_date: limitedStartDate || null,
+      limited_end_date: limitedEndDate || null,
+      photo_display_count: parseInt(formData.get('photo_display_count') as string) || 1,
     };
 
     // Validate input
@@ -422,6 +429,50 @@ export const ProductsManager = () => {
                 <Label htmlFor="coming_soon" className="font-normal">
                   Binnenkort beschikbaar
                 </Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="limited"
+                  name="limited"
+                  defaultChecked={editingProduct?.limited}
+                />
+                <Label htmlFor="limited" className="font-normal">
+                  Limited Edition
+                </Label>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="limited_start_date">Limited Start Datum</Label>
+                  <Input
+                    id="limited_start_date"
+                    name="limited_start_date"
+                    type="datetime-local"
+                    defaultValue={editingProduct?.limited_start_date ? new Date(editingProduct.limited_start_date).toISOString().slice(0, 16) : ''}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="limited_end_date">Limited Eind Datum</Label>
+                  <Input
+                    id="limited_end_date"
+                    name="limited_end_date"
+                    type="datetime-local"
+                    defaultValue={editingProduct?.limited_end_date ? new Date(editingProduct.limited_end_date).toISOString().slice(0, 16) : ''}
+                  />
+                </div>
+              </div>
+              <div>
+                <Label htmlFor="photo_display_count">Foto Weergave</Label>
+                <Select name="photo_display_count" defaultValue={editingProduct?.photo_display_count?.toString() || '1'}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="1">1 foto</SelectItem>
+                    <SelectItem value="2">2 foto's (naast elkaar)</SelectItem>
+                    <SelectItem value="3">3 foto's (1 groot, 2 klein)</SelectItem>
+                    <SelectItem value="4">4 foto's (raster)</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
               <div>
                 <Label htmlFor="images">Foto's toevoegen</Label>

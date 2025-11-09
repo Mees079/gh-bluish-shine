@@ -1,5 +1,6 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
 import placeholderImage from "@/assets/placeholder.png";
 
 export interface Product {
@@ -11,6 +12,8 @@ export interface Product {
   details: string;
   coming_soon?: boolean;
   discounted_price?: string;
+  limited?: boolean;
+  photo_display_count?: number;
 }
 
 interface ProductCardProps {
@@ -20,9 +23,105 @@ interface ProductCardProps {
 
 export const ProductCard = ({ product, onClick }: ProductCardProps) => {
   const hasImages = product.images && product.images.length > 0;
-  const hasMultipleImages = product.images && product.images.length > 1;
   const parsePrice = (s: string) => parseFloat(s.replace('€', '').replace(',', '.'));
   const hasDiscount = !!product.discounted_price && parsePrice(product.discounted_price) < parsePrice(product.price);
+  const photoCount = Math.min(product.photo_display_count || 1, product.images?.length || 1);
+  
+  const renderImages = () => {
+    if (product.coming_soon) {
+      return (
+        <div className="w-full h-full flex items-center justify-center bg-primary/10">
+          <p className="text-primary font-bold text-lg px-4 text-center">Binnenkort Beschikbaar</p>
+        </div>
+      );
+    }
+
+    if (!hasImages) {
+      return (
+        <img
+          src={placeholderImage}
+          alt="Placeholder"
+          className="w-full h-full object-cover"
+        />
+      );
+    }
+
+    if (photoCount === 1) {
+      return (
+        <img
+          src={product.images[0]}
+          alt={product.name}
+          className="w-full h-full object-cover"
+        />
+      );
+    }
+
+    if (photoCount === 2) {
+      return (
+        <div className="grid grid-cols-2 gap-0.5 h-full">
+          <img
+            src={product.images[0]}
+            alt={product.name}
+            className="w-full h-full object-cover"
+          />
+          <img
+            src={product.images[1] || placeholderImage}
+            alt={product.name}
+            className="w-full h-full object-cover"
+          />
+        </div>
+      );
+    }
+
+    if (photoCount === 3) {
+      return (
+        <div className="grid grid-cols-2 gap-0.5 h-full">
+          <img
+            src={product.images[0]}
+            alt={product.name}
+            className="w-full h-full object-cover col-span-1 row-span-2"
+          />
+          <img
+            src={product.images[1] || placeholderImage}
+            alt={product.name}
+            className="w-full h-full object-cover"
+          />
+          <img
+            src={product.images[2] || placeholderImage}
+            alt={product.name}
+            className="w-full h-full object-cover"
+          />
+        </div>
+      );
+    }
+
+    if (photoCount >= 4) {
+      return (
+        <div className="grid grid-cols-2 gap-0.5 h-full">
+          <img
+            src={product.images[0]}
+            alt={product.name}
+            className="w-full h-full object-cover"
+          />
+          <img
+            src={product.images[1] || placeholderImage}
+            alt={product.name}
+            className="w-full h-full object-cover"
+          />
+          <img
+            src={product.images[2] || placeholderImage}
+            alt={product.name}
+            className="w-full h-full object-cover"
+          />
+          <img
+            src={product.images[3] || placeholderImage}
+            alt={product.name}
+            className="w-full h-full object-cover"
+          />
+        </div>
+      );
+    }
+  };
   
   return (
     <Card
@@ -31,22 +130,11 @@ export const ProductCard = ({ product, onClick }: ProductCardProps) => {
     >
       <CardContent className="p-0">
         <div className="aspect-[4/3] overflow-hidden bg-secondary flex items-center justify-center relative">
-          {product.coming_soon ? (
-            <div className="w-full h-full flex items-center justify-center bg-primary/10">
-              <p className="text-primary font-bold text-lg px-4 text-center">Binnenkort Beschikbaar</p>
-            </div>
-          ) : hasImages ? (
-            <img
-              src={product.images[0]}
-              alt={product.name}
-              className="w-full h-full object-cover"
-            />
-          ) : (
-            <img
-              src={placeholderImage}
-              alt="Placeholder"
-              className="w-full h-full object-cover"
-            />
+          {renderImages()}
+          {product.limited && (
+            <Badge className="absolute top-2 left-2 bg-red-500 hover:bg-red-600 text-white">
+              LIMITED
+            </Badge>
           )}
         </div>
         <div className="p-3">

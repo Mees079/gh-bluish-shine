@@ -230,7 +230,11 @@ export type Database = {
           discounted_price: number | null
           display_order: number
           id: string
+          limited: boolean | null
+          limited_end_date: string | null
+          limited_start_date: string | null
           name: string
+          photo_display_count: number | null
           price: number
           updated_at: string | null
         }
@@ -244,7 +248,11 @@ export type Database = {
           discounted_price?: number | null
           display_order?: number
           id?: string
+          limited?: boolean | null
+          limited_end_date?: string | null
+          limited_start_date?: string | null
           name: string
+          photo_display_count?: number | null
           price: number
           updated_at?: string | null
         }
@@ -258,7 +266,11 @@ export type Database = {
           discounted_price?: number | null
           display_order?: number
           id?: string
+          limited?: boolean | null
+          limited_end_date?: string | null
+          limited_start_date?: string | null
           name?: string
+          photo_display_count?: number | null
           price?: number
           updated_at?: string | null
         }

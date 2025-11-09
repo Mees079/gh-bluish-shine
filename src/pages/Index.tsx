@@ -76,25 +76,40 @@ const Index = () => {
         )
       `)
       .eq('category_id', activeCategory)
-      .eq('active', true)
-      .order('display_order');
+      .eq('active', true);
 
     if (productsData) {
-      // Gebruik uitsluitend de vooraf berekende discounted_price i.v.m. RLS op kortingen
-      const formattedProducts: Product[] = productsData.map((p: any) => ({
-        id: p.id,
-        name: p.name,
-        images: p.product_images
-          .sort((a: any, b: any) => a.display_order - b.display_order)
-          .map((img: any) => img.image_url),
-        price: `€${parseFloat(p.price).toFixed(2).replace('.', ',')}`,
-        discounted_price: p.discounted_price != null
-          ? `€${parseFloat(p.discounted_price).toFixed(2).replace('.', ',')}`
-          : undefined,
-        description: p.description || '',
-        details: p.details || '',
-        coming_soon: p.coming_soon || false,
-      }));
+      // Check if products are currently limited
+      const now = new Date();
+      const formattedProducts: Product[] = productsData
+        .map((p: any) => {
+          const isLimited = p.limited && 
+            (!p.limited_start_date || new Date(p.limited_start_date) <= now) &&
+            (!p.limited_end_date || new Date(p.limited_end_date) >= now);
+          
+          return {
+            id: p.id,
+            name: p.name,
+            images: p.product_images
+              .sort((a: any, b: any) => a.display_order - b.display_order)
+              .map((img: any) => img.image_url),
+            price: `€${parseFloat(p.price).toFixed(2).replace('.', ',')}`,
+            discounted_price: p.discounted_price != null
+              ? `€${parseFloat(p.discounted_price).toFixed(2).replace('.', ',')}`
+              : undefined,
+            description: p.description || '',
+            details: p.details || '',
+            coming_soon: p.coming_soon || false,
+            limited: isLimited,
+            photo_display_count: p.photo_display_count || 1,
+          };
+        })
+        .sort((a: any, b: any) => {
+          // Limited products come first
+          if (a.limited && !b.limited) return -1;
+          if (!a.limited && b.limited) return 1;
+          return 0;
+        });
 
       setProducts(formattedProducts);
       
