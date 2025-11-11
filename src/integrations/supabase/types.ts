@@ -464,6 +464,39 @@ export type Database = {
         }
         Relationships: []
       }
+      rules_sections: {
+        Row: {
+          active: boolean | null
+          content: string
+          created_at: string
+          display_order: number
+          icon: string | null
+          id: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean | null
+          content: string
+          created_at?: string
+          display_order?: number
+          icon?: string | null
+          id?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean | null
+          content?: string
+          created_at?: string
+          display_order?: number
+          icon?: string | null
+          id?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string | null

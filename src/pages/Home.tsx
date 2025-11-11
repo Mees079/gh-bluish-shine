@@ -3,7 +3,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { Navbar } from "@/components/Navbar";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, Shield, Users, Zap, Server } from "lucide-react";
+import heroBanner from "@/assets/hero-banner.png";
 
 interface HomeConfig {
   hero_image_url: string | null;
@@ -83,50 +84,78 @@ const Home = () => {
     <div className="min-h-screen bg-background">
       <Navbar />
       
-      {/* Hero Section */}
+      {/* Hero Section with Police Banner */}
       <section className="relative h-screen flex items-center justify-center overflow-hidden">
-        {config.hero_image_url ? (
-          <div 
-            className="absolute inset-0 bg-cover bg-center animate-fade-in"
-            style={{ backgroundImage: `url(${config.hero_image_url})` }}
-          >
-            <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/50 to-background" />
-          </div>
-        ) : (
-          <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-background to-background" />
-        )}
+        <div 
+          className="absolute inset-0 bg-cover bg-center animate-fade-in"
+          style={{ backgroundImage: `url(${config.hero_image_url || heroBanner})` }}
+        >
+          <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-black/60 to-background" />
+        </div>
         
-        <div className="relative z-10 text-center space-y-8 px-4 max-w-5xl animate-fade-in">
-          <h1 className="text-5xl sm:text-7xl lg:text-8xl font-bold text-foreground drop-shadow-2xl">
+        <div className="relative z-10 text-center space-y-8 px-4 max-w-6xl animate-fade-in">
+          <div className="inline-block px-6 py-2 bg-primary/20 border border-primary/50 rounded-full backdrop-blur-sm mb-4">
+            <span className="text-primary font-semibold">🎮 Nu Live & Speelbaar</span>
+          </div>
+          
+          <h1 className="text-5xl sm:text-7xl lg:text-8xl font-bold text-white drop-shadow-2xl leading-tight">
             {config.hero_title}
           </h1>
+          
           {config.hero_subtitle && (
-            <p className="text-xl sm:text-3xl text-foreground/90 font-light drop-shadow-lg">
+            <p className="text-2xl sm:text-3xl text-white/90 font-light drop-shadow-lg max-w-3xl mx-auto">
               {config.hero_subtitle}
             </p>
           )}
-          <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
-            {config.hero_cta_link && (
-              <Button asChild size="lg" variant="glow" className="text-lg px-8 py-6">
-                <Link to={config.hero_cta_link}>
-                  {config.hero_cta_text || "Start Nu"}
-                </Link>
-              </Button>
-            )}
+          
+          <div className="flex flex-col sm:flex-row gap-4 justify-center pt-6">
+            <Button asChild size="lg" variant="glow" className="text-lg px-10 py-7 text-xl">
+              <Link to={config.hero_cta_link || "/shop"}>
+                {config.hero_cta_text || "Start Nu"} →
+              </Link>
+            </Button>
             {config.discord_link && (
-              <Button asChild size="lg" variant="outline" className="text-lg px-8 py-6 border-2">
-                <a href={config.discord_link} target="_blank" rel="noopener noreferrer">
+              <Button 
+                asChild 
+                size="lg" 
+                variant="outline" 
+                className="text-lg px-10 py-7 text-xl border-2 border-white text-white hover:bg-white/20 backdrop-blur-sm"
+              >
+                <a 
+                  href={config.discord_link} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                >
                   Join Discord
                 </a>
               </Button>
             )}
+          </div>
+
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 pt-12 max-w-4xl mx-auto">
+            {[
+              { icon: Users, label: "Actieve Community", value: "500+" },
+              { icon: Server, label: "Uptime", value: "99.9%" },
+              { icon: Shield, label: "Staff Online", value: "24/7" },
+              { icon: Zap, label: "Updates", value: "Wekelijks" },
+            ].map((stat, idx) => (
+              <div 
+                key={idx}
+                className="bg-background/10 backdrop-blur-md border border-white/20 rounded-xl p-4 animate-fade-in"
+                style={{ animationDelay: `${idx * 0.1 + 0.3}s` }}
+              >
+                <stat.icon className="h-8 w-8 text-primary mx-auto mb-2" />
+                <p className="text-3xl font-bold text-white">{stat.value}</p>
+                <p className="text-sm text-white/70">{stat.label}</p>
+              </div>
+            ))}
           </div>
         </div>
 
         {/* Scroll indicator */}
         <button 
           onClick={scrollToContent}
-          className="absolute bottom-8 left-1/2 -translate-x-1/2 animate-bounce text-foreground/60 hover:text-foreground transition-colors"
+          className="absolute bottom-8 left-1/2 -translate-x-1/2 animate-bounce text-white/80 hover:text-white transition-colors"
           aria-label="Scroll naar content"
         >
           <ChevronDown className="h-12 w-12" />
@@ -141,19 +170,27 @@ const Home = () => {
           <div className="max-w-7xl mx-auto relative z-10">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
               <div className="space-y-6 animate-fade-in">
+                <div className="inline-block px-4 py-1 bg-primary/10 border border-primary/30 rounded-full mb-2">
+                  <span className="text-primary font-semibold text-sm">Over Ons</span>
+                </div>
                 <h2 className="text-4xl sm:text-5xl font-bold text-foreground">
                   {config.about_title}
                 </h2>
                 <p className="text-lg text-muted-foreground leading-relaxed">
                   {config.about_content}
                 </p>
-                <Button asChild size="lg" variant="glow">
-                  <Link to="/shop">Bezoek Shop</Link>
-                </Button>
+                <div className="flex gap-4 pt-4">
+                  <Button asChild size="lg" variant="glow">
+                    <Link to="/shop">Bezoek Shop</Link>
+                  </Button>
+                  <Button asChild size="lg" variant="outline">
+                    <Link to="/regels">Bekijk Regels</Link>
+                  </Button>
+                </div>
               </div>
               
               {config.about_image_url && (
-                <div className="relative h-96 rounded-2xl overflow-hidden shadow-card hover:shadow-glow transition-all duration-500 animate-fade-in">
+                <div className="relative h-96 lg:h-[500px] rounded-2xl overflow-hidden shadow-card hover:shadow-glow transition-all duration-500 animate-fade-in">
                   <img 
                     src={config.about_image_url} 
                     alt={config.about_title}
@@ -170,9 +207,14 @@ const Home = () => {
       {config.show_features_section && (
         <section className="py-24 px-4 bg-card/50">
           <div className="max-w-7xl mx-auto">
-            <h2 className="text-4xl sm:text-5xl font-bold text-center text-foreground mb-16 animate-fade-in">
-              {config.features_title}
-            </h2>
+            <div className="text-center mb-16 animate-fade-in">
+              <div className="inline-block px-4 py-1 bg-primary/10 border border-primary/30 rounded-full mb-4">
+                <span className="text-primary font-semibold text-sm">Features</span>
+              </div>
+              <h2 className="text-4xl sm:text-5xl font-bold text-foreground">
+                {config.features_title}
+              </h2>
+            </div>
             
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               {[
@@ -182,7 +224,7 @@ const Home = () => {
               ].map((feature, idx) => (
                 <div 
                   key={idx}
-                  className="group relative p-8 rounded-2xl bg-background border border-border hover:border-primary transition-all duration-300 hover:shadow-glow animate-fade-in"
+                  className="group relative p-8 rounded-2xl bg-background border-2 border-border hover:border-primary transition-all duration-300 hover:shadow-glow animate-fade-in"
                   style={{ animationDelay: `${idx * 0.1}s` }}
                 >
                   <div className="text-6xl mb-6 group-hover:scale-110 transition-transform duration-300">
@@ -205,9 +247,14 @@ const Home = () => {
       {config.show_gallery && galleryImages.length > 0 && (
         <section className="py-24 px-4">
           <div className="max-w-7xl mx-auto">
-            <h2 className="text-4xl sm:text-5xl font-bold text-center text-foreground mb-16 animate-fade-in">
-              {config.gallery_title}
-            </h2>
+            <div className="text-center mb-16 animate-fade-in">
+              <div className="inline-block px-4 py-1 bg-primary/10 border border-primary/30 rounded-full mb-4">
+                <span className="text-primary font-semibold text-sm">Galerij</span>
+              </div>
+              <h2 className="text-4xl sm:text-5xl font-bold text-foreground">
+                {config.gallery_title}
+              </h2>
+            </div>
             
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {galleryImages.map((image, idx) => (
@@ -246,9 +293,13 @@ const Home = () => {
               {config.cta_section_description}
             </p>
             {config.discord_link && (
-              <Button asChild size="lg" variant="glow" className="text-lg px-12 py-6">
-                <a href={config.discord_link} target="_blank" rel="noopener noreferrer">
-                  {config.cta_button_text}
+              <Button asChild size="lg" variant="glow" className="text-lg px-12 py-7 text-xl">
+                <a 
+                  href={config.discord_link} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                >
+                  {config.cta_button_text} →
                 </a>
               </Button>
             )}
@@ -258,27 +309,43 @@ const Home = () => {
 
       {/* Footer */}
       <footer className="border-t border-border py-12 px-4">
-        <div className="max-w-7xl mx-auto text-center space-y-4">
-          <p className="text-muted-foreground">
-            © 2025 HDRP Hoofddorp Roleplay. Alle rechten voorbehouden.
-          </p>
-          <div className="flex justify-center gap-6">
-            <Link to="/regels" className="text-muted-foreground hover:text-primary transition-colors">
-              Regels
-            </Link>
-            <Link to="/shop" className="text-muted-foreground hover:text-primary transition-colors">
-              Shop
-            </Link>
-            {config.discord_link && (
-              <a 
-                href={config.discord_link} 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="text-muted-foreground hover:text-primary transition-colors"
-              >
-                Discord
-              </a>
-            )}
+        <div className="max-w-7xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
+            <div>
+              <h3 className="font-bold text-lg mb-4 text-foreground">HDRP</h3>
+              <p className="text-muted-foreground text-sm">
+                De beste Nederlandse FiveM roleplay server met realisme en kwaliteit.
+              </p>
+            </div>
+            <div>
+              <h4 className="font-semibold mb-4 text-foreground">Links</h4>
+              <div className="space-y-2">
+                <Link to="/regels" className="block text-muted-foreground hover:text-primary transition-colors text-sm">
+                  Regels
+                </Link>
+                <Link to="/shop" className="block text-muted-foreground hover:text-primary transition-colors text-sm">
+                  Shop
+                </Link>
+              </div>
+            </div>
+            <div>
+              <h4 className="font-semibold mb-4 text-foreground">Community</h4>
+              {config.discord_link && (
+                <a 
+                  href={config.discord_link} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="block text-muted-foreground hover:text-primary transition-colors text-sm"
+                >
+                  Discord
+                </a>
+              )}
+            </div>
+          </div>
+          <div className="border-t border-border pt-8 text-center">
+            <p className="text-muted-foreground text-sm">
+              © 2025 HDRP Hoofddorp Roleplay. Alle rechten voorbehouden.
+            </p>
           </div>
         </div>
       </footer>
