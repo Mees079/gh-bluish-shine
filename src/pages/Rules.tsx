@@ -265,54 +265,52 @@ const Rules = () => {
         </aside>
 
         {/* Main content */}
-        <main className="flex-1 overflow-hidden">
+        <main className="flex-1 overflow-hidden bg-background">
           <ScrollArea id="content-area" className="h-full">
             <div className="max-w-4xl mx-auto p-8">
-              <div className="animate-fade-in">
-                <Card className="p-8 border-2 hover:border-primary/50 transition-colors duration-300 mb-8">
-                  <div className="flex items-start gap-6 mb-6">
-                    <div className="text-6xl">{currentSection?.icon}</div>
-                    <div className="flex-1">
-                      <h2 className="text-4xl font-bold text-foreground mb-3">
-                        {currentSection?.title}
-                      </h2>
-                      <div className="h-1 w-24 bg-primary/50 rounded" />
+              <div className="animate-fade-in space-y-8">
+                <div className="flex items-start gap-6 mb-8">
+                  <div className="text-6xl">{currentSection?.icon}</div>
+                  <div className="flex-1">
+                    <h2 className="text-4xl font-bold text-foreground mb-3">
+                      {currentSection?.title}
+                    </h2>
+                    <div className="h-1 w-24 bg-primary/50 rounded" />
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  {currentSection?.content && (
+                    <div className="space-y-2">
+                      {renderContent(currentSection.content)}
                     </div>
-                  </div>
+                  )}
 
-                  <div className="space-y-4">
-                    {currentSection?.content && (
-                      <div className="space-y-2">
-                        {renderContent(currentSection.content)}
-                      </div>
-                    )}
-
-                    {currentSection?.subsections && currentSection.subsections.length > 0 && (
-                      <div className="space-y-12 mt-8">
-                        {currentSection.subsections.map((subsection, idx) => (
-                          <div 
-                            key={idx}
-                            id={`subsection-${idx}`}
-                            className="scroll-mt-24 space-y-3"
-                          >
-                            <div className="flex items-center gap-3 mb-4">
-                              <div className="h-1 w-12 bg-primary/50 rounded" />
-                              <h3 className="text-2xl font-semibold text-foreground">
-                                {subsection.title}
-                              </h3>
-                            </div>
-                            <div className="space-y-2 pl-4">
-                              {renderContent(subsection.content)}
-                            </div>
+                  {currentSection?.subsections && currentSection.subsections.length > 0 && (
+                    <div className="space-y-12 mt-8">
+                      {currentSection.subsections.map((subsection, idx) => (
+                        <div 
+                          key={idx}
+                          id={`subsection-${idx}`}
+                          className="scroll-mt-24 space-y-3"
+                        >
+                          <div className="flex items-center gap-3 mb-4">
+                            <div className="h-1 w-12 bg-primary/50 rounded" />
+                            <h3 className="text-2xl font-semibold text-foreground">
+                              {subsection.title}
+                            </h3>
                           </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                </Card>
+                          <div className="space-y-2 pl-4">
+                            {renderContent(subsection.content)}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
 
                 {/* Bottom warning */}
-                <Card className="p-8 bg-gradient-to-br from-destructive/10 to-destructive/5 border-destructive/30 relative overflow-hidden">
+                <Card className="p-8 bg-gradient-to-br from-destructive/10 to-destructive/5 border-destructive/30 relative overflow-hidden mt-12">
                   <div className="absolute top-0 right-0 w-48 h-48 bg-destructive/20 rounded-full blur-3xl" />
                   <div className="relative z-10 space-y-3">
                     <h3 className="text-2xl font-bold text-foreground flex items-center gap-3">
