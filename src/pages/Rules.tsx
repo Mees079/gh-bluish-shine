@@ -4,6 +4,7 @@ import { Navbar } from "@/components/Navbar";
 import { Card } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
+import { ChevronDown, ChevronRight } from "lucide-react";
 
 interface RulesSection {
   id: string;
@@ -20,6 +21,7 @@ interface RulesSection {
 const Rules = () => {
   const [sections, setSections] = useState<RulesSection[]>([]);
   const [activeSection, setActiveSection] = useState<string>("");
+  const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     loadSections();
@@ -28,6 +30,7 @@ const Rules = () => {
   useEffect(() => {
     if (sections.length > 0 && !activeSection) {
       setActiveSection(sections[0].id);
+      setExpandedSections(new Set([sections[0].id]));
     }
   }, [sections, activeSection]);
 
@@ -49,9 +52,20 @@ const Rules = () => {
     }
   };
 
-  const scrollToSection = (sectionId: string) => {
+  const toggleSection = (sectionId: string) => {
+    const newExpanded = new Set(expandedSections);
+    if (newExpanded.has(sectionId)) {
+      newExpanded.delete(sectionId);
+    } else {
+      newExpanded.add(sectionId);
+    }
+    setExpandedSections(newExpanded);
     setActiveSection(sectionId);
-    const element = document.getElementById(`section-${sectionId}`);
+  };
+
+  const scrollToSubsection = (sectionId: string, subsectionIndex: number) => {
+    setActiveSection(sectionId);
+    const element = document.getElementById(`subsection-${sectionId}-${subsectionIndex}`);
     if (element) {
       element.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
@@ -123,27 +137,44 @@ const Rules = () => {
           </div>
           
           <ScrollArea className="h-[calc(100vh-16rem)]">
-            <nav className="p-4 space-y-2">
+            <nav className="p-4 space-y-1">
               {sections.map((section) => (
-                <button
-                  key={section.id}
-                  onClick={() => scrollToSection(section.id)}
-                  className={cn(
-                    "w-full flex items-center gap-3 p-4 rounded-lg text-left transition-all duration-200",
-                    "hover:bg-primary/10 hover:border-primary/50",
-                    activeSection === section.id
-                      ? "bg-primary/20 border-2 border-primary shadow-sm"
-                      : "bg-card border border-border"
+                <div key={section.id} className="space-y-1">
+                  <button
+                    onClick={() => toggleSection(section.id)}
+                    className={cn(
+                      "w-full flex items-center gap-3 p-3 rounded-lg text-left transition-all duration-200",
+                      "hover:bg-primary/10",
+                      activeSection === section.id
+                        ? "bg-primary/10 text-primary"
+                        : "text-foreground"
+                    )}
+                  >
+                    <span className="text-2xl">{section.icon}</span>
+                    <span className="font-semibold flex-1">
+                      {section.title}
+                    </span>
+                    {section.subsections?.length > 0 && (
+                      expandedSections.has(section.id) ? 
+                        <ChevronDown className="h-4 w-4" /> : 
+                        <ChevronRight className="h-4 w-4" />
+                    )}
+                  </button>
+                  
+                  {expandedSections.has(section.id) && section.subsections?.length > 0 && (
+                    <div className="ml-8 space-y-1 mt-1">
+                      {section.subsections.map((subsection, idx) => (
+                        <button
+                          key={idx}
+                          onClick={() => scrollToSubsection(section.id, idx)}
+                          className="w-full text-left px-3 py-2 text-sm rounded hover:bg-primary/5 text-muted-foreground hover:text-foreground transition-colors"
+                        >
+                          {subsection.title}
+                        </button>
+                      ))}
+                    </div>
                   )}
-                >
-                  <span className="text-3xl">{section.icon}</span>
-                  <span className={cn(
-                    "font-semibold",
-                    activeSection === section.id ? "text-primary" : "text-foreground"
-                  )}>
-                    {section.title}
-                  </span>
-                </button>
+                </div>
               ))}
             </nav>
           </ScrollArea>
@@ -191,11 +222,12 @@ const Rules = () => {
                       )}
 
                       {section.subsections?.length > 0 && (
-                        <div className="space-y-6 mt-6">
+                        <div className="space-y-8 mt-8">
                           {section.subsections.map((subsection, idx) => (
                             <div 
                               key={idx}
-                              className="pl-6 border-l-2 border-primary/30 space-y-2"
+                              id={`subsection-${section.id}-${idx}`}
+                              className="scroll-mt-8 pl-6 border-l-2 border-primary/30 space-y-3"
                             >
                               <h3 className="text-2xl font-semibold text-foreground">
                                 {subsection.title}
