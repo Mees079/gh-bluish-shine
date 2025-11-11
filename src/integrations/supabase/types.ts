@@ -187,38 +187,143 @@ export type Database = {
           },
         ]
       }
+      gallery_images: {
+        Row: {
+          active: boolean | null
+          created_at: string
+          display_order: number
+          id: string
+          image_url: string
+          title: string | null
+        }
+        Insert: {
+          active?: boolean | null
+          created_at?: string
+          display_order?: number
+          id?: string
+          image_url: string
+          title?: string | null
+        }
+        Update: {
+          active?: boolean | null
+          created_at?: string
+          display_order?: number
+          id?: string
+          image_url?: string
+          title?: string | null
+        }
+        Relationships: []
+      }
       home_config: {
         Row: {
+          about_content: string | null
+          about_image_url: string | null
+          about_title: string | null
           banner_image_url: string | null
           banner_subtitle: string | null
           banner_title: string | null
           created_at: string
+          cta_button_text: string | null
+          cta_section_description: string | null
+          cta_section_title: string | null
           discord_link: string | null
+          feature_1_description: string | null
+          feature_1_icon: string | null
+          feature_1_title: string | null
+          feature_2_description: string | null
+          feature_2_icon: string | null
+          feature_2_title: string | null
+          feature_3_description: string | null
+          feature_3_icon: string | null
+          feature_3_title: string | null
+          features_title: string | null
+          gallery_title: string | null
+          hero_cta_link: string | null
+          hero_cta_text: string | null
+          hero_image_url: string | null
+          hero_subtitle: string | null
+          hero_title: string | null
           id: string
           rules_content: string | null
+          show_about_section: boolean | null
           show_banner: boolean | null
+          show_cta_section: boolean | null
+          show_features_section: boolean | null
+          show_gallery: boolean | null
           updated_at: string
         }
         Insert: {
+          about_content?: string | null
+          about_image_url?: string | null
+          about_title?: string | null
           banner_image_url?: string | null
           banner_subtitle?: string | null
           banner_title?: string | null
           created_at?: string
+          cta_button_text?: string | null
+          cta_section_description?: string | null
+          cta_section_title?: string | null
           discord_link?: string | null
+          feature_1_description?: string | null
+          feature_1_icon?: string | null
+          feature_1_title?: string | null
+          feature_2_description?: string | null
+          feature_2_icon?: string | null
+          feature_2_title?: string | null
+          feature_3_description?: string | null
+          feature_3_icon?: string | null
+          feature_3_title?: string | null
+          features_title?: string | null
+          gallery_title?: string | null
+          hero_cta_link?: string | null
+          hero_cta_text?: string | null
+          hero_image_url?: string | null
+          hero_subtitle?: string | null
+          hero_title?: string | null
           id?: string
           rules_content?: string | null
+          show_about_section?: boolean | null
           show_banner?: boolean | null
+          show_cta_section?: boolean | null
+          show_features_section?: boolean | null
+          show_gallery?: boolean | null
           updated_at?: string
         }
         Update: {
+          about_content?: string | null
+          about_image_url?: string | null
+          about_title?: string | null
           banner_image_url?: string | null
           banner_subtitle?: string | null
           banner_title?: string | null
           created_at?: string
+          cta_button_text?: string | null
+          cta_section_description?: string | null
+          cta_section_title?: string | null
           discord_link?: string | null
+          feature_1_description?: string | null
+          feature_1_icon?: string | null
+          feature_1_title?: string | null
+          feature_2_description?: string | null
+          feature_2_icon?: string | null
+          feature_2_title?: string | null
+          feature_3_description?: string | null
+          feature_3_icon?: string | null
+          feature_3_title?: string | null
+          features_title?: string | null
+          gallery_title?: string | null
+          hero_cta_link?: string | null
+          hero_cta_text?: string | null
+          hero_image_url?: string | null
+          hero_subtitle?: string | null
+          hero_title?: string | null
           id?: string
           rules_content?: string | null
+          show_about_section?: boolean | null
           show_banner?: boolean | null
+          show_cta_section?: boolean | null
+          show_features_section?: boolean | null
+          show_gallery?: boolean | null
           updated_at?: string
         }
         Relationships: []
