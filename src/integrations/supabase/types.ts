@@ -187,6 +187,42 @@ export type Database = {
           },
         ]
       }
+      home_config: {
+        Row: {
+          banner_image_url: string | null
+          banner_subtitle: string | null
+          banner_title: string | null
+          created_at: string
+          discord_link: string | null
+          id: string
+          rules_content: string | null
+          show_banner: boolean | null
+          updated_at: string
+        }
+        Insert: {
+          banner_image_url?: string | null
+          banner_subtitle?: string | null
+          banner_title?: string | null
+          created_at?: string
+          discord_link?: string | null
+          id?: string
+          rules_content?: string | null
+          show_banner?: boolean | null
+          updated_at?: string
+        }
+        Update: {
+          banner_image_url?: string | null
+          banner_subtitle?: string | null
+          banner_title?: string | null
+          created_at?: string
+          discord_link?: string | null
+          id?: string
+          rules_content?: string | null
+          show_banner?: boolean | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       product_images: {
         Row: {
           created_at: string | null
