@@ -64,6 +64,7 @@ export const HomeManager = () => {
     hero_subtitle: "",
     hero_cta_text: "",
     hero_cta_link: "",
+    roblox_link: "",
     about_title: "",
     about_content: "",
     about_image_url: "",
@@ -123,6 +124,7 @@ export const HomeManager = () => {
         hero_subtitle: data.hero_subtitle || "",
         hero_cta_text: data.hero_cta_text || "",
         hero_cta_link: data.hero_cta_link || "",
+        roblox_link: data.roblox_link || "",
         about_title: data.about_title || "",
         about_content: data.about_content || "",
         about_image_url: data.about_image_url || "",
@@ -172,6 +174,7 @@ export const HomeManager = () => {
         hero_subtitle: config.hero_subtitle || null,
         hero_cta_text: config.hero_cta_text || null,
         hero_cta_link: config.hero_cta_link || null,
+        roblox_link: config.roblox_link || null,
         about_title: config.about_title,
         about_content: config.about_content || null,
         about_image_url: config.about_image_url || null,
@@ -327,6 +330,14 @@ export const HomeManager = () => {
                   placeholder="/shop"
                 />
               </div>
+            </div>
+            <div className="space-y-2">
+              <Label>Roblox Link (voor "Start Nu" button)</Label>
+              <Input
+                value={config.roblox_link}
+                onChange={(e) => setConfig({ ...config, roblox_link: e.target.value })}
+                placeholder="https://www.roblox.com/games/..."
+              />
             </div>
           </CardContent>
         </Card>

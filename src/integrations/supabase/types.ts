@@ -244,6 +244,7 @@ export type Database = {
           hero_subtitle: string | null
           hero_title: string | null
           id: string
+          roblox_link: string | null
           rules_content: string | null
           show_about_section: boolean | null
           show_banner: boolean | null
@@ -281,6 +282,7 @@ export type Database = {
           hero_subtitle?: string | null
           hero_title?: string | null
           id?: string
+          roblox_link?: string | null
           rules_content?: string | null
           show_about_section?: boolean | null
           show_banner?: boolean | null
@@ -318,6 +320,7 @@ export type Database = {
           hero_subtitle?: string | null
           hero_title?: string | null
           id?: string
+          roblox_link?: string | null
           rules_content?: string | null
           show_about_section?: boolean | null
           show_banner?: boolean | null

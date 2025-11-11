@@ -13,6 +13,7 @@ interface HomeConfig {
   hero_subtitle: string | null;
   hero_cta_text: string | null;
   hero_cta_link: string | null;
+  roblox_link: string | null;
   about_title: string;
   about_content: string | null;
   about_image_url: string | null;
@@ -149,11 +150,23 @@ const Home = () => {
           )}
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center pt-6 animate-fade-in" style={{ animationDelay: '0.2s' }}>
-            <Button asChild size="lg" variant="glow" className="text-lg px-10 py-7 text-xl">
-              <Link to={config.hero_cta_link || "/shop"}>
-                {config.hero_cta_text || "Start Nu"} →
-              </Link>
-            </Button>
+            {config.roblox_link ? (
+              <Button asChild size="lg" variant="glow" className="text-lg px-10 py-7 text-xl">
+                <a 
+                  href={config.roblox_link} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                >
+                  {config.hero_cta_text || "Start Nu"} →
+                </a>
+              </Button>
+            ) : (
+              <Button asChild size="lg" variant="glow" className="text-lg px-10 py-7 text-xl">
+                <Link to={config.hero_cta_link || "/shop"}>
+                  {config.hero_cta_text || "Start Nu"} →
+                </Link>
+              </Button>
+            )}
             {config.discord_link && (
               <Button 
                 asChild 
