@@ -12,6 +12,7 @@ import { Plus, Trash2, GripVertical } from "lucide-react";
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy, useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
+import { StatsManager } from "./StatsManager";
 
 interface GalleryImage {
   id: string;
@@ -270,8 +271,9 @@ export const HomeManager = () => {
 
   return (
     <Tabs defaultValue="hero" className="w-full">
-      <TabsList className="grid w-full grid-cols-6">
+      <TabsList className="grid w-full grid-cols-7">
         <TabsTrigger value="hero">Hero</TabsTrigger>
+        <TabsTrigger value="stats">Stats</TabsTrigger>
         <TabsTrigger value="about">Over</TabsTrigger>
         <TabsTrigger value="features">Features</TabsTrigger>
         <TabsTrigger value="gallery">Galerij</TabsTrigger>
@@ -328,6 +330,10 @@ export const HomeManager = () => {
             </div>
           </CardContent>
         </Card>
+      </TabsContent>
+
+      <TabsContent value="stats" className="space-y-4 mt-6">
+        <StatsManager />
       </TabsContent>
 
       <TabsContent value="about" className="space-y-4 mt-6">

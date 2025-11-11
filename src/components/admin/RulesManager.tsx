@@ -7,11 +7,12 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Plus, Trash2, GripVertical, Edit2 } from "lucide-react";
+import { Plus, Trash2, GripVertical, Edit2, ChevronDown, ChevronUp } from "lucide-react";
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy, useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Separator } from "@/components/ui/separator";
 
 interface RulesSection {
   id: string;
@@ -20,6 +21,11 @@ interface RulesSection {
   icon: string;
   display_order: number;
   active: boolean;
+  subsections: Array<{
+    title: string;
+    content: string;
+  }>;
+  show_as_accordion: boolean;
 }
 
 const SortableRuleItem = ({ 
@@ -86,6 +92,8 @@ export const RulesManager = () => {
     title: "",
     content: "",
     icon: "📋",
+    subsections: [] as Array<{title: string; content: string}>,
+    show_as_accordion: false,
   });
 
   const sensors = useSensors(
@@ -106,7 +114,13 @@ export const RulesManager = () => {
       .order('display_order', { ascending: true });
     
     if (data) {
-      setSections(data);
+      const parsed = data.map(section => ({
+        ...section,
+        subsections: Array.isArray(section.subsections) 
+          ? section.subsections as unknown as Array<{title: string; content: string}>
+          : [],
+      })) as RulesSection[];
+      setSections(parsed);
     }
   };
 
@@ -124,6 +138,8 @@ export const RulesManager = () => {
           title: formData.title,
           content: formData.content,
           icon: formData.icon,
+          subsections: formData.subsections,
+          show_as_accordion: formData.show_as_accordion,
         })
         .eq('id', editingSection.id);
 
@@ -141,6 +157,8 @@ export const RulesManager = () => {
           content: formData.content,
           icon: formData.icon,
           display_order: sections.length,
+          subsections: formData.subsections,
+          show_as_accordion: formData.show_as_accordion,
         });
 
       if (error) {
@@ -152,7 +170,7 @@ export const RulesManager = () => {
 
     setDialogOpen(false);
     setEditingSection(null);
-    setFormData({ title: "", content: "", icon: "📋" });
+    setFormData({ title: "", content: "", icon: "📋", subsections: [], show_as_accordion: false });
     loadSections();
   };
 
@@ -162,6 +180,8 @@ export const RulesManager = () => {
       title: section.title,
       content: section.content,
       icon: section.icon,
+      subsections: section.subsections || [],
+      show_as_accordion: section.show_as_accordion || false,
     });
     setDialogOpen(true);
   };
@@ -219,8 +239,31 @@ export const RulesManager = () => {
 
   const handleNewSection = () => {
     setEditingSection(null);
-    setFormData({ title: "", content: "", icon: "📋" });
+    setFormData({ title: "", content: "", icon: "📋", subsections: [], show_as_accordion: false });
     setDialogOpen(true);
+  };
+
+  const addSubsection = () => {
+    setFormData({
+      ...formData,
+      subsections: [...formData.subsections, { title: "", content: "" }]
+    });
+  };
+
+  const removeSubsection = (index: number) => {
+    setFormData({
+      ...formData,
+      subsections: formData.subsections.filter((_, i) => i !== index)
+    });
+  };
+
+  const updateSubsection = (index: number, field: 'title' | 'content', value: string) => {
+    const updated = [...formData.subsections];
+    updated[index][field] = value;
+    setFormData({
+      ...formData,
+      subsections: updated
+    });
   };
 
   return (
@@ -268,11 +311,11 @@ export const RulesManager = () => {
       </Card>
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>{editingSection ? "Sectie Bewerken" : "Nieuwe Sectie"}</DialogTitle>
           </DialogHeader>
-          <div className="space-y-4">
+          <div className="space-y-6">
             <div className="grid grid-cols-4 gap-4">
               <div className="col-span-1 space-y-2">
                 <Label>Icon (Emoji)</Label>
@@ -292,17 +335,81 @@ export const RulesManager = () => {
                 />
               </div>
             </div>
+            
             <div className="space-y-2">
-              <Label>Content (gebruik Enter voor nieuwe regel)</Label>
+              <Label>Hoofd Content</Label>
+              <p className="text-xs text-muted-foreground">
+                Gebruik # voor kopjes, ## voor subkopjes. Elke regel wordt automatisch geformatteerd.
+              </p>
               <Textarea
                 value={formData.content}
                 onChange={(e) => setFormData({ ...formData, content: e.target.value })}
-                placeholder="1. Eerste regel&#10;2. Tweede regel&#10;3. Derde regel"
-                rows={12}
+                placeholder="# Hoofdkop&#10;Alinea tekst hier...&#10;&#10;## Subkop&#10;Meer tekst..."
+                rows={8}
                 className="font-mono text-sm"
               />
             </div>
-            <div className="flex gap-2">
+
+            <Separator />
+
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <Label>Subsecties</Label>
+                  <p className="text-xs text-muted-foreground">
+                    Voeg gedetailleerde subsecties toe voor uitgebreide regels
+                  </p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Label className="text-xs">Als Accordion</Label>
+                  <Switch
+                    checked={formData.show_as_accordion}
+                    onCheckedChange={(checked) => setFormData({ ...formData, show_as_accordion: checked })}
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                {formData.subsections.map((subsection, idx) => (
+                  <Card key={idx} className="p-4 bg-muted/50">
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between">
+                        <Label className="text-sm font-semibold">Subsectie {idx + 1}</Label>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => removeSubsection(idx)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                      <Input
+                        placeholder="Subsectie titel"
+                        value={subsection.title}
+                        onChange={(e) => updateSubsection(idx, 'title', e.target.value)}
+                      />
+                      <Textarea
+                        placeholder="Subsectie content (# en ## worden ondersteund)"
+                        value={subsection.content}
+                        onChange={(e) => updateSubsection(idx, 'content', e.target.value)}
+                        rows={6}
+                        className="font-mono text-sm"
+                      />
+                    </div>
+                  </Card>
+                ))}
+                <Button
+                  variant="outline"
+                  onClick={addSubsection}
+                  className="w-full"
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  Subsectie Toevoegen
+                </Button>
+              </div>
+            </div>
+
+            <div className="flex gap-2 pt-4">
               <Button onClick={handleSave} className="flex-1">
                 {editingSection ? "Bijwerken" : "Toevoegen"}
               </Button>
@@ -311,7 +418,7 @@ export const RulesManager = () => {
                 onClick={() => {
                   setDialogOpen(false);
                   setEditingSection(null);
-                  setFormData({ title: "", content: "", icon: "📋" });
+                  setFormData({ title: "", content: "", icon: "📋", subsections: [], show_as_accordion: false });
                 }}
               >
                 Annuleren

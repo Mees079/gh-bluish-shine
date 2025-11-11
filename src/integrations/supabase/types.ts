@@ -328,6 +328,39 @@ export type Database = {
         }
         Relationships: []
       }
+      home_stats: {
+        Row: {
+          active: boolean | null
+          created_at: string
+          display_order: number
+          icon: string
+          id: string
+          label: string
+          updated_at: string
+          value: string
+        }
+        Insert: {
+          active?: boolean | null
+          created_at?: string
+          display_order?: number
+          icon?: string
+          id?: string
+          label: string
+          updated_at?: string
+          value: string
+        }
+        Update: {
+          active?: boolean | null
+          created_at?: string
+          display_order?: number
+          icon?: string
+          id?: string
+          label?: string
+          updated_at?: string
+          value?: string
+        }
+        Relationships: []
+      }
       product_images: {
         Row: {
           created_at: string | null
@@ -472,6 +505,8 @@ export type Database = {
           display_order: number
           icon: string | null
           id: string
+          show_as_accordion: boolean | null
+          subsections: Json | null
           title: string
           updated_at: string
         }
@@ -482,6 +517,8 @@ export type Database = {
           display_order?: number
           icon?: string | null
           id?: string
+          show_as_accordion?: boolean | null
+          subsections?: Json | null
           title: string
           updated_at?: string
         }
@@ -492,6 +529,8 @@ export type Database = {
           display_order?: number
           icon?: string | null
           id?: string
+          show_as_accordion?: boolean | null
+          subsections?: Json | null
           title?: string
           updated_at?: string
         }
