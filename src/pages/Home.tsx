@@ -90,11 +90,19 @@ const Home = () => {
 
     const sections = [aboutRef.current, featuresRef.current, galleryRef.current];
     sections.forEach(section => {
-      if (section) observer.observe(section);
+      if (section) {
+        // Check if element is already in view
+        const rect = section.getBoundingClientRect();
+        const isInView = rect.top < window.innerHeight && rect.bottom > 0;
+        if (isInView) {
+          section.classList.add('animate-in');
+        }
+        observer.observe(section);
+      }
     });
 
     return () => observer.disconnect();
-  }, [config]);
+  }, [config, galleryImages]);
 
   const loadConfig = async () => {
     const { data } = await supabase
@@ -344,11 +352,9 @@ const Home = () => {
                 ].map((feature, idx) => (
                   <Card 
                     key={idx}
-                    className="group relative p-8 bg-card/50 backdrop-blur-sm border-2 border-border hover:border-primary transition-all duration-500 hover:shadow-glow overflow-hidden"
+                    className="group relative p-8 bg-card/50 backdrop-blur-sm border-2 border-border hover:border-primary transition-all duration-500 hover:shadow-glow overflow-hidden animate-slide-in"
                     style={{ 
-                      animation: 'slideInUp 0.6s ease-out forwards',
-                      animationDelay: `${idx * 0.2}s`,
-                      opacity: 0
+                      animationDelay: `${idx * 0.2}s`
                     }}
                   >
                     {/* Animated background gradient on hover */}
@@ -373,7 +379,7 @@ const Home = () => {
 
           {/* Gallery Section */}
           {config.show_gallery && galleryImages.length > 0 && (
-            <div ref={galleryRef} className="opacity-0 transition-all duration-1000 ease-out">
+            <div ref={galleryRef} className="opacity-0 transition-opacity duration-1000 ease-out">
               <div className="text-center mb-16">
                 <div className="inline-block px-4 py-1 bg-primary/10 border border-primary/30 rounded-full mb-4">
                   <span className="text-primary font-semibold text-sm">Galerij</span>
