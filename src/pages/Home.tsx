@@ -33,6 +33,7 @@ interface HomeConfig {
   cta_section_description: string;
   cta_button_text: string;
   discord_link: string | null;
+  footer_description: string | null;
   show_about_section: boolean;
   show_features_section: boolean;
   show_cta_section: boolean;
@@ -467,7 +468,7 @@ const Home = () => {
             <div>
               <h3 className="font-bold text-lg mb-4 text-foreground">HDRP</h3>
               <p className="text-muted-foreground text-sm">
-                De beste Nederlandse FiveM roleplay server met realisme en kwaliteit.
+                {config?.footer_description || "De beste Nederlandse Roblox roleplay server met realisme en kwaliteit."}
               </p>
             </div>
             <div>
