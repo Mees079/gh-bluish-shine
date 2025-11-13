@@ -7,16 +7,19 @@ import { cn } from "@/lib/utils";
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
+interface Subsection {
+  title: string;
+  content: string;
+  subsections?: Subsection[];
+}
+
 interface RulesSection {
   id: string;
   title: string;
   content: string;
   icon: string;
   display_order: number;
-  subsections: Array<{
-    title: string;
-    content: string;
-  }>;
+  subsections: Subsection[];
 }
 
 const Rules = () => {
@@ -38,7 +41,7 @@ const Rules = () => {
       const parsed = data.map(section => ({
         ...section,
         subsections: Array.isArray(section.subsections) 
-          ? section.subsections as unknown as Array<{title: string; content: string}>
+          ? section.subsections as unknown as Subsection[]
           : [],
       })) as RulesSection[];
       setSections(parsed);
