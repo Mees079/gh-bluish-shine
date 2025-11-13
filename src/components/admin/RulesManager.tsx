@@ -448,6 +448,14 @@ export const RulesManager = () => {
                   onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                   placeholder="Algemene Regels"
                 />
+                <Label>Beschrijving (kaart-tekst onder de titel)</Label>
+                <Textarea
+                  value={formData.content}
+                  onChange={(e) => setFormData({ ...formData, content: e.target.value })}
+                  placeholder="Korte introductie of samenvatting die op de regels-kaart wordt getoond"
+                  rows={3}
+                  className="font-mono text-sm"
+                />
               </div>
             </div>
 

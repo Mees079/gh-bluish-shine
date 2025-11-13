@@ -112,7 +112,38 @@ const Home = () => {
       .single();
     
     if (data) {
-      setConfig(data);
+      const c = data as any;
+      setConfig({
+        hero_image_url: c.hero_image_url ?? null,
+        hero_title: c.hero_title ?? "",
+        hero_subtitle: c.hero_subtitle ?? null,
+        hero_cta_text: c.hero_cta_text ?? null,
+        hero_cta_link: c.hero_cta_link ?? null,
+        roblox_link: c.roblox_link ?? null,
+        about_title: c.about_title ?? "",
+        about_content: c.about_content ?? null,
+        about_image_url: c.about_image_url ?? null,
+        features_title: c.features_title ?? "",
+        feature_1_title: c.feature_1_title ?? "",
+        feature_1_description: c.feature_1_description ?? "",
+        feature_1_icon: c.feature_1_icon ?? "",
+        feature_2_title: c.feature_2_title ?? "",
+        feature_2_description: c.feature_2_description ?? "",
+        feature_2_icon: c.feature_2_icon ?? "",
+        feature_3_title: c.feature_3_title ?? "",
+        feature_3_description: c.feature_3_description ?? "",
+        feature_3_icon: c.feature_3_icon ?? "",
+        gallery_title: c.gallery_title ?? "",
+        show_gallery: c.show_gallery ?? true,
+        cta_section_title: c.cta_section_title ?? "",
+        cta_section_description: c.cta_section_description ?? "",
+        cta_button_text: c.cta_button_text ?? "",
+        discord_link: c.discord_link ?? null,
+        footer_description: c.footer_description ?? null,
+        show_about_section: c.show_about_section ?? true,
+        show_features_section: c.show_features_section ?? true,
+        show_cta_section: c.show_cta_section ?? true,
+      });
     }
   };
 
