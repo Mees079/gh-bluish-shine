@@ -12,7 +12,12 @@ import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, us
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy, useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Separator } from "@/components/ui/separator";
+
+interface Subsection {
+  title: string;
+  content: string;
+  subsections?: Subsection[];
+}
 
 interface RulesSection {
   id: string;
@@ -21,12 +26,100 @@ interface RulesSection {
   icon: string;
   display_order: number;
   active: boolean;
-  subsections: Array<{
-    title: string;
-    content: string;
-  }>;
+  subsections: Subsection[];
   show_as_accordion: boolean;
 }
+
+interface SubsectionEditorProps {
+  subsection: Subsection;
+  path: number[];
+  onUpdate: (path: number[], field: 'title' | 'content', value: string) => void;
+  onRemove: (path: number[]) => void;
+  onAddNested: (path: number[]) => void;
+  level: number;
+}
+
+const SubsectionEditor = ({ 
+  subsection, 
+  path, 
+  onUpdate, 
+  onRemove, 
+  onAddNested, 
+  level 
+}: SubsectionEditorProps) => {
+  const [isExpanded, setIsExpanded] = useState(true);
+  
+  return (
+    <Card className={`p-4 ${level === 0 ? 'bg-muted/50' : 'bg-background'}`} style={{ marginLeft: `${level * 1}rem` }}>
+      <div className="space-y-3">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setIsExpanded(!isExpanded)}
+            >
+              {isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+            </Button>
+            <Label className="text-sm font-semibold">
+              {level === 0 ? `Regel ${path[0] + 1}` : `Subregel ${path.join('.')}`}
+            </Label>
+          </div>
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => onAddNested(path)}
+            >
+              <Plus className="h-3 w-3 mr-1" />
+              Subregel
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => onRemove(path)}
+            >
+              <Trash2 className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
+        
+        {isExpanded && (
+          <>
+            <Input
+              placeholder="Regel titel"
+              value={subsection.title}
+              onChange={(e) => onUpdate(path, 'title', e.target.value)}
+            />
+            <Textarea
+              placeholder="Regel beschrijving/uitleg (# en ## worden ondersteund)"
+              value={subsection.content}
+              onChange={(e) => onUpdate(path, 'content', e.target.value)}
+              rows={4}
+              className="font-mono text-sm"
+            />
+            
+            {subsection.subsections && subsection.subsections.length > 0 && (
+              <div className="space-y-2 pt-2 border-t">
+                {subsection.subsections.map((sub, idx) => (
+                  <SubsectionEditor
+                    key={idx}
+                    subsection={sub}
+                    path={[...path, idx]}
+                    onUpdate={onUpdate}
+                    onRemove={onRemove}
+                    onAddNested={onAddNested}
+                    level={level + 1}
+                  />
+                ))}
+              </div>
+            )}
+          </>
+        )}
+      </div>
+    </Card>
+  );
+};
 
 const SortableRuleItem = ({ 
   section, 
@@ -60,7 +153,9 @@ const SortableRuleItem = ({
       <div className="text-2xl">{section.icon}</div>
       <div className="flex-1">
         <p className="text-sm font-medium text-foreground">{section.title}</p>
-        <p className="text-xs text-muted-foreground line-clamp-1">{section.content}</p>
+        <p className="text-xs text-muted-foreground">
+          {section.subsections?.length || 0} regels
+        </p>
       </div>
       <Switch
         checked={section.active}
@@ -92,7 +187,7 @@ export const RulesManager = () => {
     title: "",
     content: "",
     icon: "📋",
-    subsections: [] as Array<{title: string; content: string}>,
+    subsections: [] as Subsection[],
     show_as_accordion: false,
   });
 
@@ -117,30 +212,31 @@ export const RulesManager = () => {
       const parsed = data.map(section => ({
         ...section,
         subsections: Array.isArray(section.subsections) 
-          ? section.subsections as unknown as Array<{title: string; content: string}>
+          ? section.subsections as unknown as Subsection[]
           : [],
       })) as RulesSection[];
       setSections(parsed);
     }
   };
 
-  const handleSave = async () => {
-    if (!formData.title || !formData.content) {
-      toast.error("Titel en content zijn verplicht");
+  const handleSubmit = async () => {
+    if (!formData.title) {
+      toast.error("Titel is verplicht");
       return;
     }
 
+    const data = {
+      title: formData.title,
+      content: formData.content || "",
+      icon: formData.icon,
+      subsections: formData.subsections as any,
+      show_as_accordion: formData.show_as_accordion,
+    };
+
     if (editingSection) {
-      // Update existing
       const { error } = await supabase
         .from('rules_sections')
-        .update({
-          title: formData.title,
-          content: formData.content,
-          icon: formData.icon,
-          subsections: formData.subsections,
-          show_as_accordion: formData.show_as_accordion,
-        })
+        .update(data as any)
         .eq('id', editingSection.id);
 
       if (error) {
@@ -149,17 +245,13 @@ export const RulesManager = () => {
       }
       toast.success("Sectie bijgewerkt");
     } else {
-      // Create new
       const { error } = await supabase
         .from('rules_sections')
-        .insert({
-          title: formData.title,
-          content: formData.content,
-          icon: formData.icon,
+        .insert([{ 
+          ...data, 
           display_order: sections.length,
-          subsections: formData.subsections,
-          show_as_accordion: formData.show_as_accordion,
-        });
+          active: true
+        } as any]);
 
       if (error) {
         toast.error("Fout bij toevoegen");
@@ -169,8 +261,6 @@ export const RulesManager = () => {
     }
 
     setDialogOpen(false);
-    setEditingSection(null);
-    setFormData({ title: "", content: "", icon: "📋", subsections: [], show_as_accordion: false });
     loadSections();
   };
 
@@ -180,13 +270,15 @@ export const RulesManager = () => {
       title: section.title,
       content: section.content,
       icon: section.icon,
-      subsections: section.subsections || [],
-      show_as_accordion: section.show_as_accordion || false,
+      subsections: section.subsections,
+      show_as_accordion: section.show_as_accordion,
     });
     setDialogOpen(true);
   };
 
   const handleDelete = async (id: string) => {
+    if (!confirm("Weet je zeker dat je deze sectie wilt verwijderen?")) return;
+
     const { error } = await supabase
       .from('rules_sections')
       .delete()
@@ -225,7 +317,6 @@ export const RulesManager = () => {
       const newOrder = arrayMove(sections, oldIndex, newIndex);
       setSections(newOrder);
 
-      // Update display_order in database
       for (let i = 0; i < newOrder.length; i++) {
         await supabase
           .from('rules_sections')
@@ -243,27 +334,51 @@ export const RulesManager = () => {
     setDialogOpen(true);
   };
 
-  const addSubsection = () => {
-    setFormData({
-      ...formData,
-      subsections: [...formData.subsections, { title: "", content: "" }]
-    });
-  };
-
-  const removeSubsection = (index: number) => {
-    setFormData({
-      ...formData,
-      subsections: formData.subsections.filter((_, i) => i !== index)
-    });
-  };
-
-  const updateSubsection = (index: number, field: 'title' | 'content', value: string) => {
+  const addSubsection = (path: number[] = []) => {
     const updated = [...formData.subsections];
-    updated[index][field] = value;
-    setFormData({
-      ...formData,
-      subsections: updated
-    });
+    
+    if (path.length === 0) {
+      updated.push({ title: "", content: "", subsections: [] });
+    } else {
+      let target: any = updated;
+      for (let i = 0; i < path.length - 1; i++) {
+        target = target[path[i]].subsections;
+      }
+      if (!target[path[path.length - 1]].subsections) {
+        target[path[path.length - 1]].subsections = [];
+      }
+      target[path[path.length - 1]].subsections.push({ title: "", content: "", subsections: [] });
+    }
+    
+    setFormData({ ...formData, subsections: updated });
+  };
+
+  const removeSubsection = (path: number[]) => {
+    const updated = [...formData.subsections];
+    
+    if (path.length === 1) {
+      updated.splice(path[0], 1);
+    } else {
+      let target: any = updated;
+      for (let i = 0; i < path.length - 1; i++) {
+        target = target[path[i]].subsections;
+      }
+      target.splice(path[path.length - 1], 1);
+    }
+    
+    setFormData({ ...formData, subsections: updated });
+  };
+
+  const updateSubsection = (path: number[], field: 'title' | 'content', value: string) => {
+    const updated = [...formData.subsections];
+    let target: any = updated;
+    
+    for (let i = 0; i < path.length - 1; i++) {
+      target = target[path[i]].subsections;
+    }
+    target[path[path.length - 1]][field] = value;
+    
+    setFormData({ ...formData, subsections: updated });
   };
 
   return (
@@ -335,93 +450,46 @@ export const RulesManager = () => {
                 />
               </div>
             </div>
-            
-            <div className="space-y-2">
-              <Label>Hoofd Content</Label>
-              <p className="text-xs text-muted-foreground">
-                Gebruik # voor kopjes, ## voor subkopjes. Elke regel wordt automatisch geformatteerd.
-              </p>
-              <Textarea
-                value={formData.content}
-                onChange={(e) => setFormData({ ...formData, content: e.target.value })}
-                placeholder="# Hoofdkop&#10;Alinea tekst hier...&#10;&#10;## Subkop&#10;Meer tekst..."
-                rows={8}
-                className="font-mono text-sm"
-              />
-            </div>
-
-            <Separator />
 
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <Label>Subsecties</Label>
+                  <Label>Regels</Label>
                   <p className="text-xs text-muted-foreground">
-                    Voeg gedetailleerde subsecties toe voor uitgebreide regels
+                    Voeg regels toe met geneste subregels
                   </p>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Label className="text-xs">Als Accordion</Label>
-                  <Switch
-                    checked={formData.show_as_accordion}
-                    onCheckedChange={(checked) => setFormData({ ...formData, show_as_accordion: checked })}
-                  />
                 </div>
               </div>
 
               <div className="space-y-4">
                 {formData.subsections.map((subsection, idx) => (
-                  <Card key={idx} className="p-4 bg-muted/50">
-                    <div className="space-y-3">
-                      <div className="flex items-center justify-between">
-                        <Label className="text-sm font-semibold">Subsectie {idx + 1}</Label>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => removeSubsection(idx)}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
-                      <Input
-                        placeholder="Subsectie titel"
-                        value={subsection.title}
-                        onChange={(e) => updateSubsection(idx, 'title', e.target.value)}
-                      />
-                      <Textarea
-                        placeholder="Subsectie content (# en ## worden ondersteund)"
-                        value={subsection.content}
-                        onChange={(e) => updateSubsection(idx, 'content', e.target.value)}
-                        rows={6}
-                        className="font-mono text-sm"
-                      />
-                    </div>
-                  </Card>
+                  <SubsectionEditor
+                    key={idx}
+                    subsection={subsection}
+                    path={[idx]}
+                    onUpdate={updateSubsection}
+                    onRemove={removeSubsection}
+                    onAddNested={addSubsection}
+                    level={0}
+                  />
                 ))}
                 <Button
                   variant="outline"
-                  onClick={addSubsection}
+                  onClick={() => addSubsection([])}
                   className="w-full"
                 >
                   <Plus className="h-4 w-4 mr-2" />
-                  Subsectie Toevoegen
+                  Nieuwe Regel
                 </Button>
               </div>
             </div>
 
-            <div className="flex gap-2 pt-4">
-              <Button onClick={handleSave} className="flex-1">
-                {editingSection ? "Bijwerken" : "Toevoegen"}
-              </Button>
-              <Button 
-                variant="outline" 
-                onClick={() => {
-                  setDialogOpen(false);
-                  setEditingSection(null);
-                  setFormData({ title: "", content: "", icon: "📋", subsections: [], show_as_accordion: false });
-                }}
-              >
+            <div className="flex gap-2 justify-end pt-4 border-t">
+              <Button variant="outline" onClick={() => setDialogOpen(false)}>
                 Annuleren
+              </Button>
+              <Button onClick={handleSubmit}>
+                {editingSection ? "Bijwerken" : "Toevoegen"}
               </Button>
             </div>
           </div>
