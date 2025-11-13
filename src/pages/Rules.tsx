@@ -49,11 +49,18 @@ const Rules = () => {
   const loadConfig = async () => {
     const { data } = await supabase
       .from('home_config')
-      .select('rules_page_title, rules_page_subtitle, rules_warning_title, rules_warning_text, rules_footer_text')
+      .select('*')
       .single();
     
     if (data) {
-      setConfig(data);
+      const c = data as any;
+      setConfig({
+        rules_page_title: c.rules_page_title ?? 'Server Regels',
+        rules_page_subtitle: c.rules_page_subtitle ?? 'Selecteer een categorie om de regels te bekijken',
+        rules_warning_title: c.rules_warning_title ?? 'Belangrijke Waarschuwing',
+        rules_warning_text: c.rules_warning_text ?? 'Het overtreden van deze regels kan leiden tot een waarschuwing, kick, tijdelijke ban of permanente ban, afhankelijk van de ernst van de overtreding. Bij twijfel, vraag het aan een staff lid!',
+        rules_footer_text: c.rules_footer_text ?? 'Heb je vragen over de regels? Neem contact op via Discord!'
+      });
     }
   };
 
