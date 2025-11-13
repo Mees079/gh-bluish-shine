@@ -84,7 +84,7 @@ export const HomeManager = () => {
     cta_section_description: "",
     cta_button_text: "",
     discord_link: "",
-    rules_content: "",
+    footer_description: "",
     rules_page_title: "",
     rules_page_subtitle: "",
     rules_warning_title: "",
@@ -149,7 +149,7 @@ export const HomeManager = () => {
         cta_section_description: data.cta_section_description || "",
         cta_button_text: data.cta_button_text || "",
         discord_link: data.discord_link || "",
-        rules_content: data.rules_content || "",
+        footer_description: data.footer_description || "",
         rules_page_title: data.rules_page_title || "",
         rules_page_subtitle: data.rules_page_subtitle || "",
         rules_warning_title: data.rules_warning_title || "",
@@ -204,7 +204,7 @@ export const HomeManager = () => {
         cta_section_description: config.cta_section_description,
         cta_button_text: config.cta_button_text,
         discord_link: config.discord_link || null,
-        rules_content: config.rules_content || null,
+        footer_description: config.footer_description || null,
         rules_page_title: config.rules_page_title || null,
         rules_page_subtitle: config.rules_page_subtitle || null,
         rules_warning_title: config.rules_warning_title || null,
@@ -693,7 +693,7 @@ export const HomeManager = () => {
         <Card>
           <CardHeader>
             <CardTitle>Overige Instellingen</CardTitle>
-            <CardDescription>Discord link en regels</CardDescription>
+            <CardDescription>Discord link en footer tekst</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
@@ -705,12 +705,12 @@ export const HomeManager = () => {
               />
             </div>
             <div className="space-y-2">
-              <Label>Regels Content (Markdown)</Label>
+              <Label>Footer Beschrijving</Label>
               <Textarea
-                value={config.rules_content}
-                onChange={(e) => setConfig({ ...config, rules_content: e.target.value })}
-                rows={12}
-                className="font-mono text-sm"
+                value={config.footer_description}
+                onChange={(e) => setConfig({ ...config, footer_description: e.target.value })}
+                rows={3}
+                placeholder="De beste Nederlandse Roblox roleplay server met realisme en kwaliteit."
               />
             </div>
           </CardContent>
