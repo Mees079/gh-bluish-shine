@@ -85,6 +85,11 @@ export const HomeManager = () => {
     cta_button_text: "",
     discord_link: "",
     rules_content: "",
+    rules_page_title: "",
+    rules_page_subtitle: "",
+    rules_warning_title: "",
+    rules_warning_text: "",
+    rules_footer_text: "",
     show_about_section: true,
     show_features_section: true,
     show_cta_section: true,
@@ -145,6 +150,11 @@ export const HomeManager = () => {
         cta_button_text: data.cta_button_text || "",
         discord_link: data.discord_link || "",
         rules_content: data.rules_content || "",
+        rules_page_title: data.rules_page_title || "",
+        rules_page_subtitle: data.rules_page_subtitle || "",
+        rules_warning_title: data.rules_warning_title || "",
+        rules_warning_text: data.rules_warning_text || "",
+        rules_footer_text: data.rules_footer_text || "",
         show_about_section: data.show_about_section ?? true,
         show_features_section: data.show_features_section ?? true,
         show_cta_section: data.show_cta_section ?? true,
@@ -195,6 +205,11 @@ export const HomeManager = () => {
         cta_button_text: config.cta_button_text,
         discord_link: config.discord_link || null,
         rules_content: config.rules_content || null,
+        rules_page_title: config.rules_page_title || null,
+        rules_page_subtitle: config.rules_page_subtitle || null,
+        rules_warning_title: config.rules_warning_title || null,
+        rules_warning_text: config.rules_warning_text || null,
+        rules_footer_text: config.rules_footer_text || null,
         show_about_section: config.show_about_section,
         show_features_section: config.show_features_section,
         show_cta_section: config.show_cta_section,
@@ -274,12 +289,13 @@ export const HomeManager = () => {
 
   return (
     <Tabs defaultValue="hero" className="w-full">
-      <TabsList className="grid w-full grid-cols-7">
+      <TabsList className="grid w-full grid-cols-8">
         <TabsTrigger value="hero">Hero</TabsTrigger>
         <TabsTrigger value="stats">Stats</TabsTrigger>
         <TabsTrigger value="about">Over</TabsTrigger>
         <TabsTrigger value="features">Features</TabsTrigger>
         <TabsTrigger value="gallery">Galerij</TabsTrigger>
+        <TabsTrigger value="rules">Regels</TabsTrigger>
         <TabsTrigger value="cta">CTA</TabsTrigger>
         <TabsTrigger value="other">Overig</TabsTrigger>
       </TabsList>
@@ -576,6 +592,58 @@ export const HomeManager = () => {
                   </p>
                 )}
               </div>
+            </div>
+          </CardContent>
+        </Card>
+      </TabsContent>
+
+      <TabsContent value="rules" className="space-y-4 mt-6">
+        <Card>
+          <CardHeader>
+            <CardTitle>Regels Pagina</CardTitle>
+            <CardDescription>Instellingen voor de regels pagina</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Label>Pagina Titel</Label>
+              <Input
+                value={config.rules_page_title}
+                onChange={(e) => setConfig({ ...config, rules_page_title: e.target.value })}
+                placeholder="Server Regels"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Pagina Subtitel</Label>
+              <Input
+                value={config.rules_page_subtitle}
+                onChange={(e) => setConfig({ ...config, rules_page_subtitle: e.target.value })}
+                placeholder="Selecteer een categorie om de regels te bekijken"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Waarschuwing Titel</Label>
+              <Input
+                value={config.rules_warning_title}
+                onChange={(e) => setConfig({ ...config, rules_warning_title: e.target.value })}
+                placeholder="Belangrijke Waarschuwing"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Waarschuwing Tekst</Label>
+              <Textarea
+                value={config.rules_warning_text}
+                onChange={(e) => setConfig({ ...config, rules_warning_text: e.target.value })}
+                rows={4}
+                placeholder="Het overtreden van deze regels kan leiden tot..."
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Footer Tekst</Label>
+              <Input
+                value={config.rules_footer_text}
+                onChange={(e) => setConfig({ ...config, rules_footer_text: e.target.value })}
+                placeholder="Heb je vragen over de regels?"
+              />
             </div>
           </CardContent>
         </Card>

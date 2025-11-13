@@ -22,13 +22,40 @@ interface RulesSection {
   subsections: Subsection[];
 }
 
+interface RulesConfig {
+  rules_page_title: string;
+  rules_page_subtitle: string;
+  rules_warning_title: string;
+  rules_warning_text: string;
+  rules_footer_text: string;
+}
+
 const Rules = () => {
   const [sections, setSections] = useState<RulesSection[]>([]);
   const [selectedSection, setSelectedSection] = useState<string | null>(null);
+  const [config, setConfig] = useState<RulesConfig>({
+    rules_page_title: 'Server Regels',
+    rules_page_subtitle: 'Selecteer een categorie om de regels te bekijken',
+    rules_warning_title: 'Belangrijke Waarschuwing',
+    rules_warning_text: 'Het overtreden van deze regels kan leiden tot een waarschuwing, kick, tijdelijke ban of permanente ban, afhankelijk van de ernst van de overtreding. Bij twijfel, vraag het aan een staff lid!',
+    rules_footer_text: 'Heb je vragen over de regels? Neem contact op via Discord!'
+  });
 
   useEffect(() => {
     loadSections();
+    loadConfig();
   }, []);
+
+  const loadConfig = async () => {
+    const { data } = await supabase
+      .from('home_config')
+      .select('rules_page_title, rules_page_subtitle, rules_warning_title, rules_warning_text, rules_footer_text')
+      .single();
+    
+    if (data) {
+      setConfig(data);
+    }
+  };
 
   const loadSections = async () => {
     const { data } = await supabase
@@ -123,10 +150,10 @@ const Rules = () => {
               <span className="text-primary font-semibold text-sm">Regels</span>
             </div>
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-foreground">
-              Server Regels
+              {config.rules_page_title}
             </h1>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              Selecteer een categorie om de regels te bekijken
+              {config.rules_page_subtitle}
             </p>
           </div>
 
@@ -181,11 +208,10 @@ const Rules = () => {
             <div className="relative z-10 space-y-3">
               <h3 className="text-2xl font-bold text-foreground flex items-center gap-3">
                 <span className="text-3xl">⚠️</span>
-                Belangrijke Waarschuwing
+                {config.rules_warning_title}
               </h3>
               <p className="text-foreground/90 leading-relaxed text-lg">
-                Het overtreden van deze regels kan leiden tot een waarschuwing, kick, tijdelijke ban of permanente ban, 
-                afhankelijk van de ernst van de overtreding. Bij twijfel, vraag het aan een staff lid!
+                {config.rules_warning_text}
               </p>
             </div>
           </Card>
@@ -195,7 +221,7 @@ const Rules = () => {
         <footer className="relative border-t border-border/50 py-12 px-4 mt-24">
           <div className="max-w-7xl mx-auto text-center">
             <p className="text-muted-foreground text-lg">
-              Heb je vragen over de regels? Neem contact op via Discord!
+              {config.rules_footer_text}
             </p>
           </div>
         </footer>
@@ -310,11 +336,10 @@ const Rules = () => {
                   <div className="relative z-10 space-y-3">
                     <h3 className="text-2xl font-bold text-foreground flex items-center gap-3">
                       <span className="text-3xl">⚠️</span>
-                      Belangrijke Waarschuwing
+                      {config.rules_warning_title}
                     </h3>
                     <p className="text-foreground/90 leading-relaxed text-lg">
-                      Het overtreden van deze regels kan leiden tot een waarschuwing, kick, tijdelijke ban of permanente ban, 
-                      afhankelijk van de ernst van de overtreding. Bij twijfel, vraag het aan een staff lid!
+                      {config.rules_warning_text}
                     </p>
                   </div>
                 </Card>
