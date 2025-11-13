@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
@@ -63,12 +63,38 @@ const Home = () => {
   const [config, setConfig] = useState<HomeConfig | null>(null);
   const [stats, setStats] = useState<HomeStat[]>([]);
   const [galleryImages, setGalleryImages] = useState<GalleryImage[]>([]);
+  const [showAllGallery, setShowAllGallery] = useState(false);
+  const aboutRef = useRef<HTMLDivElement>(null);
+  const featuresRef = useRef<HTMLDivElement>(null);
+  const galleryRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     loadConfig();
     loadStats();
     loadGallery();
   }, []);
+
+  useEffect(() => {
+    const observerOptions = {
+      threshold: 0.1,
+      rootMargin: '0px 0px -100px 0px'
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('animate-in');
+        }
+      });
+    }, observerOptions);
+
+    const sections = [aboutRef.current, featuresRef.current, galleryRef.current];
+    sections.forEach(section => {
+      if (section) observer.observe(section);
+    });
+
+    return () => observer.disconnect();
+  }, [config]);
 
   const loadConfig = async () => {
     const { data } = await supabase
@@ -222,8 +248,8 @@ const Home = () => {
         <div className="max-w-7xl mx-auto space-y-32">
           {/* About Section */}
           {config.show_about_section && (
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-              <div className="space-y-6 animate-fade-in">
+            <div ref={aboutRef} className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center opacity-0 transition-opacity duration-1000">
+              <div className="space-y-6">
                 <div className="inline-block px-4 py-1 bg-primary/10 border border-primary/30 rounded-full mb-2">
                   <span className="text-primary font-semibold text-sm">Over Ons</span>
                 </div>
@@ -258,8 +284,8 @@ const Home = () => {
 
           {/* Features Section */}
           {config.show_features_section && (
-            <div>
-              <div className="text-center mb-16 animate-fade-in">
+            <div ref={featuresRef} className="opacity-0 transition-opacity duration-1000">
+              <div className="text-center mb-16">
                 <div className="inline-block px-4 py-1 bg-primary/10 border border-primary/30 rounded-full mb-4">
                   <span className="text-primary font-semibold text-sm">Features</span>
                 </div>
@@ -276,8 +302,12 @@ const Home = () => {
                 ].map((feature, idx) => (
                   <Card 
                     key={idx}
-                    className="group relative p-8 bg-card/50 backdrop-blur-sm border-2 border-border hover:border-primary transition-all duration-500 hover:shadow-glow animate-fade-in overflow-hidden"
-                    style={{ animationDelay: `${idx * 0.1}s` }}
+                    className="group relative p-8 bg-card/50 backdrop-blur-sm border-2 border-border hover:border-primary transition-all duration-500 hover:shadow-glow overflow-hidden"
+                    style={{ 
+                      animation: 'slideInUp 0.6s ease-out forwards',
+                      animationDelay: `${idx * 0.2}s`,
+                      opacity: 0
+                    }}
                   >
                     {/* Animated background gradient on hover */}
                     <div className="absolute inset-0 bg-gradient-to-br from-primary/0 to-primary/0 group-hover:from-primary/5 group-hover:to-primary/10 transition-all duration-500" />
@@ -301,8 +331,8 @@ const Home = () => {
 
           {/* Gallery Section */}
           {config.show_gallery && galleryImages.length > 0 && (
-            <div>
-              <div className="text-center mb-16 animate-fade-in">
+            <div ref={galleryRef} className="opacity-0 transition-opacity duration-1000">
+              <div className="text-center mb-16">
                 <div className="inline-block px-4 py-1 bg-primary/10 border border-primary/30 rounded-full mb-4">
                   <span className="text-primary font-semibold text-sm">Galerij</span>
                 </div>
@@ -312,11 +342,15 @@ const Home = () => {
               </div>
               
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {galleryImages.map((image, idx) => (
+                {(showAllGallery ? galleryImages : galleryImages.slice(0, 3)).map((image, idx) => (
                   <div 
                     key={image.id}
-                    className="relative h-64 rounded-2xl overflow-hidden shadow-card hover:shadow-glow transition-all duration-500 group animate-fade-in"
-                    style={{ animationDelay: `${idx * 0.1}s` }}
+                    className="relative h-64 rounded-2xl overflow-hidden shadow-card hover:shadow-glow transition-all duration-500 group"
+                    style={{ 
+                      animation: 'slideInScale 0.6s ease-out forwards',
+                      animationDelay: `${idx * 0.15}s`,
+                      opacity: 0
+                    }}
                   >
                     <img 
                       src={image.image_url} 
@@ -332,6 +366,20 @@ const Home = () => {
                   </div>
                 ))}
               </div>
+
+              {galleryImages.length > 3 && (
+                <div className="text-center mt-8">
+                  <Button 
+                    onClick={() => setShowAllGallery(!showAllGallery)}
+                    variant="outline"
+                    size="lg"
+                    className="group"
+                  >
+                    {showAllGallery ? 'Toon Minder' : `Bekijk Alle ${galleryImages.length} Foto's`}
+                    <ChevronDown className={`ml-2 h-4 w-4 transition-transform duration-300 ${showAllGallery ? 'rotate-180' : ''}`} />
+                  </Button>
+                </div>
+              )}
             </div>
           )}
 
