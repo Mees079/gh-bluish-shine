@@ -139,11 +139,53 @@ const Home = () => {
 
   return (
     <div className="min-h-screen bg-background relative overflow-hidden">
-      {/* Animated background shapes */}
-      <div className="fixed inset-0 pointer-events-none opacity-20">
-        <div className="absolute top-20 left-10 w-72 h-72 bg-primary/30 rounded-full blur-3xl animate-pulse" style={{ animationDuration: '4s' }} />
-        <div className="absolute bottom-40 right-20 w-96 h-96 bg-primary/20 rounded-full blur-3xl animate-pulse" style={{ animationDuration: '6s' }} />
-        <div className="absolute top-1/2 left-1/3 w-64 h-64 bg-primary/10 rounded-full blur-3xl animate-pulse" style={{ animationDuration: '5s' }} />
+      {/* Animated background shapes with hexagons */}
+      <div className="fixed inset-0 pointer-events-none overflow-hidden">
+        {/* Glowing orbs */}
+        <div className="absolute top-20 left-10 w-72 h-72 bg-primary/20 rounded-full blur-3xl animate-pulse opacity-30" style={{ animationDuration: '4s' }} />
+        <div className="absolute bottom-40 right-20 w-96 h-96 bg-primary/15 rounded-full blur-3xl animate-pulse opacity-25" style={{ animationDuration: '6s' }} />
+        <div className="absolute top-1/2 left-1/3 w-64 h-64 bg-primary/10 rounded-full blur-3xl animate-pulse opacity-20" style={{ animationDuration: '5s' }} />
+        
+        {/* Animated hexagon shapes */}
+        <div className="absolute top-1/4 left-1/4 w-32 h-32 animate-float-slow opacity-10">
+          <svg viewBox="0 0 100 100" className="w-full h-full">
+            <polygon points="50 0, 93.3 25, 93.3 75, 50 100, 6.7 75, 6.7 25" 
+              fill="none" stroke="hsl(var(--primary))" strokeWidth="2"
+              className="animate-pulse" style={{ animationDuration: '3s' }}/>
+            <polygon points="50 0, 93.3 25, 93.3 75, 50 100, 6.7 75, 6.7 25" 
+              fill="hsl(var(--primary) / 0.05)" className="blur-sm"/>
+          </svg>
+        </div>
+        
+        <div className="absolute top-2/3 right-1/4 w-24 h-24 animate-float-medium opacity-15">
+          <svg viewBox="0 0 100 100" className="w-full h-full">
+            <polygon points="50 0, 93.3 25, 93.3 75, 50 100, 6.7 75, 6.7 25" 
+              fill="none" stroke="hsl(var(--primary))" strokeWidth="2"
+              className="animate-pulse" style={{ animationDuration: '4s' }}/>
+            <polygon points="50 0, 93.3 25, 93.3 75, 50 100, 6.7 75, 6.7 25" 
+              fill="hsl(var(--primary) / 0.08)" className="blur-sm"/>
+          </svg>
+        </div>
+        
+        <div className="absolute bottom-1/4 left-1/3 w-20 h-20 animate-float-fast opacity-12">
+          <svg viewBox="0 0 100 100" className="w-full h-full">
+            <polygon points="50 0, 93.3 25, 93.3 75, 50 100, 6.7 75, 6.7 25" 
+              fill="none" stroke="hsl(var(--primary-glow))" strokeWidth="2"
+              className="animate-pulse" style={{ animationDuration: '2.5s' }}/>
+            <polygon points="50 0, 93.3 25, 93.3 75, 50 100, 6.7 75, 6.7 25" 
+              fill="hsl(var(--primary-glow) / 0.1)" className="blur-sm"/>
+          </svg>
+        </div>
+        
+        <div className="absolute top-1/2 right-1/3 w-28 h-28 animate-float-medium opacity-10" style={{ animationDelay: '1s' }}>
+          <svg viewBox="0 0 100 100" className="w-full h-full">
+            <polygon points="50 0, 93.3 25, 93.3 75, 50 100, 6.7 75, 6.7 25" 
+              fill="none" stroke="hsl(var(--primary))" strokeWidth="2"
+              className="animate-pulse" style={{ animationDuration: '3.5s' }}/>
+            <polygon points="50 0, 93.3 25, 93.3 75, 50 100, 6.7 75, 6.7 25" 
+              fill="hsl(var(--primary) / 0.06)" className="blur-sm"/>
+          </svg>
+        </div>
       </div>
 
       <Navbar />
@@ -331,7 +373,7 @@ const Home = () => {
 
           {/* Gallery Section */}
           {config.show_gallery && galleryImages.length > 0 && (
-            <div ref={galleryRef} className="opacity-0 transition-opacity duration-1000">
+            <div ref={galleryRef} className="opacity-0 transition-all duration-1000 ease-out">
               <div className="text-center mb-16">
                 <div className="inline-block px-4 py-1 bg-primary/10 border border-primary/30 rounded-full mb-4">
                   <span className="text-primary font-semibold text-sm">Galerij</span>
@@ -345,12 +387,8 @@ const Home = () => {
                 {(showAllGallery ? galleryImages : galleryImages.slice(0, 3)).map((image, idx) => (
                   <div 
                     key={image.id}
-                    className="relative h-64 rounded-2xl overflow-hidden shadow-card hover:shadow-glow transition-all duration-500 group"
-                    style={{ 
-                      animation: 'slideInScale 0.6s ease-out forwards',
-                      animationDelay: `${idx * 0.15}s`,
-                      opacity: 0
-                    }}
+                    className="relative h-64 rounded-2xl overflow-hidden shadow-card hover:shadow-glow transition-all duration-500 group animate-fade-in"
+                    style={{ animationDelay: `${idx * 0.15}s` }}
                   >
                     <img 
                       src={image.image_url} 
