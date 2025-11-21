@@ -191,12 +191,6 @@ const Rules = () => {
                       {section.content.split('\n')[0]}
                     </p>
                   )}
-                  
-                  {section.subsections?.length > 0 && (
-                    <div className="mt-4 text-sm text-muted-foreground">
-                      {section.subsections.length} onderwerpen
-                    </div>
-                  )}
                 </div>
               </Card>
             ))}

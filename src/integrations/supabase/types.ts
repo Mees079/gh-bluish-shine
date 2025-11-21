@@ -237,6 +237,7 @@ export type Database = {
           feature_3_icon: string | null
           feature_3_title: string | null
           features_title: string | null
+          footer_description: string | null
           gallery_title: string | null
           hero_cta_link: string | null
           hero_cta_text: string | null
@@ -246,6 +247,11 @@ export type Database = {
           id: string
           roblox_link: string | null
           rules_content: string | null
+          rules_footer_text: string | null
+          rules_page_subtitle: string | null
+          rules_page_title: string | null
+          rules_warning_text: string | null
+          rules_warning_title: string | null
           show_about_section: boolean | null
           show_banner: boolean | null
           show_cta_section: boolean | null
@@ -275,6 +281,7 @@ export type Database = {
           feature_3_icon?: string | null
           feature_3_title?: string | null
           features_title?: string | null
+          footer_description?: string | null
           gallery_title?: string | null
           hero_cta_link?: string | null
           hero_cta_text?: string | null
@@ -284,6 +291,11 @@ export type Database = {
           id?: string
           roblox_link?: string | null
           rules_content?: string | null
+          rules_footer_text?: string | null
+          rules_page_subtitle?: string | null
+          rules_page_title?: string | null
+          rules_warning_text?: string | null
+          rules_warning_title?: string | null
           show_about_section?: boolean | null
           show_banner?: boolean | null
           show_cta_section?: boolean | null
@@ -313,6 +325,7 @@ export type Database = {
           feature_3_icon?: string | null
           feature_3_title?: string | null
           features_title?: string | null
+          footer_description?: string | null
           gallery_title?: string | null
           hero_cta_link?: string | null
           hero_cta_text?: string | null
@@ -322,6 +335,11 @@ export type Database = {
           id?: string
           roblox_link?: string | null
           rules_content?: string | null
+          rules_footer_text?: string | null
+          rules_page_subtitle?: string | null
+          rules_page_title?: string | null
+          rules_warning_text?: string | null
+          rules_warning_title?: string | null
           show_about_section?: boolean | null
           show_banner?: boolean | null
           show_cta_section?: boolean | null
