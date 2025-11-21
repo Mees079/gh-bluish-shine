@@ -33,91 +33,135 @@ interface RulesSection {
 interface SubsectionEditorProps {
   subsection: Subsection;
   path: number[];
-  onUpdate: (path: number[], field: 'title' | 'content', value: string) => void;
+  onUpdate: (path: number[], field: 'title' | 'content' | 'subsections', value: string | Subsection[]) => void;
   onRemove: (path: number[]) => void;
   onAddNested: (path: number[]) => void;
   level: number;
 }
 
-const SubsectionEditor = ({ 
+const SortableSubsectionEditor = ({ 
   subsection, 
   path, 
   onUpdate, 
   onRemove, 
   onAddNested, 
-  level 
-}: SubsectionEditorProps) => {
+  level,
+  id
+}: SubsectionEditorProps & { id: string }) => {
   const [isExpanded, setIsExpanded] = useState(true);
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+  } = useSortable({ id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+  };
   
   return (
-    <Card className={`p-4 ${level === 0 ? 'bg-muted/50' : 'bg-background'}`} style={{ marginLeft: `${level * 1}rem` }}>
-      <div className="space-y-3">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setIsExpanded(!isExpanded)}
-            >
-              {isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-            </Button>
-            <Label className="text-sm font-semibold">
-              {level === 0 ? `Regel ${path[0] + 1}` : `Subregel ${path.join('.')}`}
-            </Label>
-          </div>
-          <div className="flex gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => onAddNested(path)}
-            >
-              <Plus className="h-3 w-3 mr-1" />
-              Subregel
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => onRemove(path)}
-            >
-              <Trash2 className="h-4 w-4" />
-            </Button>
-          </div>
-        </div>
-        
-        {isExpanded && (
-          <>
-            <Input
-              placeholder="Regel titel"
-              value={subsection.title}
-              onChange={(e) => onUpdate(path, 'title', e.target.value)}
-            />
-            <Textarea
-              placeholder="Regel beschrijving/uitleg (# en ## worden ondersteund)"
-              value={subsection.content}
-              onChange={(e) => onUpdate(path, 'content', e.target.value)}
-              rows={4}
-              className="font-mono text-sm"
-            />
-            
-            {subsection.subsections && subsection.subsections.length > 0 && (
-              <div className="space-y-2 pt-2 border-t">
-                {subsection.subsections.map((sub, idx) => (
-                  <SubsectionEditor
-                    key={idx}
-                    subsection={sub}
-                    path={[...path, idx]}
-                    onUpdate={onUpdate}
-                    onRemove={onRemove}
-                    onAddNested={onAddNested}
-                    level={level + 1}
-                  />
-                ))}
+    <div ref={setNodeRef} style={style}>
+      <Card className={`p-4 ${level === 0 ? 'bg-muted/50' : 'bg-background'}`} style={{ marginLeft: `${level * 1}rem` }}>
+        <div className="space-y-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <div {...attributes} {...listeners} className="cursor-grab active:cursor-grabbing">
+                <GripVertical className="h-4 w-4 text-muted-foreground" />
               </div>
-            )}
-          </>
-        )}
-      </div>
-    </Card>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setIsExpanded(!isExpanded)}
+              >
+                {isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+              </Button>
+              <Label className="text-sm font-semibold">
+                {subsection.title || 'Nieuwe regel'}
+              </Label>
+            </div>
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => onAddNested(path)}
+              >
+                <Plus className="h-3 w-3 mr-1" />
+                Subregel
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => onRemove(path)}
+              >
+                <Trash2 className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+          
+          {isExpanded && (
+            <>
+              <Input
+                placeholder="Regel titel (bijvoorbeeld: Respecteer andere spelers)"
+                value={subsection.title}
+                onChange={(e) => onUpdate(path, 'title', e.target.value)}
+              />
+              <Textarea
+                placeholder="Regel beschrijving/uitleg. Gebruik # voor kopjes. Geen nummering nodig!"
+                value={subsection.content}
+                onChange={(e) => onUpdate(path, 'content', e.target.value)}
+                rows={4}
+                className="font-mono text-sm"
+              />
+              
+              {subsection.subsections && subsection.subsections.length > 0 && (
+                <div className="space-y-2 pt-2 border-t">
+                  <DndContext
+                    sensors={useSensors(
+                      useSensor(PointerSensor),
+                      useSensor(KeyboardSensor, {
+                        coordinateGetter: sortableKeyboardCoordinates,
+                      })
+                    )}
+                    collisionDetection={closestCenter}
+                    onDragEnd={(event) => {
+                      const { active, over } = event;
+                      if (active.id !== over.id && subsection.subsections) {
+                        const oldIndex = subsection.subsections.findIndex((_, i) => `${id}-${i}` === active.id);
+                        const newIndex = subsection.subsections.findIndex((_, i) => `${id}-${i}` === over.id);
+                        const reordered = arrayMove(subsection.subsections, oldIndex, newIndex);
+                        // Update parent with reordered subsections
+                        onUpdate(path, 'subsections' as any, reordered as any);
+                      }
+                    }}
+                  >
+                    <SortableContext
+                      items={subsection.subsections.map((_, i) => `${id}-${i}`)}
+                      strategy={verticalListSortingStrategy}
+                    >
+                      {subsection.subsections.map((sub, idx) => (
+                        <SortableSubsectionEditor
+                          key={`${id}-${idx}`}
+                          id={`${id}-${idx}`}
+                          subsection={sub}
+                          path={[...path, idx]}
+                          onUpdate={onUpdate}
+                          onRemove={onRemove}
+                          onAddNested={onAddNested}
+                          level={level + 1}
+                        />
+                      ))}
+                    </SortableContext>
+                  </DndContext>
+                </div>
+              )}
+            </>
+          )}
+        </div>
+      </Card>
+    </div>
   );
 };
 
@@ -369,14 +413,19 @@ export const RulesManager = () => {
     setFormData({ ...formData, subsections: updated });
   };
 
-  const updateSubsection = (path: number[], field: 'title' | 'content', value: string) => {
+  const updateSubsection = (path: number[], field: 'title' | 'content' | 'subsections', value: string | Subsection[]) => {
     const updated = [...formData.subsections];
     let target: any = updated;
     
     for (let i = 0; i < path.length - 1; i++) {
       target = target[path[i]].subsections;
     }
-    target[path[path.length - 1]][field] = value;
+    
+    if (field === 'subsections') {
+      target[path[path.length - 1]][field] = value;
+    } else {
+      target[path[path.length - 1]][field] = value;
+    }
     
     setFormData({ ...formData, subsections: updated });
   };
@@ -389,6 +438,18 @@ export const RulesManager = () => {
           <CardDescription>Beheer alle regel secties van je server</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
+          <Card className="p-4 bg-primary/5 border-primary/20">
+            <div className="space-y-2">
+              <p className="text-sm font-semibold text-foreground">💡 Tips:</p>
+              <ul className="text-sm text-muted-foreground space-y-1 list-disc list-inside">
+                <li>Sleep regels om de volgorde te wijzigen</li>
+                <li>Gebruik GEEN nummering (1., 2., etc.) - de site nummert automatisch</li>
+                <li>Typ gewoon "Respecteer andere spelers" in plaats van "1. Respecteer andere spelers"</li>
+                <li>Gebruik # in de beschrijving voor kopjes (# Groot, ## Medium, ### Klein)</li>
+              </ul>
+            </div>
+          </Card>
+
           <Button onClick={handleNewSection} className="w-full">
             <Plus className="h-4 w-4 mr-2" />
             Nieuwe Regel Sectie
@@ -470,17 +531,38 @@ export const RulesManager = () => {
               </div>
 
               <div className="space-y-4">
-                {formData.subsections.map((subsection, idx) => (
-                  <SubsectionEditor
-                    key={idx}
-                    subsection={subsection}
-                    path={[idx]}
-                    onUpdate={updateSubsection}
-                    onRemove={removeSubsection}
-                    onAddNested={addSubsection}
-                    level={0}
-                  />
-                ))}
+                <DndContext
+                  sensors={sensors}
+                  collisionDetection={closestCenter}
+                  onDragEnd={(event) => {
+                    const { active, over } = event;
+                    if (active.id !== over.id) {
+                      const oldIndex = formData.subsections.findIndex((_, i) => `subsection-${i}` === active.id);
+                      const newIndex = formData.subsections.findIndex((_, i) => `subsection-${i}` === over.id);
+                      const reordered = arrayMove(formData.subsections, oldIndex, newIndex);
+                      setFormData({ ...formData, subsections: reordered });
+                      toast.success("Volgorde bijgewerkt");
+                    }
+                  }}
+                >
+                  <SortableContext
+                    items={formData.subsections.map((_, i) => `subsection-${i}`)}
+                    strategy={verticalListSortingStrategy}
+                  >
+                    {formData.subsections.map((subsection, idx) => (
+                      <SortableSubsectionEditor
+                        key={`subsection-${idx}`}
+                        id={`subsection-${idx}`}
+                        subsection={subsection}
+                        path={[idx]}
+                        onUpdate={updateSubsection}
+                        onRemove={removeSubsection}
+                        onAddNested={addSubsection}
+                        level={0}
+                      />
+                    ))}
+                  </SortableContext>
+                </DndContext>
                 <Button
                   variant="outline"
                   onClick={() => addSubsection([])}
