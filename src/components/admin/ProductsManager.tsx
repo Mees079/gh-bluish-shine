@@ -102,6 +102,7 @@ export const ProductsManager = () => {
     // Get sound URL if uploaded
     const soundInput = document.getElementById('sound') as HTMLInputElement;
     const soundUrl = (soundInput as any)?.dataset?.soundUrl || editingProduct?.sound_url || null;
+    const soundDuration = formData.get('sound_duration') as string;
 
     const productData = {
       name: formData.get('name') as string,
@@ -117,6 +118,7 @@ export const ProductsManager = () => {
       limited_end_date: limitedEndDate || null,
       photo_display_count: parseInt(formData.get('photo_display_count') as string) || 1,
       sound_url: soundUrl,
+      sound_duration: soundDuration ? parseInt(soundDuration) : null,
     };
 
     // Validate input
@@ -544,6 +546,21 @@ export const ProductsManager = () => {
                 />
                 <p className="text-xs text-muted-foreground mt-1">
                   Upload een geluid dat speelt wanneer op dit product geklikt wordt
+                </p>
+              </div>
+              <div>
+                <Label htmlFor="sound_duration">Geluid Duur (seconden, optioneel)</Label>
+                <Input
+                  id="sound_duration"
+                  name="sound_duration"
+                  type="number"
+                  min="1"
+                  max="30"
+                  defaultValue={editingProduct?.sound_duration || ''}
+                  placeholder="Leeg = volledige lengte"
+                />
+                <p className="text-xs text-muted-foreground mt-1">
+                  Hoeveel seconden het geluid moet afspelen (bijv. 3 voor 3 seconden)
                 </p>
               </div>
               <Button type="submit" className="w-full">Opslaan</Button>
