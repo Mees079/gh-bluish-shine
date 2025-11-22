@@ -99,6 +99,10 @@ export const ProductsManager = () => {
     const limitedStartDate = formData.get('limited_start_date') as string;
     const limitedEndDate = formData.get('limited_end_date') as string;
 
+    // Get sound URL if uploaded
+    const soundInput = document.getElementById('sound') as HTMLInputElement;
+    const soundUrl = (soundInput as any)?.dataset?.soundUrl || editingProduct?.sound_url || null;
+
     const productData = {
       name: formData.get('name') as string,
       category_id: formData.get('category_id') as string,
@@ -108,9 +112,11 @@ export const ProductsManager = () => {
       active: formData.get('active') === 'true',
       coming_soon: formData.get('coming_soon') !== null,
       limited: formData.get('limited') !== null,
+      is_new: formData.get('is_new') !== null,
       limited_start_date: limitedStartDate || null,
       limited_end_date: limitedEndDate || null,
       photo_display_count: parseInt(formData.get('photo_display_count') as string) || 1,
+      sound_url: soundUrl,
     };
 
     // Validate input
@@ -440,6 +446,16 @@ export const ProductsManager = () => {
                   Limited Edition
                 </Label>
               </div>
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="is_new"
+                  name="is_new"
+                  defaultChecked={editingProduct?.is_new}
+                />
+                <Label htmlFor="is_new" className="font-normal">
+                  Nieuw Product (komt bovenaan)
+                </Label>
+              </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <Label htmlFor="limited_start_date">Limited Start Datum</Label>
@@ -485,6 +501,49 @@ export const ProductsManager = () => {
                 />
                 <p className="text-xs text-muted-foreground mt-1">
                   {uploadingImages ? `${uploadingImages.length} foto('s) geselecteerd` : 'Selecteer één of meerdere foto\'s'}
+                </p>
+              </div>
+              <div>
+                <Label htmlFor="sound">Product Geluid (optioneel)</Label>
+                <Input
+                  id="sound"
+                  type="file"
+                  accept="audio/*"
+                  onChange={async (e) => {
+                    const file = e.target.files?.[0];
+                    if (!file) return;
+                    
+                    try {
+                      const fileExt = file.name.split('.').pop();
+                      const fileName = `sounds/${Math.random()}.${fileExt}`;
+                      
+                      const { error: uploadError } = await supabase.storage
+                        .from('product-images')
+                        .upload(fileName, file);
+                      
+                      if (uploadError) throw uploadError;
+                      
+                      const { data: { publicUrl } } = supabase.storage
+                        .from('product-images')
+                        .getPublicUrl(fileName);
+                      
+                      // Store the URL temporarily
+                      (e.target as any).dataset.soundUrl = publicUrl;
+                      
+                      toast({
+                        title: "Geluid geüpload",
+                      });
+                    } catch (error: any) {
+                      toast({
+                        variant: "destructive",
+                        title: "Fout bij uploaden",
+                        description: error.message,
+                      });
+                    }
+                  }}
+                />
+                <p className="text-xs text-muted-foreground mt-1">
+                  Upload een geluid dat speelt wanneer op dit product geklikt wordt
                 </p>
               </div>
               <Button type="submit" className="w-full">Opslaan</Button>
