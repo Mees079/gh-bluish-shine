@@ -425,12 +425,14 @@ export type Database = {
           discounted_price: number | null
           display_order: number
           id: string
+          is_new: boolean | null
           limited: boolean | null
           limited_end_date: string | null
           limited_start_date: string | null
           name: string
           photo_display_count: number | null
           price: number
+          sound_url: string | null
           updated_at: string | null
         }
         Insert: {
@@ -443,12 +445,14 @@ export type Database = {
           discounted_price?: number | null
           display_order?: number
           id?: string
+          is_new?: boolean | null
           limited?: boolean | null
           limited_end_date?: string | null
           limited_start_date?: string | null
           name: string
           photo_display_count?: number | null
           price: number
+          sound_url?: string | null
           updated_at?: string | null
         }
         Update: {
@@ -461,12 +465,14 @@ export type Database = {
           discounted_price?: number | null
           display_order?: number
           id?: string
+          is_new?: boolean | null
           limited?: boolean | null
           limited_end_date?: string | null
           limited_start_date?: string | null
           name?: string
           photo_display_count?: number | null
           price?: number
+          sound_url?: string | null
           updated_at?: string | null
         }
         Relationships: [

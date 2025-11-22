@@ -113,10 +113,16 @@ const Shop = () => {
             details: p.details || '',
             coming_soon: p.coming_soon || false,
             limited: isLimited,
+            is_new: p.is_new || false,
+            sound_url: p.sound_url || null,
             photo_display_count: p.photo_display_count || 1,
           };
         })
         .sort((a: any, b: any) => {
+          // Nieuwe producten eerst
+          if (a.is_new && !b.is_new) return -1;
+          if (!a.is_new && b.is_new) return 1;
+          // Dan limited producten
           if (a.limited && !b.limited) return -1;
           if (!a.limited && b.limited) return 1;
           return 0;
@@ -147,6 +153,13 @@ const Shop = () => {
       return matchesSearch && matchesPrice;
     })
     .sort((a, b) => {
+      // Altijd eerst nieuwe producten, dan limited
+      if (a.is_new && !b.is_new) return -1;
+      if (!a.is_new && b.is_new) return 1;
+      if (a.limited && !b.limited) return -1;
+      if (!a.limited && b.limited) return 1;
+      
+      // Dan de normale sortering
       const priceStrA = a.discounted_price || a.price;
       const priceStrB = b.discounted_price || b.price;
       const priceA = parseFloat(priceStrA.replace('€', '').replace(',', '.'));
