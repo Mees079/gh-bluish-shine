@@ -432,6 +432,7 @@ export type Database = {
           name: string
           photo_display_count: number | null
           price: number
+          sound_duration: number | null
           sound_url: string | null
           updated_at: string | null
         }
@@ -452,6 +453,7 @@ export type Database = {
           name: string
           photo_display_count?: number | null
           price: number
+          sound_duration?: number | null
           sound_url?: string | null
           updated_at?: string | null
         }
@@ -472,6 +474,7 @@ export type Database = {
           name?: string
           photo_display_count?: number | null
           price?: number
+          sound_duration?: number | null
           sound_url?: string | null
           updated_at?: string | null
         }

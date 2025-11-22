@@ -115,6 +115,7 @@ const Shop = () => {
             limited: isLimited,
             is_new: p.is_new || false,
             sound_url: p.sound_url || null,
+            sound_duration: p.sound_duration || null,
             photo_display_count: p.photo_display_count || 1,
           };
         })

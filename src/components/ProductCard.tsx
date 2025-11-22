@@ -15,6 +15,7 @@ export interface Product {
   limited?: boolean;
   is_new?: boolean;
   sound_url?: string | null;
+  sound_duration?: number | null;
   photo_display_count?: number;
 }
 
@@ -29,14 +30,30 @@ export const ProductCard = ({ product, onClick }: ProductCardProps) => {
   const hasDiscount = !!product.discounted_price && parsePrice(product.discounted_price) < parsePrice(product.price);
   const photoCount = Math.min(product.photo_display_count || 1, product.images?.length || 1);
   
+  // Cooldown tracking per product
+  const lastPlayTime = (window as any)[`lastSound_${product.id}`] || 0;
+  
   const handleClick = () => {
-    // Speel geluid af als het er is
-    if (product.sound_url) {
+    // Check cooldown (15 seconden)
+    const now = Date.now();
+    if (product.sound_url && (now - lastPlayTime) > 15000) {
       const audio = new Audio(product.sound_url);
       audio.volume = 0.5;
+      
+      // Stop na sound_duration seconden als ingesteld
+      if (product.sound_duration && product.sound_duration > 0) {
+        setTimeout(() => {
+          audio.pause();
+          audio.currentTime = 0;
+        }, product.sound_duration * 1000);
+      }
+      
       audio.play().catch(() => {
         // Ignore errors als audio niet kan afspelen
       });
+      
+      // Update last play time
+      (window as any)[`lastSound_${product.id}`] = now;
     }
     onClick();
   };
@@ -140,42 +157,49 @@ export const ProductCard = ({ product, onClick }: ProductCardProps) => {
   return (
     <Card
       className={cn(
-        "overflow-hidden cursor-pointer transition-all duration-300 hover:shadow-glow hover:scale-105",
-        product.limited && "border-2 border-blue-500 animate-limited-glow",
+        "overflow-hidden cursor-pointer transition-all duration-300 hover:shadow-glow hover:scale-105 relative",
+        product.limited && "p-[3px]",
         !product.limited && "border-border/50"
       )}
       onClick={handleClick}
+      style={product.limited ? {
+        background: "linear-gradient(90deg, #3b82f6, #8b5cf6, #ec4899, #3b82f6)",
+        backgroundSize: "300% 100%",
+        animation: "limited-border 8s ease infinite"
+      } : undefined}
     >
-      <CardContent className="p-0">
-        <div className="aspect-[4/3] overflow-hidden bg-secondary flex items-center justify-center relative">
-          {renderImages()}
-          <div className="absolute top-2 left-2 flex gap-2">
-            {product.is_new && (
-              <Badge className="bg-green-500 hover:bg-green-600 text-white font-bold animate-bounce">
-                NIEUW
-              </Badge>
-            )}
-            {product.limited && (
-              <Badge className="bg-blue-600 hover:bg-blue-700 text-white font-bold">
-                LIMITED
-              </Badge>
+      <div className={cn("overflow-hidden", product.limited && "bg-background rounded-lg")}>
+        <CardContent className="p-0">
+          <div className="aspect-[4/3] overflow-hidden bg-secondary flex items-center justify-center relative">
+            {renderImages()}
+            <div className="absolute top-2 left-2 flex gap-2">
+              {product.is_new && (
+                <Badge className="bg-green-500 hover:bg-green-600 text-white font-bold animate-bounce">
+                  NIEUW
+                </Badge>
+              )}
+              {product.limited && (
+                <Badge className="bg-blue-600 hover:bg-blue-700 text-white font-bold">
+                  LIMITED
+                </Badge>
+              )}
+            </div>
+          </div>
+          <div className="p-3">
+            <h3 className="font-semibold text-base text-foreground mb-1">{product.name}</h3>
+            {product.coming_soon ? (
+              <p className="text-primary font-bold">Binnenkort Beschikbaar</p>
+            ) : hasDiscount ? (
+              <div className="flex items-center gap-2">
+                <p className="text-muted-foreground line-through text-sm">{product.price}</p>
+                <p className="text-primary font-bold">{product.discounted_price}</p>
+              </div>
+            ) : (
+              <p className="text-primary font-bold">{product.price}</p>
             )}
           </div>
-        </div>
-        <div className="p-3">
-          <h3 className="font-semibold text-base text-foreground mb-1">{product.name}</h3>
-          {product.coming_soon ? (
-            <p className="text-primary font-bold">Binnenkort Beschikbaar</p>
-          ) : hasDiscount ? (
-            <div className="flex items-center gap-2">
-              <p className="text-muted-foreground line-through text-sm">{product.price}</p>
-              <p className="text-primary font-bold">{product.discounted_price}</p>
-            </div>
-          ) : (
-            <p className="text-primary font-bold">{product.price}</p>
-          )}
-        </div>
-      </CardContent>
+        </CardContent>
+      </div>
     </Card>
   );
 };
