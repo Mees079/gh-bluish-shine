@@ -141,7 +141,7 @@ export const ProductCard = ({ product, onClick }: ProductCardProps) => {
     <Card
       className={cn(
         "overflow-hidden cursor-pointer transition-all duration-300 hover:shadow-glow hover:scale-105",
-        product.limited && "border-2 border-red-500 animate-pulse shadow-[0_0_20px_rgba(239,68,68,0.5)]",
+        product.limited && "border-2 border-blue-500 animate-limited-glow",
         !product.limited && "border-border/50"
       )}
       onClick={handleClick}
@@ -156,7 +156,7 @@ export const ProductCard = ({ product, onClick }: ProductCardProps) => {
               </Badge>
             )}
             {product.limited && (
-              <Badge className="bg-red-500 hover:bg-red-600 text-white font-bold animate-pulse">
+              <Badge className="bg-blue-600 hover:bg-blue-700 text-white font-bold">
                 LIMITED
               </Badge>
             )}
