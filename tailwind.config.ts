@@ -96,11 +96,22 @@ export default {
             transform: "translateY(0)",
           },
         },
+        "limited-glow": {
+          "0%, 100%": { 
+            boxShadow: "0 0 5px rgba(59, 130, 246, 0.3)",
+            borderColor: "rgba(59, 130, 246, 0.5)"
+          },
+          "50%": { 
+            boxShadow: "0 0 20px rgba(59, 130, 246, 0.6)",
+            borderColor: "rgba(59, 130, 246, 0.9)"
+          }
+        }
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
         "fade-in": "fade-in 0.6s ease-out forwards",
+        "limited-glow": "limited-glow 4s ease-in-out infinite"
       },
     },
   },
