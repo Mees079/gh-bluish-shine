@@ -119,6 +119,7 @@ export const ProductsManager = () => {
       photo_display_count: parseInt(formData.get('photo_display_count') as string) || 1,
       sound_url: soundUrl,
       sound_duration: soundDuration ? parseInt(soundDuration) : null,
+      stock_quantity: formData.get('stock_quantity') ? parseInt(formData.get('stock_quantity') as string) : null,
     };
 
     // Validate input
