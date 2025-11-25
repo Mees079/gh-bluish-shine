@@ -101,7 +101,8 @@ Deno.serve(async (req) => {
           description,
           details,
           price,
-          category_id
+          category_id,
+          stock_quantity
         )
       `)
       .eq('code_id', redemptionCode.id)
@@ -111,6 +112,24 @@ Deno.serve(async (req) => {
       return new Response(
         JSON.stringify({ success: false, error: 'Fout bij ophalen producten' }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+
+    // Check stock availability
+    const outOfStockProducts = codeProducts.filter((cp: any) => {
+      const prod = (cp as any).products
+      return prod && prod.stock_quantity !== null && 
+        prod.stock_quantity !== undefined && 
+        prod.stock_quantity <= 0
+    })
+    
+    if (outOfStockProducts.length > 0) {
+      return new Response(
+        JSON.stringify({ 
+          success: false, 
+          error: `Product(en) niet op voorraad: ${outOfStockProducts.map((cp: any) => (cp as any).products.name).join(', ')}` 
+        }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
 
@@ -203,6 +222,22 @@ Deno.serve(async (req) => {
         JSON.stringify({ success: false, error: 'Fout bij claimen code' }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
+    }
+
+    // Decrease stock for products that have stock tracking
+    for (const cp of codeProducts) {
+      const prod = (cp as any).products
+      if (prod && prod.stock_quantity !== null && prod.stock_quantity !== undefined) {
+        const { error: stockError } = await supabaseAdmin
+          .from('products')
+          .update({ stock_quantity: prod.stock_quantity - 1 })
+          .eq('id', prod.id)
+        
+        if (stockError) {
+          console.error('Error updating stock:', stockError)
+          // Don't fail the claim if stock update fails, just log it
+        }
+      }
     }
 
     // Track claim in statistics (only if not a test code)

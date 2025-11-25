@@ -117,6 +117,7 @@ const Shop = () => {
             sound_url: p.sound_url || null,
             sound_duration: p.sound_duration || null,
             photo_display_count: p.photo_display_count || 1,
+            stock_quantity: p.stock_quantity ?? null,
           };
         })
         .sort((a: any, b: any) => {
