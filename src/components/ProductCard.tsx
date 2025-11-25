@@ -189,7 +189,7 @@ export const ProductCard = ({ product, onClick }: ProductCardProps) => {
                   variant={product.stock_quantity === 0 ? "destructive" : "secondary"} 
                   className="shadow-lg font-bold"
                 >
-                  {product.stock_quantity === 0 ? 'UITVERKOCHT' : `Voorraad: ${product.stock_quantity}`}
+                  {product.stock_quantity === 0 ? 'OP=OP' : `In stock: ${product.stock_quantity}`}
                 </Badge>
               )}
             </div>
