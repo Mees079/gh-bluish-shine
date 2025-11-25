@@ -17,6 +17,7 @@ export interface Product {
   sound_url?: string | null;
   sound_duration?: number | null;
   photo_display_count?: number;
+  stock_quantity?: number | null;
 }
 
 interface ProductCardProps {
@@ -172,7 +173,7 @@ export const ProductCard = ({ product, onClick }: ProductCardProps) => {
         <CardContent className="p-0">
           <div className="aspect-[4/3] overflow-hidden bg-secondary flex items-center justify-center relative">
             {renderImages()}
-            <div className="absolute top-2 left-2 flex gap-2">
+            <div className="absolute top-2 left-2 flex gap-2 flex-wrap max-w-[calc(100%-1rem)]">
               {product.is_new && (
                 <Badge className="bg-green-500 hover:bg-green-600 text-white font-bold animate-bounce">
                   NIEUW
@@ -181,6 +182,14 @@ export const ProductCard = ({ product, onClick }: ProductCardProps) => {
               {product.limited && (
                 <Badge className="bg-blue-600 hover:bg-blue-700 text-white font-bold">
                   LIMITED
+                </Badge>
+              )}
+              {product.stock_quantity !== null && product.stock_quantity !== undefined && (
+                <Badge 
+                  variant={product.stock_quantity === 0 ? "destructive" : "secondary"} 
+                  className="shadow-lg font-bold"
+                >
+                  {product.stock_quantity === 0 ? 'UITVERKOCHT' : `Voorraad: ${product.stock_quantity}`}
                 </Badge>
               )}
             </div>

@@ -434,6 +434,7 @@ export type Database = {
           price: number
           sound_duration: number | null
           sound_url: string | null
+          stock_quantity: number | null
           updated_at: string | null
         }
         Insert: {
@@ -455,6 +456,7 @@ export type Database = {
           price: number
           sound_duration?: number | null
           sound_url?: string | null
+          stock_quantity?: number | null
           updated_at?: string | null
         }
         Update: {
@@ -476,6 +478,7 @@ export type Database = {
           price?: number
           sound_duration?: number | null
           sound_url?: string | null
+          stock_quantity?: number | null
           updated_at?: string | null
         }
         Relationships: [

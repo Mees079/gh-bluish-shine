@@ -563,6 +563,20 @@ export const ProductsManager = () => {
                   Hoeveel seconden het geluid moet afspelen (bijv. 3 voor 3 seconden)
                 </p>
               </div>
+              <div>
+                <Label htmlFor="stock_quantity">Voorraad (optioneel)</Label>
+                <Input
+                  id="stock_quantity"
+                  name="stock_quantity"
+                  type="number"
+                  min="0"
+                  defaultValue={editingProduct?.stock_quantity ?? ''}
+                  placeholder="Leeg = onbeperkte voorraad"
+                />
+                <p className="text-xs text-muted-foreground mt-1">
+                  Aantal items op voorraad. Bij elke code claim gaat er 1 vanaf.
+                </p>
+              </div>
               <Button type="submit" className="w-full">Opslaan</Button>
             </form>
           </DialogContent>
