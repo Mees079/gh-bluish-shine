@@ -8,6 +8,7 @@ import { InitializeDefaultAdmin } from "@/components/admin/InitializeDefaultAdmi
 import Home from "./pages/Home";
 import Shop from "./pages/Shop";
 import Rules from "./pages/Rules";
+import Support from "./pages/Support";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -24,6 +25,7 @@ const App = () => (
           <Route path="/" element={<Home />} />
           <Route path="/shop" element={<Shop />} />
           <Route path="/regels" element={<Rules />} />
+          <Route path="/support" element={<Support />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

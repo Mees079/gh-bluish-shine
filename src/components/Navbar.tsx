@@ -75,6 +75,17 @@ export const Navbar = ({ discordLink: propDiscordLink }: NavbarProps) => {
                 <span className="absolute -bottom-2 left-0 right-0 h-0.5 bg-primary rounded-full" />
               )}
             </Link>
+            <Link 
+              to="/support" 
+              className={`relative font-medium transition-colors ${
+                isActive('/support') ? 'text-primary' : 'text-foreground hover:text-primary'
+              }`}
+            >
+              Support
+              {isActive('/support') && (
+                <span className="absolute -bottom-2 left-0 right-0 h-0.5 bg-primary rounded-full" />
+              )}
+            </Link>
             {discordLink && (
               <a 
                 href={discordLink} 
@@ -119,6 +130,13 @@ export const Navbar = ({ discordLink: propDiscordLink }: NavbarProps) => {
               onClick={() => setMobileMenuOpen(false)}
             >
               Shop
+            </Link>
+            <Link 
+              to="/support" 
+              className="block px-4 py-2 text-foreground hover:bg-accent rounded-md"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              Support
             </Link>
             {discordLink && (
               <a 

@@ -569,6 +569,80 @@ export type Database = {
         }
         Relationships: []
       }
+      support_messages: {
+        Row: {
+          created_at: string
+          id: string
+          is_admin_reply: boolean
+          message: string
+          ticket_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_admin_reply?: boolean
+          message: string
+          ticket_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_admin_reply?: boolean
+          message?: string
+          ticket_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "support_messages_ticket_id_fkey"
+            columns: ["ticket_id"]
+            isOneToOne: false
+            referencedRelation: "support_tickets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      support_tickets: {
+        Row: {
+          created_at: string
+          discord_name: string
+          email: string
+          id: string
+          name: string
+          recipient: string
+          roblox_name: string
+          status: string
+          subject: string
+          ticket_number: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          discord_name: string
+          email: string
+          id?: string
+          name: string
+          recipient: string
+          roblox_name: string
+          status?: string
+          subject: string
+          ticket_number: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          discord_name?: string
+          email?: string
+          id?: string
+          name?: string
+          recipient?: string
+          roblox_name?: string
+          status?: string
+          subject?: string
+          ticket_number?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string | null
