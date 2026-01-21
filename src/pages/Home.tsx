@@ -511,6 +511,9 @@ const Home = () => {
                 <Link to="/shop" className="block text-muted-foreground hover:text-primary transition-colors text-sm">
                   Shop
                 </Link>
+                <Link to="/support" className="block text-muted-foreground hover:text-primary transition-colors text-sm">
+                  Support
+                </Link>
               </div>
             </div>
             <div>
