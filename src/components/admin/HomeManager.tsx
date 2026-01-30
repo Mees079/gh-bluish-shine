@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,11 +8,12 @@ import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Plus, Trash2, GripVertical } from "lucide-react";
+import { Plus, Trash2, GripVertical, Upload, Loader2 } from "lucide-react";
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy, useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { StatsManager } from "./StatsManager";
+import { ImageUploadField } from "./ImageUploadField";
 
 interface GalleryImage {
   id: string;
@@ -97,6 +98,8 @@ export const HomeManager = () => {
   const [loading, setLoading] = useState(false);
   const [galleryImages, setGalleryImages] = useState<GalleryImage[]>([]);
   const [newGalleryImage, setNewGalleryImage] = useState({ url: "", title: "" });
+  const [galleryUploading, setGalleryUploading] = useState(false);
+  const galleryFileInputRef = useRef<HTMLInputElement>(null);
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -227,9 +230,56 @@ export const HomeManager = () => {
     toast.success("Instellingen opgeslagen");
   };
 
+  const handleGalleryFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      toast.error("Alleen afbeeldingen zijn toegestaan");
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("Bestand mag niet groter zijn dan 5MB");
+      return;
+    }
+
+    setGalleryUploading(true);
+
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+      const filePath = `gallery/${fileName}`;
+
+      const { data, error } = await supabase.storage
+        .from('home-images')
+        .upload(filePath, file, {
+          cacheControl: '3600',
+          upsert: false
+        });
+
+      if (error) throw error;
+
+      const { data: urlData } = supabase.storage
+        .from('home-images')
+        .getPublicUrl(data.path);
+
+      setNewGalleryImage({ ...newGalleryImage, url: urlData.publicUrl });
+      toast.success("Afbeelding geüpload!");
+    } catch (error: any) {
+      console.error("Upload error:", error);
+      toast.error("Fout bij uploaden: " + (error.message || "Onbekende fout"));
+    } finally {
+      setGalleryUploading(false);
+      if (galleryFileInputRef.current) {
+        galleryFileInputRef.current.value = '';
+      }
+    }
+  };
+
   const handleAddGalleryImage = async () => {
     if (!newGalleryImage.url) {
-      toast.error("Voer een afbeelding URL in");
+      toast.error("Upload eerst een afbeelding");
       return;
     }
 
@@ -308,14 +358,12 @@ export const HomeManager = () => {
             <CardDescription>Hoofdpagina banner instellingen</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <Label>Achtergrond Afbeelding URL</Label>
-              <Input
-                value={config.hero_image_url}
-                onChange={(e) => setConfig({ ...config, hero_image_url: e.target.value })}
-                placeholder="https://example.com/hero.jpg"
-              />
-            </div>
+            <ImageUploadField
+              label="Achtergrond Afbeelding"
+              value={config.hero_image_url}
+              onChange={(url) => setConfig({ ...config, hero_image_url: url })}
+              folder="hero"
+            />
             <div className="space-y-2">
               <Label>Titel</Label>
               <Input
@@ -393,13 +441,12 @@ export const HomeManager = () => {
                 rows={6}
               />
             </div>
-            <div className="space-y-2">
-              <Label>Afbeelding URL</Label>
-              <Input
-                value={config.about_image_url}
-                onChange={(e) => setConfig({ ...config, about_image_url: e.target.value })}
-              />
-            </div>
+            <ImageUploadField
+              label="Afbeelding"
+              value={config.about_image_url}
+              onChange={(url) => setConfig({ ...config, about_image_url: url })}
+              folder="about"
+            />
           </CardContent>
         </Card>
       </TabsContent>
@@ -545,14 +592,50 @@ export const HomeManager = () => {
               <h4 className="font-semibold">Afbeeldingen Beheren</h4>
               
               <div className="space-y-3">
+                {/* File upload for gallery */}
                 <div className="space-y-2">
-                  <Label>Afbeelding URL</Label>
-                  <Input
-                    value={newGalleryImage.url}
-                    onChange={(e) => setNewGalleryImage({ ...newGalleryImage, url: e.target.value })}
-                    placeholder="https://example.com/image.jpg"
+                  <Label>Afbeelding uploaden</Label>
+                  <input
+                    ref={galleryFileInputRef}
+                    type="file"
+                    accept="image/*"
+                    onChange={handleGalleryFileSelect}
+                    className="hidden"
+                    id="gallery-file-upload"
                   />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => galleryFileInputRef.current?.click()}
+                    disabled={galleryUploading}
+                    className="w-full"
+                  >
+                    {galleryUploading ? (
+                      <>
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        Uploaden...
+                      </>
+                    ) : (
+                      <>
+                        <Upload className="h-4 w-4 mr-2" />
+                        Kies bestand
+                      </>
+                    )}
+                  </Button>
                 </div>
+
+                {/* Preview of uploaded image */}
+                {newGalleryImage.url && (
+                  <div className="space-y-2">
+                    <Label>Preview</Label>
+                    <img 
+                      src={newGalleryImage.url} 
+                      alt="Preview" 
+                      className="w-full max-w-xs h-32 object-cover rounded-lg border border-border"
+                    />
+                  </div>
+                )}
+
                 <div className="space-y-2">
                   <Label>Titel (optioneel)</Label>
                   <Input
@@ -561,7 +644,7 @@ export const HomeManager = () => {
                     placeholder="Beschrijving van afbeelding"
                   />
                 </div>
-                <Button onClick={handleAddGalleryImage} className="w-full">
+                <Button onClick={handleAddGalleryImage} className="w-full" disabled={!newGalleryImage.url}>
                   <Plus className="h-4 w-4 mr-2" />
                   Afbeelding Toevoegen
                 </Button>
