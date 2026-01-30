@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { Upload, X, Loader2 } from "lucide-react";
+import { Upload, X, Loader2, ImageIcon } from "lucide-react";
 
 interface ImageUploadFieldProps {
   label: string;
@@ -22,12 +22,10 @@ export const ImageUploadField = ({
   folder = ""
 }: ImageUploadFieldProps) => {
   const [uploading, setUploading] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
+  const uploadFile = async (file: File) => {
     // Validate file type
     if (!file.type.startsWith('image/')) {
       toast.error("Alleen afbeeldingen zijn toegestaan");
@@ -77,6 +75,36 @@ export const ImageUploadField = ({
     }
   };
 
+  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      await uploadFile(file);
+    }
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+  };
+
+  const handleDrop = async (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+
+    const file = e.dataTransfer.files?.[0];
+    if (file) {
+      await uploadFile(file);
+    }
+  };
+
   const handleClear = () => {
     onChange("");
   };
@@ -105,22 +133,67 @@ export const ImageUploadField = ({
         </div>
       )}
 
-      {/* Upload button */}
-      <div className="flex gap-2">
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept="image/*"
-          onChange={handleFileSelect}
-          className="hidden"
-          id={`file-upload-${label}`}
-        />
+      {/* Drag and drop zone */}
+      {!value && (
+        <div
+          onDragOver={handleDragOver}
+          onDragLeave={handleDragLeave}
+          onDrop={handleDrop}
+          onClick={() => fileInputRef.current?.click()}
+          className={`
+            relative border-2 border-dashed rounded-lg p-8 text-center cursor-pointer
+            transition-all duration-200 ease-in-out
+            ${isDragging 
+              ? 'border-primary bg-primary/10 scale-[1.02]' 
+              : 'border-border hover:border-primary/50 hover:bg-muted/50'
+            }
+            ${uploading ? 'pointer-events-none opacity-50' : ''}
+          `}
+        >
+          {uploading ? (
+            <div className="flex flex-col items-center gap-2">
+              <Loader2 className="h-10 w-10 text-primary animate-spin" />
+              <p className="text-sm text-muted-foreground">Uploaden...</p>
+            </div>
+          ) : (
+            <div className="flex flex-col items-center gap-2">
+              <div className={`p-3 rounded-full ${isDragging ? 'bg-primary/20' : 'bg-muted'}`}>
+                <ImageIcon className={`h-8 w-8 ${isDragging ? 'text-primary' : 'text-muted-foreground'}`} />
+              </div>
+              <div>
+                <p className="text-sm font-medium text-foreground">
+                  {isDragging ? 'Laat los om te uploaden' : 'Sleep een afbeelding hierheen'}
+                </p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  of klik om te bladeren
+                </p>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                PNG, JPG, WEBP tot 5MB
+              </p>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Hidden file input */}
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/*"
+        onChange={handleFileSelect}
+        className="hidden"
+        id={`file-upload-${label}`}
+      />
+
+      {/* Change image button when image exists */}
+      {value && (
         <Button
           type="button"
           variant="outline"
           onClick={() => fileInputRef.current?.click()}
           disabled={uploading}
-          className="flex-1"
+          size="sm"
         >
           {uploading ? (
             <>
@@ -130,11 +203,11 @@ export const ImageUploadField = ({
           ) : (
             <>
               <Upload className="h-4 w-4 mr-2" />
-              {value ? "Andere afbeelding kiezen" : "Afbeelding uploaden"}
+              Andere afbeelding kiezen
             </>
           )}
         </Button>
-      </div>
+      )}
 
       {/* URL input as fallback */}
       <div className="space-y-1">
