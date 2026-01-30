@@ -8,7 +8,7 @@ import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Plus, Trash2, GripVertical, Upload, Loader2 } from "lucide-react";
+import { Plus, Trash2, GripVertical, Upload, Loader2, ImageIcon } from "lucide-react";
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy, useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
@@ -99,6 +99,7 @@ export const HomeManager = () => {
   const [galleryImages, setGalleryImages] = useState<GalleryImage[]>([]);
   const [newGalleryImage, setNewGalleryImage] = useState({ url: "", title: "" });
   const [galleryUploading, setGalleryUploading] = useState(false);
+  const [galleryDragging, setGalleryDragging] = useState(false);
   const galleryFileInputRef = useRef<HTMLInputElement>(null);
 
   const sensors = useSensors(
@@ -592,47 +593,99 @@ export const HomeManager = () => {
               <h4 className="font-semibold">Afbeeldingen Beheren</h4>
               
               <div className="space-y-3">
-                {/* File upload for gallery */}
-                <div className="space-y-2">
-                  <Label>Afbeelding uploaden</Label>
-                  <input
-                    ref={galleryFileInputRef}
-                    type="file"
-                    accept="image/*"
-                    onChange={handleGalleryFileSelect}
-                    className="hidden"
-                    id="gallery-file-upload"
-                  />
-                  <Button
-                    type="button"
-                    variant="outline"
+                {/* Hidden file input */}
+                <input
+                  ref={galleryFileInputRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={handleGalleryFileSelect}
+                  className="hidden"
+                  id="gallery-file-upload"
+                />
+
+                {/* Drag and drop zone for gallery */}
+                {!newGalleryImage.url ? (
+                  <div
+                    onDragOver={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      setGalleryDragging(true);
+                    }}
+                    onDragLeave={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      setGalleryDragging(false);
+                    }}
+                    onDrop={async (e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      setGalleryDragging(false);
+                      const file = e.dataTransfer.files?.[0];
+                      if (file) {
+                        // Simulate file input change
+                        const dt = new DataTransfer();
+                        dt.items.add(file);
+                        if (galleryFileInputRef.current) {
+                          galleryFileInputRef.current.files = dt.files;
+                          galleryFileInputRef.current.dispatchEvent(new Event('change', { bubbles: true }));
+                        }
+                      }
+                    }}
                     onClick={() => galleryFileInputRef.current?.click()}
-                    disabled={galleryUploading}
-                    className="w-full"
+                    className={`
+                      relative border-2 border-dashed rounded-lg p-8 text-center cursor-pointer
+                      transition-all duration-200 ease-in-out
+                      ${galleryDragging 
+                        ? 'border-primary bg-primary/10 scale-[1.02]' 
+                        : 'border-border hover:border-primary/50 hover:bg-muted/50'
+                      }
+                      ${galleryUploading ? 'pointer-events-none opacity-50' : ''}
+                    `}
                   >
                     {galleryUploading ? (
-                      <>
-                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                        Uploaden...
-                      </>
+                      <div className="flex flex-col items-center gap-2">
+                        <Loader2 className="h-10 w-10 text-primary animate-spin" />
+                        <p className="text-sm text-muted-foreground">Uploaden...</p>
+                      </div>
                     ) : (
-                      <>
-                        <Upload className="h-4 w-4 mr-2" />
-                        Kies bestand
-                      </>
+                      <div className="flex flex-col items-center gap-2">
+                        <div className={`p-3 rounded-full ${galleryDragging ? 'bg-primary/20' : 'bg-muted'}`}>
+                          <ImageIcon className={`h-8 w-8 ${galleryDragging ? 'text-primary' : 'text-muted-foreground'}`} />
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium text-foreground">
+                            {galleryDragging ? 'Laat los om te uploaden' : 'Sleep een afbeelding hierheen'}
+                          </p>
+                          <p className="text-xs text-muted-foreground mt-1">
+                            of klik om te bladeren
+                          </p>
+                        </div>
+                        <p className="text-xs text-muted-foreground">
+                          PNG, JPG, WEBP tot 5MB
+                        </p>
+                      </div>
                     )}
-                  </Button>
-                </div>
-
-                {/* Preview of uploaded image */}
-                {newGalleryImage.url && (
+                  </div>
+                ) : (
+                  /* Preview of uploaded image */
                   <div className="space-y-2">
                     <Label>Preview</Label>
-                    <img 
-                      src={newGalleryImage.url} 
-                      alt="Preview" 
-                      className="w-full max-w-xs h-32 object-cover rounded-lg border border-border"
-                    />
+                    <div className="relative inline-block">
+                      <img 
+                        src={newGalleryImage.url} 
+                        alt="Preview" 
+                        className="w-full max-w-xs h-32 object-cover rounded-lg border border-border"
+                      />
+                      <Button
+                        type="button"
+                        variant="destructive"
+                        size="icon"
+                        className="absolute -top-2 -right-2 h-6 w-6"
+                        onClick={() => setNewGalleryImage({ ...newGalleryImage, url: "" })}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
                   </div>
                 )}
 
