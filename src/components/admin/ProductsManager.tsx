@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
+import { RichTextEditor } from "./RichTextEditor";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
@@ -26,6 +26,7 @@ export const ProductsManager = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [activeTab, setActiveTab] = useState<string>("all");
   const [uploadingImages, setUploadingImages] = useState<FileList | null>(null);
+  const [detailsContent, setDetailsContent] = useState("");
   const { toast } = useToast();
 
   useEffect(() => {
@@ -108,8 +109,8 @@ export const ProductsManager = () => {
       name: formData.get('name') as string,
       category_id: formData.get('category_id') as string,
       price: price,
-      description: formData.get('description') as string,
-      details: formData.get('details') as string,
+      description: '',
+      details: detailsContent,
       active: formData.get('active') === 'true',
       coming_soon: formData.get('coming_soon') !== null,
       limited: formData.get('limited') !== null,
@@ -400,21 +401,12 @@ export const ProductsManager = () => {
                 </div>
               </div>
               <div>
-                <Label htmlFor="description">Korte Beschrijving</Label>
-                <Textarea
-                  id="description"
-                  name="description"
-                  defaultValue={editingProduct?.description}
-                  rows={2}
-                />
-              </div>
-              <div>
-                <Label htmlFor="details">Uitgebreide Beschrijving</Label>
-                <Textarea
-                  id="details"
-                  name="details"
-                  defaultValue={editingProduct?.details}
-                  rows={4}
+                <Label>Beschrijving</Label>
+                <RichTextEditor
+                  value={detailsContent}
+                  onChange={setDetailsContent}
+                  placeholder="Schrijf hier de productbeschrijving..."
+                  rows={8}
                 />
               </div>
               <div>
