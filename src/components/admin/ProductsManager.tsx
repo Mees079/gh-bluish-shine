@@ -337,6 +337,7 @@ export const ProductsManager = () => {
             setEditingProduct(null);
             setUploadingImages(null);
             setRoundToNinetyNine(false);
+            setDetailsContent("");
           }
         }}>
           <DialogTrigger asChild>
