@@ -618,6 +618,7 @@ export const ProductsManager = () => {
                   variant="outline"
                   onClick={() => {
                     setEditingProduct(product);
+                    setDetailsContent(product.details || product.description || "");
                     setDialogOpen(true);
                   }}
                 >
