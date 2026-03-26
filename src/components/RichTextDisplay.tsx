@@ -1,4 +1,5 @@
 import ReactMarkdown from "react-markdown";
+import rehypeRaw from "rehype-raw";
 
 interface RichTextDisplayProps {
   content: string;
@@ -11,6 +12,7 @@ export const RichTextDisplay = ({ content, className = "" }: RichTextDisplayProp
   return (
     <div className={`prose prose-sm max-w-none dark:prose-invert ${className}`}>
       <ReactMarkdown
+        rehypePlugins={[rehypeRaw]}
         components={{
           h1: ({ children }) => (
             <h1 className="text-2xl font-bold text-foreground mt-4 mb-2">{children}</h1>
