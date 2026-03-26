@@ -641,62 +641,146 @@ export const CodesManager = () => {
       </TabsContent>
 
       <TabsContent value="claimed" className="space-y-4">
-        {claimedCodes.length === 0 ? (
-          <Card>
-            <CardContent className="pt-6">
-              <p className="text-center text-muted-foreground">
-                Geen geclaimde codes beschikbaar
-              </p>
-            </CardContent>
-          </Card>
-        ) : (
-          claimedCodes.map((code) => (
-            <Card key={code.id}>
-              <CardContent className="pt-6">
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <code className="text-lg font-mono font-bold text-muted-foreground line-through">
-                      {code.code}
-                    </code>
-                    <Badge variant="secondary">Geclaimed</Badge>
-                    {code.is_test_code && (
-                      <Badge variant="outline" className="border-orange-500 text-orange-500">
-                        Test
-                      </Badge>
-                    )}
-                  </div>
-                  
-                  <div className="space-y-1 text-sm text-muted-foreground">
-                    <div className="flex items-center gap-2">
-                      <User className="h-3 w-3" />
-                      Aangemaakt door: {code.creator_email || 'Onbekend'}
+        {/* Search Bar */}
+        <Card>
+          <CardContent className="pt-6">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Zoek op Roblox username..."
+                value={claimedSearchQuery}
+                onChange={(e) => {
+                  setClaimedSearchQuery(e.target.value);
+                  setExpandedUser(null);
+                }}
+                className="pl-10 pr-10"
+              />
+              {claimedSearchQuery && (
+                <button
+                  onClick={() => { setClaimedSearchQuery(""); setExpandedUser(null); }}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+
+        {(() => {
+          // Group claimed codes by username
+          const filteredClaimed = claimedCodes.filter(c =>
+            c.claimed_by_username?.toLowerCase().includes(claimedSearchQuery.toLowerCase())
+          );
+
+          const userMap = new Map<string, RedemptionCode[]>();
+          filteredClaimed.forEach(code => {
+            const username = code.claimed_by_username || 'Onbekend';
+            if (!userMap.has(username)) userMap.set(username, []);
+            userMap.get(username)!.push(code);
+          });
+
+          // Also find active (unclaimed) codes — not username-filtered but shown when user is expanded
+          const sortedUsers = Array.from(userMap.entries())
+            .sort((a, b) => b[1].length - a[1].length);
+
+          if (sortedUsers.length === 0) {
+            return (
+              <Card>
+                <CardContent className="pt-6">
+                  <p className="text-center text-muted-foreground">
+                    {claimedSearchQuery ? `Geen resultaten voor "${claimedSearchQuery}"` : 'Geen geclaimde codes beschikbaar'}
+                  </p>
+                </CardContent>
+              </Card>
+            );
+          }
+
+          return sortedUsers.map(([username, userCodes]) => {
+            const isExpanded = expandedUser === username;
+            const totalProducts = userCodes.reduce((sum, c) => sum + c.products.length, 0);
+            const sortedCodes = [...userCodes].sort((a, b) =>
+              new Date(b.claimed_at!).getTime() - new Date(a.claimed_at!).getTime()
+            );
+            const lastClaim = sortedCodes[0];
+
+            return (
+              <Card key={username} className="overflow-hidden">
+                <button
+                  onClick={() => setExpandedUser(isExpanded ? null : username)}
+                  className="w-full text-left"
+                >
+                  <CardContent className="pt-6 pb-4">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
+                          <User className="h-5 w-5 text-primary" />
+                        </div>
+                        <div>
+                          <p className="font-bold text-lg">{username}</p>
+                          <p className="text-sm text-muted-foreground">
+                            {userCodes.length} code{userCodes.length !== 1 ? 's' : ''} geclaimed • {totalProducts} product{totalProducts !== 1 ? 'en' : ''}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <div className="text-right hidden sm:block">
+                          <p className="text-xs text-muted-foreground">Laatste claim</p>
+                          <p className="text-sm font-medium">
+                            {format(new Date(lastClaim.claimed_at!), 'dd-MM-yyyy HH:mm')}
+                          </p>
+                        </div>
+                        {isExpanded ? <ChevronUp className="h-5 w-5 text-muted-foreground" /> : <ChevronDown className="h-5 w-5 text-muted-foreground" />}
+                      </div>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <Calendar className="h-3 w-3" />
-                      Aangemaakt: {format(new Date(code.created_at), 'dd-MM-yyyy HH:mm')}
-                    </div>
-                    <div className="flex items-center gap-2 text-green-600 dark:text-green-400">
-                      <User className="h-3 w-3" />
-                      Geclaimed door: <span className="font-medium">{code.claimed_by_username}</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Clock className="h-3 w-3" />
-                      Geclaimed op: {format(new Date(code.claimed_at!), 'dd-MM-yyyy HH:mm')}
-                    </div>
-                  </div>
-                  
-                  <div className="flex flex-wrap gap-1">
-                    {code.products.map((product, idx) => (
-                      <Badge key={idx} variant="outline">
-                        {product.name}
-                      </Badge>
+                  </CardContent>
+                </button>
+
+                {isExpanded && (
+                  <div className="border-t bg-muted/30 px-6 py-4 space-y-3">
+                    <h4 className="font-semibold text-sm text-muted-foreground uppercase tracking-wide">
+                      Alle geclaimde codes van {username}
+                    </h4>
+                    {sortedCodes.map((code) => (
+                      <div key={code.id} className="bg-background rounded-lg border p-4 space-y-2">
+                        <div className="flex items-center justify-between flex-wrap gap-2">
+                          <div className="flex items-center gap-2">
+                            <code className="font-mono font-bold text-muted-foreground line-through">{code.code}</code>
+                            <Badge variant="secondary">Geclaimed</Badge>
+                            {code.is_test_code && (
+                              <Badge variant="outline" className="border-orange-500 text-orange-500">Test</Badge>
+                            )}
+                          </div>
+                        </div>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-1 text-sm text-muted-foreground">
+                          <div className="flex items-center gap-2">
+                            <Calendar className="h-3 w-3" />
+                            Aangemaakt: {format(new Date(code.created_at), 'dd-MM-yyyy HH:mm')}
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Clock className="h-3 w-3" />
+                            Geclaimed: {format(new Date(code.claimed_at!), 'dd-MM-yyyy HH:mm')}
+                          </div>
+                          {code.creator_email && (
+                            <div className="flex items-center gap-2">
+                              <User className="h-3 w-3" />
+                              Door: {code.creator_email}
+                            </div>
+                          )}
+                        </div>
+                        <div className="flex flex-wrap gap-1 pt-1">
+                          {code.products.map((product, idx) => (
+                            <Badge key={idx} variant="outline">{product.name}</Badge>
+                          ))}
+                        </div>
+                      </div>
                     ))}
                   </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))
-        )}
+                )}
+              </Card>
+            );
+          });
+        })()}
       </TabsContent>
     </Tabs>
 
