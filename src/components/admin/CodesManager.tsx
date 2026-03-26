@@ -4,7 +4,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Copy, Check, Trash2, Calendar, User, Clock } from "lucide-react";
+import { Loader2, Copy, Check, Trash2, Calendar, User, Clock, Search, X, ChevronDown, ChevronUp } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
@@ -75,6 +75,8 @@ export const CodesManager = () => {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [codeToDelete, setCodeToDelete] = useState<string | null>(null);
   const [discounts, setDiscounts] = useState<Discount[]>([]);
+  const [claimedSearchQuery, setClaimedSearchQuery] = useState("");
+  const [expandedUser, setExpandedUser] = useState<string | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
