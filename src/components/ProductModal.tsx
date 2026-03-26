@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/carousel";
 import { X, ExternalLink } from "lucide-react";
 import placeholderImage from "@/assets/placeholder.png";
+import { RichTextDisplay } from "./RichTextDisplay";
 
 interface ProductModalProps {
   product: Product | null;
@@ -113,15 +114,11 @@ export const ProductModal = ({ product, open, onOpenChange }: ProductModalProps)
                   <p className="text-primary font-semibold">Dit product is binnenkort beschikbaar!</p>
                 </div>
               )}
-              <div>
-                <h3 className="font-semibold mb-2">Beschrijving</h3>
-                <p className="text-muted-foreground">{product.description}</p>
-              </div>
-              {product.details && (
+              {(product.details || product.description) && (
                 <div>
-                  <h3 className="font-semibold mb-2">Details</h3>
-                  <div className="max-h-[300px] overflow-y-auto custom-scrollbar pr-2">
-                    <p className="text-muted-foreground whitespace-pre-line">{product.details}</p>
+                  <h3 className="font-semibold mb-2">Beschrijving</h3>
+                  <div className="max-h-[400px] overflow-y-auto custom-scrollbar pr-2">
+                    <RichTextDisplay content={product.details || product.description} />
                   </div>
                 </div>
               )}
