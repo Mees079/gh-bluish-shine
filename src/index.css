@@ -191,4 +191,39 @@ All colors MUST be HSL.
   .animate-float-fast {
     animation: float-fast 9s ease-in-out infinite;
   }
+
+  /* Limited Edition Effects */
+  .limited-effect-pulse {
+    animation: limited-border 8s ease infinite, limited-pulse 2s ease-in-out infinite;
+  }
+
+  .limited-effect-glow {
+    animation: limited-border 8s ease infinite;
+    filter: brightness(1.1);
+    box-shadow: 0 0 15px rgba(139, 92, 246, 0.4), 0 0 30px rgba(139, 92, 246, 0.2);
+  }
+
+  .limited-effect-shake {
+    animation: limited-border 8s ease infinite, limited-shake 0.5s ease-in-out infinite;
+  }
+
+  .limited-effect-sparkle {
+    animation: limited-border 8s ease infinite, limited-sparkle 1.5s ease-in-out infinite;
+  }
+}
+
+@keyframes limited-pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.03); }
+}
+
+@keyframes limited-shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-2px); }
+  75% { transform: translateX(2px); }
+}
+
+@keyframes limited-sparkle {
+  0%, 100% { filter: brightness(1); }
+  50% { filter: brightness(1.3); }
 }

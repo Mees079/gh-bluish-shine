@@ -427,7 +427,9 @@ export type Database = {
           id: string
           is_new: boolean | null
           limited: boolean | null
+          limited_effect: string | null
           limited_end_date: string | null
+          limited_gradient: string | null
           limited_start_date: string | null
           name: string
           photo_display_count: number | null
@@ -449,7 +451,9 @@ export type Database = {
           id?: string
           is_new?: boolean | null
           limited?: boolean | null
+          limited_effect?: string | null
           limited_end_date?: string | null
+          limited_gradient?: string | null
           limited_start_date?: string | null
           name: string
           photo_display_count?: number | null
@@ -471,7 +475,9 @@ export type Database = {
           id?: string
           is_new?: boolean | null
           limited?: boolean | null
+          limited_effect?: string | null
           limited_end_date?: string | null
+          limited_gradient?: string | null
           limited_start_date?: string | null
           name?: string
           photo_display_count?: number | null

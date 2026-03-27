@@ -3,6 +3,19 @@ import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import placeholderImage from "@/assets/placeholder.png";
 
+export type LimitedGradient = 'blue-purple-pink' | 'gold' | 'red-orange' | 'green-teal' | 'rainbow' | 'ice' | 'fire' | 'custom';
+export type LimitedEffect = 'none' | 'pulse' | 'glow' | 'shake' | 'sparkle';
+
+export const GRADIENT_PRESETS: Record<string, string> = {
+  'blue-purple-pink': 'linear-gradient(90deg, #3b82f6, #8b5cf6, #ec4899, #3b82f6)',
+  'gold': 'linear-gradient(90deg, #f59e0b, #eab308, #fbbf24, #f59e0b)',
+  'red-orange': 'linear-gradient(90deg, #ef4444, #f97316, #ef4444)',
+  'green-teal': 'linear-gradient(90deg, #10b981, #14b8a6, #06b6d4, #10b981)',
+  'rainbow': 'linear-gradient(90deg, #ef4444, #f97316, #eab308, #22c55e, #3b82f6, #8b5cf6, #ef4444)',
+  'ice': 'linear-gradient(90deg, #67e8f9, #a5f3fc, #e0f2fe, #67e8f9)',
+  'fire': 'linear-gradient(90deg, #dc2626, #f97316, #fbbf24, #dc2626)',
+};
+
 export interface Product {
   id: string;
   name: string;
@@ -18,6 +31,8 @@ export interface Product {
   sound_duration?: number | null;
   photo_display_count?: number;
   stock_quantity?: number | null;
+  limited_gradient?: string;
+  limited_effect?: string;
 }
 
 interface ProductCardProps {
@@ -155,16 +170,25 @@ export const ProductCard = ({ product, onClick }: ProductCardProps) => {
     }
   };
   
+  const gradientBg = product.limited
+    ? GRADIENT_PRESETS[product.limited_gradient || 'blue-purple-pink'] || GRADIENT_PRESETS['blue-purple-pink']
+    : undefined;
+
+  const effectClass = product.limited && product.limited_effect && product.limited_effect !== 'none'
+    ? `limited-effect-${product.limited_effect}`
+    : '';
+
   return (
     <Card
       className={cn(
         "overflow-hidden cursor-pointer transition-all duration-300 hover:shadow-glow hover:scale-105 relative",
         product.limited && "p-[3px]",
-        !product.limited && "border-border/50"
+        !product.limited && "border-border/50",
+        effectClass
       )}
       onClick={handleClick}
       style={product.limited ? {
-        background: "linear-gradient(90deg, #3b82f6, #8b5cf6, #ec4899, #3b82f6)",
+        background: gradientBg,
         backgroundSize: "300% 100%",
         animation: "limited-border 8s ease infinite"
       } : undefined}

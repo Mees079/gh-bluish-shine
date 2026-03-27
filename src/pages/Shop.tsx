@@ -118,6 +118,8 @@ const Shop = () => {
             sound_duration: p.sound_duration || null,
             photo_display_count: p.photo_display_count || 1,
             stock_quantity: p.stock_quantity ?? null,
+            limited_gradient: p.limited_gradient || 'blue-purple-pink',
+            limited_effect: p.limited_effect || 'none',
           };
         })
         .sort((a: any, b: any) => {
