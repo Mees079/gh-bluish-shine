@@ -680,44 +680,48 @@ export const ProductsManager = () => {
   );
 };
 
-const SortableImage = ({ image, onDelete }: { image: any; onDelete: () => void }) => {
+const SortableImage = ({ image, index, onDelete }: { image: any; index: number; onDelete: () => void }) => {
   const {
     attributes,
     listeners,
     setNodeRef,
     transform,
     transition,
+    isDragging,
   } = useSortable({ id: image.id });
 
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
+    zIndex: isDragging ? 50 : undefined,
+    opacity: isDragging ? 0.8 : 1,
   };
 
   return (
     <div
       ref={setNodeRef}
       style={style}
-      className="relative group"
+      className={`relative group flex items-center gap-2 border rounded-lg p-2 bg-card ${isDragging ? 'shadow-lg ring-2 ring-primary' : ''}`}
     >
       <div
         {...attributes}
         {...listeners}
-        className="cursor-grab active:cursor-grabbing absolute top-1 left-1 bg-background/80 rounded p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+        className="cursor-grab active:cursor-grabbing p-1 hover:bg-muted rounded touch-none"
       >
-        <GripVertical className="h-3 w-3" />
+        <GripVertical className="h-5 w-5 text-muted-foreground" />
       </div>
+      <span className="text-xs font-bold text-muted-foreground w-5 text-center">{index + 1}</span>
       <img
         src={image.image_url}
         alt="Product"
-        className="w-20 h-20 object-cover rounded"
+        className="w-16 h-16 object-cover rounded"
       />
       <button
         type="button"
         onClick={onDelete}
-        className="absolute top-1 right-1 bg-destructive text-destructive-foreground rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+        className="ml-auto p-1.5 bg-destructive/10 hover:bg-destructive/20 text-destructive rounded-md transition-colors"
       >
-        <X className="h-3 w-3" />
+        <X className="h-4 w-4" />
       </button>
     </div>
   );
