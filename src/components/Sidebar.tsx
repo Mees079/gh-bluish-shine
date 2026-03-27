@@ -61,7 +61,8 @@ export const Sidebar = ({ activeCategory, onCategoryChange }: SidebarProps) => {
         ) : (
           <>
             {categories.map((category) => {
-              const Icon = getIcon(category.icon);
+              const iconNames = category.icon ? category.icon.split(',').filter(Boolean) : [];
+              const icons = iconNames.map((name: string) => getIcon(name.trim()));
               const isActive = activeCategory === category.id;
               
               return (
@@ -71,7 +72,11 @@ export const Sidebar = ({ activeCategory, onCategoryChange }: SidebarProps) => {
                   className="flex-shrink-0 sm:flex-shrink sm:w-full justify-center sm:justify-start gap-2 sm:gap-3 text-xs sm:text-sm h-9 sm:h-11 px-3 sm:px-4"
                   onClick={() => onCategoryChange(category.id)}
                 >
-                  <Icon className="h-3 w-3 sm:h-4 sm:w-4 lg:h-5 lg:w-5 flex-shrink-0" />
+                  <span className="flex items-center gap-1 flex-shrink-0">
+                    {icons.map((Icon, i) => (
+                      <Icon key={i} className="h-3 w-3 sm:h-4 sm:w-4 lg:h-5 lg:w-5" />
+                    ))}
+                  </span>
                   <span className="truncate hidden sm:inline">{category.label}</span>
                   <span className="truncate sm:hidden text-[10px]">{category.label.split(' ')[0]}</span>
                 </Button>

@@ -4,7 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Edit, Trash2, GripVertical, Search } from "lucide-react";
+import { Plus, Edit, Trash2, GripVertical, Search, X } from "lucide-react";
+import * as LucideIcons from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import {
   DndContext,
@@ -61,7 +62,12 @@ const SortableCategory = ({ category, onEdit, onDelete }: SortableCategoryProps)
         <div>
           <h4 className="font-semibold">{category.label}</h4>
           <p className="text-sm text-muted-foreground">Code: {category.name}</p>
-          <p className="text-sm text-muted-foreground">Icoon: {category.icon}</p>
+          <div className="flex items-center gap-1 mt-1">
+            {(category.icon || '').split(',').filter(Boolean).map((iconName: string, i: number) => {
+              const Icon = (LucideIcons as any)[iconName.trim()] || LucideIcons.Package;
+              return <Icon key={i} className="h-4 w-4 text-muted-foreground" />;
+            })}
+          </div>
         </div>
       </div>
       <div className="flex gap-2">
@@ -89,7 +95,17 @@ export const CategoriesManager = () => {
   const [editingCategory, setEditingCategory] = useState<any>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedIcons, setSelectedIcons] = useState<string[]>([]);
+  const [iconSearch, setIconSearch] = useState("");
   const { toast } = useToast();
+
+  const allIconNames = Object.keys(LucideIcons).filter(
+    (name) => name !== 'default' && name !== 'createLucideIcon' && name !== 'icons' && typeof (LucideIcons as any)[name] === 'object' && (LucideIcons as any)[name]?.$$typeof
+  );
+
+  const filteredIcons = iconSearch.length >= 2
+    ? allIconNames.filter(name => name.toLowerCase().includes(iconSearch.toLowerCase())).slice(0, 20)
+    : [];
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -152,7 +168,7 @@ export const CategoriesManager = () => {
     const categoryData = {
       name: formData.get('name') as string,
       label: formData.get('label') as string,
-      icon: formData.get('icon') as string,
+      icon: selectedIcons.join(','),
     };
 
     try {
@@ -227,10 +243,18 @@ export const CategoriesManager = () => {
         </div>
         <Dialog open={dialogOpen} onOpenChange={(open) => {
           setDialogOpen(open);
-          if (!open) setEditingCategory(null);
+          if (!open) {
+            setEditingCategory(null);
+            setSelectedIcons([]);
+            setIconSearch("");
+          }
         }}>
           <DialogTrigger asChild>
-            <Button>
+            <Button onClick={() => {
+              setEditingCategory(null);
+              setSelectedIcons([]);
+              setIconSearch("");
+            }}>
               <Plus className="h-4 w-4 mr-2" />
               Categorie Toevoegen
             </Button>
@@ -263,16 +287,55 @@ export const CategoriesManager = () => {
                 />
               </div>
               <div>
-                <Label htmlFor="icon">Icoon (Lucide naam)</Label>
+                <Label>Iconen</Label>
+                {selectedIcons.length > 0 && (
+                  <div className="flex flex-wrap gap-2 mt-2 mb-2">
+                    {selectedIcons.map((iconName, i) => {
+                      const Icon = (LucideIcons as any)[iconName] || LucideIcons.Package;
+                      return (
+                        <span key={i} className="inline-flex items-center gap-1 bg-muted px-2 py-1 rounded text-sm">
+                          <Icon className="h-4 w-4" />
+                          {iconName}
+                          <button type="button" onClick={() => setSelectedIcons(prev => prev.filter((_, idx) => idx !== i))} className="hover:text-destructive">
+                            <X className="h-3 w-3" />
+                          </button>
+                        </span>
+                      );
+                    })}
+                  </div>
+                )}
                 <Input
-                  id="icon"
-                  name="icon"
-                  placeholder="bijv: Car"
-                  defaultValue={editingCategory?.icon}
-                  required
+                  placeholder="Zoek icoon... (bijv: Car)"
+                  value={iconSearch}
+                  onChange={(e) => setIconSearch(e.target.value)}
                 />
+                {filteredIcons.length > 0 && (
+                  <div className="grid grid-cols-4 gap-1 mt-2 max-h-40 overflow-y-auto border rounded p-2">
+                    {filteredIcons.map((name) => {
+                      const Icon = (LucideIcons as any)[name];
+                      const isSelected = selectedIcons.includes(name);
+                      return (
+                        <button
+                          key={name}
+                          type="button"
+                          className={`flex flex-col items-center gap-1 p-2 rounded text-xs hover:bg-accent ${isSelected ? 'bg-primary/20 ring-1 ring-primary' : ''}`}
+                          onClick={() => {
+                            if (isSelected) {
+                              setSelectedIcons(prev => prev.filter(n => n !== name));
+                            } else {
+                              setSelectedIcons(prev => [...prev, name]);
+                            }
+                          }}
+                        >
+                          <Icon className="h-5 w-5" />
+                          <span className="truncate w-full text-center">{name}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
                 <p className="text-xs text-muted-foreground mt-1">
-                  Zie <a href="https://lucide.dev" target="_blank" className="underline">lucide.dev</a> voor icoon namen
+                  Zoek en klik om iconen toe te voegen. Zie <a href="https://lucide.dev" target="_blank" className="underline">lucide.dev</a> voor namen.
                 </p>
               </div>
               <Button type="submit" className="w-full">Opslaan</Button>
@@ -301,6 +364,8 @@ export const CategoriesManager = () => {
                 category={category}
                 onEdit={(cat) => {
                   setEditingCategory(cat);
+                  setSelectedIcons(cat.icon ? cat.icon.split(',').filter(Boolean) : []);
+                  setIconSearch("");
                   setDialogOpen(true);
                 }}
                 onDelete={handleDelete}
