@@ -259,8 +259,6 @@ export const CategoriesManager = () => {
               Categorie Toevoegen
             </Button>
           </DialogTrigger>
-            </Button>
-          </DialogTrigger>
           <DialogContent>
             <DialogHeader>
               <DialogTitle>
