@@ -364,6 +364,8 @@ export const CategoriesManager = () => {
                 category={category}
                 onEdit={(cat) => {
                   setEditingCategory(cat);
+                  setSelectedIcons(cat.icon ? cat.icon.split(',').filter(Boolean) : []);
+                  setIconSearch("");
                   setDialogOpen(true);
                 }}
                 onDelete={handleDelete}
