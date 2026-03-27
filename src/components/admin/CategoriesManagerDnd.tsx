@@ -100,7 +100,7 @@ export const CategoriesManager = () => {
   const { toast } = useToast();
 
   const allIconNames = Object.keys(LucideIcons).filter(
-    (name) => name !== 'default' && name !== 'createLucideIcon' && name !== 'icons' && typeof (LucideIcons as any)[name] === 'object' && (LucideIcons as any)[name]?.$$typeof
+    (name) => /^[A-Z]/.test(name) && name !== 'default' && name !== 'Icon' && typeof (LucideIcons as any)[name] === 'object'
   );
 
   const filteredIcons = iconSearch.length >= 2
