@@ -170,16 +170,15 @@ export const ProductCard = ({ product, onClick }: ProductCardProps) => {
     }
   };
   
+  const gradientBg = product.limited
+    ? GRADIENT_PRESETS[product.limited_gradient || 'blue-purple-pink'] || GRADIENT_PRESETS['blue-purple-pink']
+    : undefined;
+
+  const effectClass = product.limited && product.limited_effect && product.limited_effect !== 'none'
+    ? `limited-effect-${product.limited_effect}`
+    : '';
+
   return (
-    const gradientBg = product.limited
-      ? GRADIENT_PRESETS[product.limited_gradient || 'blue-purple-pink'] || GRADIENT_PRESETS['blue-purple-pink']
-      : undefined;
-
-    const effectClass = product.limited && product.limited_effect && product.limited_effect !== 'none'
-      ? `limited-effect-${product.limited_effect}`
-      : '';
-
-    return (
     <Card
       className={cn(
         "overflow-hidden cursor-pointer transition-all duration-300 hover:shadow-glow hover:scale-105 relative",
