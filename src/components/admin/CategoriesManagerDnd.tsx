@@ -4,7 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Edit, Trash2, GripVertical, Search } from "lucide-react";
+import { Plus, Edit, Trash2, GripVertical, Search, X } from "lucide-react";
+import * as LucideIcons from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import {
   DndContext,
@@ -61,7 +62,12 @@ const SortableCategory = ({ category, onEdit, onDelete }: SortableCategoryProps)
         <div>
           <h4 className="font-semibold">{category.label}</h4>
           <p className="text-sm text-muted-foreground">Code: {category.name}</p>
-          <p className="text-sm text-muted-foreground">Icoon: {category.icon}</p>
+          <div className="flex items-center gap-1 mt-1">
+            {(category.icon || '').split(',').filter(Boolean).map((iconName: string, i: number) => {
+              const Icon = (LucideIcons as any)[iconName.trim()] || LucideIcons.Package;
+              return <Icon key={i} className="h-4 w-4 text-muted-foreground" />;
+            })}
+          </div>
         </div>
       </div>
       <div className="flex gap-2">
