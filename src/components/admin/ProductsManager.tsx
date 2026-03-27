@@ -121,6 +121,8 @@ export const ProductsManager = () => {
       sound_url: soundUrl,
       sound_duration: soundDuration ? parseInt(soundDuration) : null,
       stock_quantity: formData.get('stock_quantity') ? parseInt(formData.get('stock_quantity') as string) : null,
+      limited_gradient: formData.get('limited_gradient') as string || 'blue-purple-pink',
+      limited_effect: formData.get('limited_effect') as string || 'none',
     };
 
     // Validate input
@@ -471,6 +473,77 @@ export const ProductsManager = () => {
                     defaultValue={editingProduct?.limited_end_date ? new Date(editingProduct.limited_end_date).toISOString().slice(0, 16) : ''}
                   />
                 </div>
+              </div>
+
+              {/* Limited Gradient Keuze */}
+              <div>
+                <Label htmlFor="limited_gradient">Limited Rand Gradient</Label>
+                <Select name="limited_gradient" defaultValue={editingProduct?.limited_gradient || 'blue-purple-pink'}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="blue-purple-pink">
+                      <div className="flex items-center gap-2">
+                        <div className="w-16 h-4 rounded" style={{ background: 'linear-gradient(90deg, #3b82f6, #8b5cf6, #ec4899)' }} />
+                        Blauw-Paars-Roze
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="gold">
+                      <div className="flex items-center gap-2">
+                        <div className="w-16 h-4 rounded" style={{ background: 'linear-gradient(90deg, #f59e0b, #eab308, #fbbf24)' }} />
+                        Goud
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="red-orange">
+                      <div className="flex items-center gap-2">
+                        <div className="w-16 h-4 rounded" style={{ background: 'linear-gradient(90deg, #ef4444, #f97316, #ef4444)' }} />
+                        Rood-Oranje
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="green-teal">
+                      <div className="flex items-center gap-2">
+                        <div className="w-16 h-4 rounded" style={{ background: 'linear-gradient(90deg, #10b981, #14b8a6, #06b6d4)' }} />
+                        Groen-Teal
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="rainbow">
+                      <div className="flex items-center gap-2">
+                        <div className="w-16 h-4 rounded" style={{ background: 'linear-gradient(90deg, #ef4444, #f97316, #eab308, #22c55e, #3b82f6, #8b5cf6)' }} />
+                        Regenboog
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="ice">
+                      <div className="flex items-center gap-2">
+                        <div className="w-16 h-4 rounded" style={{ background: 'linear-gradient(90deg, #67e8f9, #a5f3fc, #e0f2fe)' }} />
+                        IJs
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="fire">
+                      <div className="flex items-center gap-2">
+                        <div className="w-16 h-4 rounded" style={{ background: 'linear-gradient(90deg, #dc2626, #f97316, #fbbf24)' }} />
+                        Vuur
+                      </div>
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Limited Effect Keuze */}
+              <div>
+                <Label htmlFor="limited_effect">Limited Effect</Label>
+                <Select name="limited_effect" defaultValue={editingProduct?.limited_effect || 'none'}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">Geen effect</SelectItem>
+                    <SelectItem value="pulse">Pulse (groter/kleiner)</SelectItem>
+                    <SelectItem value="glow">Glow (oplichtend)</SelectItem>
+                    <SelectItem value="shake">Shake (trillen)</SelectItem>
+                    <SelectItem value="sparkle">Sparkle (glitter)</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
               <div>
                 <Label htmlFor="photo_display_count">Foto Weergave</Label>
