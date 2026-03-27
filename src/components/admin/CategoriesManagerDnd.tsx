@@ -168,7 +168,7 @@ export const CategoriesManager = () => {
     const categoryData = {
       name: formData.get('name') as string,
       label: formData.get('label') as string,
-      icon: formData.get('icon') as string,
+      icon: selectedIcons.join(','),
     };
 
     try {
@@ -243,12 +243,22 @@ export const CategoriesManager = () => {
         </div>
         <Dialog open={dialogOpen} onOpenChange={(open) => {
           setDialogOpen(open);
-          if (!open) setEditingCategory(null);
+          if (!open) {
+            setEditingCategory(null);
+            setSelectedIcons([]);
+            setIconSearch("");
+          }
         }}>
           <DialogTrigger asChild>
-            <Button>
+            <Button onClick={() => {
+              setEditingCategory(null);
+              setSelectedIcons([]);
+              setIconSearch("");
+            }}>
               <Plus className="h-4 w-4 mr-2" />
               Categorie Toevoegen
+            </Button>
+          </DialogTrigger>
             </Button>
           </DialogTrigger>
           <DialogContent>
@@ -279,16 +289,55 @@ export const CategoriesManager = () => {
                 />
               </div>
               <div>
-                <Label htmlFor="icon">Icoon (Lucide naam)</Label>
+                <Label>Iconen</Label>
+                {selectedIcons.length > 0 && (
+                  <div className="flex flex-wrap gap-2 mt-2 mb-2">
+                    {selectedIcons.map((iconName, i) => {
+                      const Icon = (LucideIcons as any)[iconName] || LucideIcons.Package;
+                      return (
+                        <span key={i} className="inline-flex items-center gap-1 bg-muted px-2 py-1 rounded text-sm">
+                          <Icon className="h-4 w-4" />
+                          {iconName}
+                          <button type="button" onClick={() => setSelectedIcons(prev => prev.filter((_, idx) => idx !== i))} className="hover:text-destructive">
+                            <X className="h-3 w-3" />
+                          </button>
+                        </span>
+                      );
+                    })}
+                  </div>
+                )}
                 <Input
-                  id="icon"
-                  name="icon"
-                  placeholder="bijv: Car"
-                  defaultValue={editingCategory?.icon}
-                  required
+                  placeholder="Zoek icoon... (bijv: Car)"
+                  value={iconSearch}
+                  onChange={(e) => setIconSearch(e.target.value)}
                 />
+                {filteredIcons.length > 0 && (
+                  <div className="grid grid-cols-4 gap-1 mt-2 max-h-40 overflow-y-auto border rounded p-2">
+                    {filteredIcons.map((name) => {
+                      const Icon = (LucideIcons as any)[name];
+                      const isSelected = selectedIcons.includes(name);
+                      return (
+                        <button
+                          key={name}
+                          type="button"
+                          className={`flex flex-col items-center gap-1 p-2 rounded text-xs hover:bg-accent ${isSelected ? 'bg-primary/20 ring-1 ring-primary' : ''}`}
+                          onClick={() => {
+                            if (isSelected) {
+                              setSelectedIcons(prev => prev.filter(n => n !== name));
+                            } else {
+                              setSelectedIcons(prev => [...prev, name]);
+                            }
+                          }}
+                        >
+                          <Icon className="h-5 w-5" />
+                          <span className="truncate w-full text-center">{name}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
                 <p className="text-xs text-muted-foreground mt-1">
-                  Zie <a href="https://lucide.dev" target="_blank" className="underline">lucide.dev</a> voor icoon namen
+                  Zoek en klik om iconen toe te voegen. Zie <a href="https://lucide.dev" target="_blank" className="underline">lucide.dev</a> voor namen.
                 </p>
               </div>
               <Button type="submit" className="w-full">Opslaan</Button>
