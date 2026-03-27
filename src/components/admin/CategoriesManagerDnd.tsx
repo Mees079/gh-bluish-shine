@@ -95,7 +95,17 @@ export const CategoriesManager = () => {
   const [editingCategory, setEditingCategory] = useState<any>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedIcons, setSelectedIcons] = useState<string[]>([]);
+  const [iconSearch, setIconSearch] = useState("");
   const { toast } = useToast();
+
+  const allIconNames = Object.keys(LucideIcons).filter(
+    (name) => name !== 'default' && name !== 'createLucideIcon' && name !== 'icons' && typeof (LucideIcons as any)[name] === 'object' && (LucideIcons as any)[name]?.$$typeof
+  );
+
+  const filteredIcons = iconSearch.length >= 2
+    ? allIconNames.filter(name => name.toLowerCase().includes(iconSearch.toLowerCase())).slice(0, 20)
+    : [];
 
   const sensors = useSensors(
     useSensor(PointerSensor),
