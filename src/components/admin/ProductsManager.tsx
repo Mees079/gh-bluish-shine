@@ -659,11 +659,12 @@ export const ProductsManager = () => {
                   items={product.images?.map((img: any) => img.id) || []}
                   strategy={horizontalListSortingStrategy}
                 >
-                  <div className="flex gap-2 mt-2 flex-wrap">
-                    {product.images?.map((img: any) => (
+                  <div className="flex flex-col gap-2 mt-2">
+                    {product.images?.sort((a: any, b: any) => (a.display_order ?? 0) - (b.display_order ?? 0)).map((img: any, idx: number) => (
                       <SortableImage
                         key={img.id}
                         image={img}
+                        index={idx}
                         onDelete={() => handleImageDelete(img.id, img.image_url)}
                       />
                     ))}
