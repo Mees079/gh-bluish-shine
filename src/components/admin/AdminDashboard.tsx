@@ -11,6 +11,7 @@ import { CodesManager } from "./CodesManager";
 import { HomeManager } from "./HomeManager";
 import { RulesManager } from "./RulesManager";
 import { SupportManager } from "./SupportManager";
+import { StaffAccountManager } from "./StaffAccountManager";
 
 interface AdminDashboardProps {
   user: User;
@@ -34,9 +35,10 @@ export const AdminDashboard = ({ user, onLogout }: AdminDashboardProps) => {
       </div>
 
       <Tabs defaultValue="codes" className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="codes">Codes</TabsTrigger>
           <TabsTrigger value="support">Support</TabsTrigger>
+          <TabsTrigger value="staff">Staff</TabsTrigger>
           <TabsTrigger value="site">Site Bewerken</TabsTrigger>
         </TabsList>
 
@@ -46,6 +48,10 @@ export const AdminDashboard = ({ user, onLogout }: AdminDashboardProps) => {
 
         <TabsContent value="support" className="mt-6">
           <SupportManager />
+        </TabsContent>
+
+        <TabsContent value="staff" className="mt-6">
+          <StaffAccountManager />
         </TabsContent>
 
         <TabsContent value="site" className="mt-6">
