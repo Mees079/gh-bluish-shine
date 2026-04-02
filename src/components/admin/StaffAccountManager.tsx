@@ -120,7 +120,7 @@ export const StaffAccountManager = () => {
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="staff">Stafflid</SelectItem>
+                <SelectItem value="coordinatie">Staff Coördinatie</SelectItem>
                 <SelectItem value="bestuur">Bestuur</SelectItem>
               </SelectContent>
             </Select>
