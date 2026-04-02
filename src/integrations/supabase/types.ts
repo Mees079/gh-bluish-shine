@@ -575,6 +575,90 @@ export type Database = {
         }
         Relationships: []
       }
+      staff_absences: {
+        Row: {
+          active: boolean
+          created_at: string
+          end_date: string
+          id: string
+          reason: string | null
+          user_id: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          end_date: string
+          id?: string
+          reason?: string | null
+          user_id: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          end_date?: string
+          id?: string
+          reason?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      staff_announcements: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          message: string
+          title: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          message: string
+          title?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          message?: string
+          title?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      staff_hours: {
+        Row: {
+          created_at: string
+          hours: number
+          id: string
+          notes: string | null
+          submitted_at: string
+          user_id: string
+          week_start: string
+        }
+        Insert: {
+          created_at?: string
+          hours?: number
+          id?: string
+          notes?: string | null
+          submitted_at?: string
+          user_id: string
+          week_start: string
+        }
+        Update: {
+          created_at?: string
+          hours?: number
+          id?: string
+          notes?: string | null
+          submitted_at?: string
+          user_id?: string
+          week_start?: string
+        }
+        Relationships: []
+      }
       staff_profiles: {
         Row: {
           created_at: string | null
@@ -601,6 +685,47 @@ export type Database = {
           username?: string
         }
         Relationships: []
+      }
+      staff_task_requests: {
+        Row: {
+          created_at: string
+          id: string
+          message: string | null
+          request_type: string
+          requested_by: string
+          status: string
+          taken_by: string | null
+          task_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          message?: string | null
+          request_type?: string
+          requested_by: string
+          status?: string
+          taken_by?: string | null
+          task_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          message?: string | null
+          request_type?: string
+          requested_by?: string
+          status?: string
+          taken_by?: string | null
+          task_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "staff_task_requests_task_id_fkey"
+            columns: ["task_id"]
+            isOneToOne: false
+            referencedRelation: "staff_tasks"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       staff_task_updates: {
         Row: {
@@ -788,7 +913,7 @@ export type Database = {
       is_staff_member: { Args: { _user_id: string }; Returns: boolean }
     }
     Enums: {
-      app_role: "admin" | "super_admin" | "staff" | "bestuur"
+      app_role: "admin" | "super_admin" | "coordinatie" | "bestuur"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -916,7 +1041,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["admin", "super_admin", "staff", "bestuur"],
+      app_role: ["admin", "super_admin", "coordinatie", "bestuur"],
     },
   },
 } as const

@@ -36,7 +36,7 @@ serve(async (req) => {
 
     const { username, role } = await req.json()
     if (!username || !role) throw new Error('Username and role are required')
-    if (!['staff', 'bestuur'].includes(role)) throw new Error('Invalid role')
+    if (!['coordinatie', 'bestuur'].includes(role)) throw new Error('Invalid role')
 
     // Generate temp password
     const tempPassword = crypto.randomUUID().slice(0, 12) + 'A1!'

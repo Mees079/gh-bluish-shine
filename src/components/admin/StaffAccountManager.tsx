@@ -18,7 +18,7 @@ interface StaffMember {
 
 export const StaffAccountManager = () => {
   const [username, setUsername] = useState("");
-  const [role, setRole] = useState("staff");
+  const [role, setRole] = useState("coordinatie");
   const [loading, setLoading] = useState(false);
   const [tempPassword, setTempPassword] = useState("");
   const [staffMembers, setStaffMembers] = useState<StaffMember[]>([]);
@@ -36,7 +36,7 @@ export const StaffAccountManager = () => {
     const members: StaffMember[] = [];
     for (const p of profiles) {
       const { data: roles } = await supabase.from('user_roles').select('role').eq('user_id', p.user_id);
-      const staffRole = roles?.find(r => ['staff', 'bestuur'].includes(r.role))?.role || 'staff';
+      const staffRole = roles?.find(r => ['coordinatie', 'bestuur'].includes(r.role))?.role || 'coordinatie';
       members.push({ ...p, role: staffRole });
     }
     setStaffMembers(members);
@@ -120,7 +120,7 @@ export const StaffAccountManager = () => {
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="staff">Stafflid</SelectItem>
+                <SelectItem value="coordinatie">Staff Coördinatie</SelectItem>
                 <SelectItem value="bestuur">Bestuur</SelectItem>
               </SelectContent>
             </Select>
@@ -175,7 +175,7 @@ export const StaffAccountManager = () => {
                   <span className={`text-xs px-2 py-0.5 rounded ${
                     m.role === 'bestuur' ? 'bg-amber-500/20 text-amber-400' : 'bg-primary/20 text-primary'
                   }`}>
-                    {m.role === 'bestuur' ? 'Bestuur' : 'Stafflid'}
+                    {m.role === 'bestuur' ? 'Bestuur' : 'Staff Coördinatie'}
                   </span>
                 </TableCell>
                 <TableCell>
