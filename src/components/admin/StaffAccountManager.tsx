@@ -18,7 +18,7 @@ interface StaffMember {
 
 export const StaffAccountManager = () => {
   const [username, setUsername] = useState("");
-  const [role, setRole] = useState("staff");
+  const [role, setRole] = useState("coordinatie");
   const [loading, setLoading] = useState(false);
   const [tempPassword, setTempPassword] = useState("");
   const [staffMembers, setStaffMembers] = useState<StaffMember[]>([]);
