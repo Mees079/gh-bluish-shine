@@ -175,7 +175,7 @@ export const StaffAccountManager = () => {
                   <span className={`text-xs px-2 py-0.5 rounded ${
                     m.role === 'bestuur' ? 'bg-amber-500/20 text-amber-400' : 'bg-primary/20 text-primary'
                   }`}>
-                    {m.role === 'bestuur' ? 'Bestuur' : 'Stafflid'}
+                    {m.role === 'bestuur' ? 'Bestuur' : 'Staff Coördinatie'}
                   </span>
                 </TableCell>
                 <TableCell>
