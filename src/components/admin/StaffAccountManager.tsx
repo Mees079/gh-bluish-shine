@@ -36,7 +36,7 @@ export const StaffAccountManager = () => {
     const members: StaffMember[] = [];
     for (const p of profiles) {
       const { data: roles } = await supabase.from('user_roles').select('role').eq('user_id', p.user_id);
-      const staffRole = roles?.find(r => ['staff', 'bestuur'].includes(r.role))?.role || 'staff';
+      const staffRole = roles?.find(r => ['coordinatie', 'bestuur'].includes(r.role))?.role || 'coordinatie';
       members.push({ ...p, role: staffRole });
     }
     setStaffMembers(members);
