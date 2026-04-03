@@ -3,10 +3,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useToast } from "@/hooks/use-toast";
-import { UserPlus, Copy, Users, Shield, Trash2 } from "lucide-react";
+import { UserPlus, Copy, Users, Trash2 } from "lucide-react";
 
 interface StaffMember {
   user_id: string;
@@ -16,9 +15,32 @@ interface StaffMember {
   role?: string;
 }
 
+const rolePriority = ["super_admin", "admin", "bestuur", "coordinatie"] as const;
+
+const getRoleMeta = (role?: string) => {
+  if (role === "super_admin" || role === "admin") {
+    return {
+      label: "Admin",
+      className: "bg-destructive/10 text-destructive",
+    };
+  }
+
+  if (role === "bestuur") {
+    return {
+      label: "Bestuur",
+      className: "bg-amber-500/20 text-amber-400",
+    };
+  }
+
+  return {
+    label: "Staff Coördinatie",
+    className: "bg-primary/20 text-primary",
+  };
+};
+
 export const StaffAccountManager = () => {
   const [username, setUsername] = useState("");
-  const [role, setRole] = useState("coordinatie");
+  const [role, setRole] = useState<"coordinatie" | "bestuur">("coordinatie");
   const [loading, setLoading] = useState(false);
   const [tempPassword, setTempPassword] = useState("");
   const [staffMembers, setStaffMembers] = useState<StaffMember[]>([]);
@@ -29,21 +51,44 @@ export const StaffAccountManager = () => {
   }, []);
 
   const loadStaffMembers = async () => {
-    const { data: profiles } = await supabase.from('staff_profiles').select('*');
-    if (!profiles) return;
+    const { data: profiles, error: profilesError } = await supabase
+      .from("staff_profiles")
+      .select("user_id, username, must_change_password, created_at")
+      .order("created_at", { ascending: false });
 
-    // Get roles for each staff member
-    const members: StaffMember[] = [];
-    for (const p of profiles) {
-      const { data: roles } = await supabase.from('user_roles').select('role').eq('user_id', p.user_id);
-      const staffRole = roles?.find(r => ['coordinatie', 'bestuur'].includes(r.role))?.role || 'coordinatie';
-      members.push({ ...p, role: staffRole });
+    if (profilesError || !profiles) {
+      setStaffMembers([]);
+      return;
     }
+
+    const userIds = profiles.map((profile) => profile.user_id);
+    const { data: roles } = userIds.length
+      ? await supabase.from("user_roles").select("user_id, role").in("user_id", userIds)
+      : { data: [] as Array<{ user_id: string; role: string }> };
+
+    const roleMap = new Map<string, string[]>();
+    (roles || []).forEach((entry) => {
+      const current = roleMap.get(entry.user_id) || [];
+      current.push(entry.role);
+      roleMap.set(entry.user_id, current);
+    });
+
+    const members: StaffMember[] = profiles.map((profile) => {
+      const rolesForUser = roleMap.get(profile.user_id) || [];
+      const highestRole = rolePriority.find((candidate) => rolesForUser.includes(candidate)) || "coordinatie";
+
+      return {
+        ...profile,
+        role: highestRole,
+      };
+    });
+
     setStaffMembers(members);
   };
 
   const handleCreate = async () => {
     if (!username.trim()) return;
+
     setLoading(true);
     setTempPassword("");
 
@@ -51,20 +96,25 @@ export const StaffAccountManager = () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) throw new Error("Niet ingelogd");
 
-      const { data, error } = await supabase.functions.invoke('create-staff-account', {
-        body: { username: username.trim(), role },
+      const requestedRole = role;
+      const { data, error } = await supabase.functions.invoke("create-staff-account", {
+        body: { username: username.trim(), role: requestedRole },
       });
 
       if (error) throw error;
-      if (data.error) throw new Error(data.error);
+      if (data?.error) throw new Error(data.error);
+      if (data?.role && data.role !== requestedRole) {
+        throw new Error(`Rol mismatch: gevraagd ${requestedRole}, ontvangen ${data.role}`);
+      }
 
       setTempPassword(data.tempPassword);
       setUsername("");
-      loadStaffMembers();
+      setRole("coordinatie");
+      await loadStaffMembers();
 
       toast({
         title: "Account aangemaakt!",
-        description: `Staff account '${data.username}' is aangemaakt.`,
+        description: `${data.username} is aangemaakt als ${requestedRole === "bestuur" ? "Bestuur" : "Staff Coördinatie"}.`,
       });
     } catch (err: any) {
       toast({
@@ -86,9 +136,9 @@ export const StaffAccountManager = () => {
     if (!confirm(`Weet je zeker dat je '${member.username}' wilt verwijderen?`)) return;
 
     try {
-      await supabase.from('user_roles').delete().eq('user_id', member.user_id);
-      await supabase.from('staff_profiles').delete().eq('user_id', member.user_id);
-      loadStaffMembers();
+      await supabase.from("user_roles").delete().eq("user_id", member.user_id);
+      await supabase.from("staff_profiles").delete().eq("user_id", member.user_id);
+      await loadStaffMembers();
       toast({ title: "Verwijderd", description: `${member.username} is verwijderd als stafflid.` });
     } catch (err: any) {
       toast({ variant: "destructive", title: "Fout", description: err.message });
@@ -97,7 +147,6 @@ export const StaffAccountManager = () => {
 
   return (
     <div className="space-y-8">
-      {/* Create new staff */}
       <div className="bg-secondary/30 rounded-lg p-6 border">
         <h3 className="text-lg font-semibold text-foreground flex items-center gap-2 mb-4">
           <UserPlus className="h-5 w-5" />
@@ -109,22 +158,42 @@ export const StaffAccountManager = () => {
             <Label>Gebruikersnaam</Label>
             <Input
               value={username}
-              onChange={e => setUsername(e.target.value)}
+              onChange={(e) => setUsername(e.target.value)}
               placeholder="bijv. jan123"
             />
           </div>
+
           <div>
             <Label>Rang</Label>
-            <Select value={role} onValueChange={setRole}>
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="coordinatie">Staff Coördinatie</SelectItem>
-                <SelectItem value="bestuur">Bestuur</SelectItem>
-              </SelectContent>
-            </Select>
+            <div className="grid grid-cols-2 gap-2 mt-2">
+              <button
+                type="button"
+                onClick={() => setRole("coordinatie")}
+                className={`rounded-lg border px-3 py-3 text-sm font-medium transition-colors ${
+                  role === "coordinatie"
+                    ? "border-primary bg-primary/10 text-primary"
+                    : "border-border bg-background text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                Staff Coördinatie
+              </button>
+              <button
+                type="button"
+                onClick={() => setRole("bestuur")}
+                className={`rounded-lg border px-3 py-3 text-sm font-medium transition-colors ${
+                  role === "bestuur"
+                    ? "border-primary bg-primary/10 text-primary"
+                    : "border-border bg-background text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                Bestuur
+              </button>
+            </div>
+            <p className="text-xs text-muted-foreground mt-2">
+              Je maakt nu een <span className="text-foreground font-medium">{role === "bestuur" ? "Bestuur" : "Staff Coördinatie"}</span> account aan.
+            </p>
           </div>
+
           <div className="flex items-end">
             <Button onClick={handleCreate} disabled={loading || !username.trim()} variant="glow" className="w-full">
               {loading ? "Aanmaken..." : "Aanmaken"}
@@ -150,7 +219,6 @@ export const StaffAccountManager = () => {
         )}
       </div>
 
-      {/* Staff list */}
       <div>
         <h3 className="text-lg font-semibold text-foreground flex items-center gap-2 mb-4">
           <Users className="h-5 w-5" />
@@ -168,33 +236,35 @@ export const StaffAccountManager = () => {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {staffMembers.map(m => (
-              <TableRow key={m.user_id}>
-                <TableCell className="font-medium">{m.username}</TableCell>
-                <TableCell>
-                  <span className={`text-xs px-2 py-0.5 rounded ${
-                    m.role === 'bestuur' ? 'bg-amber-500/20 text-amber-400' : 'bg-primary/20 text-primary'
-                  }`}>
-                    {m.role === 'bestuur' ? 'Bestuur' : 'Staff Coördinatie'}
-                  </span>
-                </TableCell>
-                <TableCell>
-                  {m.must_change_password ? (
-                    <span className="text-xs text-amber-400">Wacht op eerste login</span>
-                  ) : (
-                    <span className="text-xs text-green-400">Actief</span>
-                  )}
-                </TableCell>
-                <TableCell className="text-sm text-muted-foreground">
-                  {new Date(m.created_at).toLocaleDateString('nl-NL')}
-                </TableCell>
-                <TableCell>
-                  <Button variant="ghost" size="icon" onClick={() => handleDelete(m)}>
-                    <Trash2 className="h-4 w-4 text-destructive" />
-                  </Button>
-                </TableCell>
-              </TableRow>
-            ))}
+            {staffMembers.map((member) => {
+              const roleMeta = getRoleMeta(member.role);
+
+              return (
+                <TableRow key={member.user_id}>
+                  <TableCell className="font-medium">{member.username}</TableCell>
+                  <TableCell>
+                    <span className={`text-xs px-2 py-0.5 rounded ${roleMeta.className}`}>
+                      {roleMeta.label}
+                    </span>
+                  </TableCell>
+                  <TableCell>
+                    {member.must_change_password ? (
+                      <span className="text-xs text-amber-400">Wacht op eerste login</span>
+                    ) : (
+                      <span className="text-xs text-green-400">Actief</span>
+                    )}
+                  </TableCell>
+                  <TableCell className="text-sm text-muted-foreground">
+                    {new Date(member.created_at).toLocaleDateString("nl-NL")}
+                  </TableCell>
+                  <TableCell>
+                    <Button variant="ghost" size="icon" onClick={() => handleDelete(member)}>
+                      <Trash2 className="h-4 w-4 text-destructive" />
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              );
+            })}
             {staffMembers.length === 0 && (
               <TableRow>
                 <TableCell colSpan={5} className="text-center text-muted-foreground py-8">
