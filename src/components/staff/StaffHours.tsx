@@ -2,7 +2,12 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { format, startOfWeek, addDays } from "date-fns";
 import { nl } from "date-fns/locale";
-import { Clock, Plus, X, Send } from "lucide-react";
+import { Clock, Send, Search, UserX, Check } from "lucide-react";
+
+interface StaffProfile {
+  user_id: string;
+  username: string;
+}
 
 interface HourEntry {
   id: string;
@@ -13,68 +18,95 @@ interface HourEntry {
   submitted_at: string;
 }
 
-interface StaffProfile {
-  user_id: string;
-  username: string;
-}
-
 interface Props {
   isBestuur: boolean;
   currentUserId: string;
   staffProfiles: StaffProfile[];
 }
 
-export const StaffHours = ({ isBestuur, currentUserId, staffProfiles }: Props) => {
-  const [hours, setHours] = useState<HourEntry[]>([]);
-  const [showAdd, setShowAdd] = useState(false);
-  const [newHours, setNewHours] = useState("");
-  const [newNotes, setNewNotes] = useState("");
-  const [loading, setLoading] = useState(true);
+interface RowData {
+  user_id: string;
+  username: string;
+  hours: string;
+  afgemeld: boolean;
+}
 
-  const currentWeekStart = format(startOfWeek(new Date(), { weekStartsOn: 1 }), 'yyyy-MM-dd');
+export const StaffHours = ({ isBestuur, currentUserId, staffProfiles }: Props) => {
+  const [existingHours, setExistingHours] = useState<HourEntry[]>([]);
+  const [rows, setRows] = useState<RowData[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
+  const [search, setSearch] = useState("");
+
+  const weekStart = startOfWeek(new Date(), { weekStartsOn: 1 });
+  const currentWeekStart = format(weekStart, 'yyyy-MM-dd');
 
   useEffect(() => {
-    loadHours();
+    loadData();
   }, []);
 
-  const loadHours = async () => {
-    let query = supabase.from('staff_hours').select('*').order('week_start', { ascending: false });
-    if (!isBestuur) {
-      query = query.eq('user_id', currentUserId);
-    }
-    const { data } = await query;
-    setHours((data as HourEntry[]) || []);
+  const loadData = async () => {
+    const { data } = await supabase.from('staff_hours').select('*').order('week_start', { ascending: false });
+    const hours = (data as HourEntry[]) || [];
+    setExistingHours(hours);
+
+    // Check if this week already has entries
+    const thisWeek = hours.filter(h => h.week_start === currentWeekStart);
+
+    // Build rows for all staff
+    const newRows: RowData[] = staffProfiles.map(p => {
+      const existing = thisWeek.find(h => h.user_id === p.user_id);
+      return {
+        user_id: p.user_id,
+        username: p.username,
+        hours: existing ? String(existing.hours) : "",
+        afgemeld: existing?.notes === "AFGEMELD",
+      };
+    });
+    setRows(newRows);
+    setSubmitted(thisWeek.length > 0);
     setLoading(false);
   };
 
+  const updateRow = (userId: string, field: 'hours' | 'afgemeld', value: any) => {
+    setRows(prev => prev.map(r => {
+      if (r.user_id !== userId) return r;
+      if (field === 'afgemeld') return { ...r, afgemeld: value, hours: value ? "0" : r.hours };
+      return { ...r, [field]: value };
+    }));
+  };
+
   const handleSubmit = async () => {
-    const h = parseFloat(newHours);
-    if (isNaN(h) || h < 0) return;
-    
-    // Check if already submitted for this week
-    const existing = hours.find(e => e.user_id === currentUserId && e.week_start === currentWeekStart);
-    if (existing) {
-      await supabase.from('staff_hours').update({ hours: h, notes: newNotes.trim() || null }).eq('id', existing.id);
-    } else {
-      await supabase.from('staff_hours').insert({
-        user_id: currentUserId,
-        week_start: currentWeekStart,
-        hours: h,
-        notes: newNotes.trim() || null,
-      });
+    setSubmitting(true);
+    try {
+      for (const row of rows) {
+        const h = parseFloat(row.hours) || 0;
+        const existing = existingHours.find(e => e.user_id === row.user_id && e.week_start === currentWeekStart);
+
+        if (existing) {
+          await supabase.from('staff_hours').update({
+            hours: h,
+            notes: row.afgemeld ? "AFGEMELD" : null,
+          }).eq('id', existing.id);
+        } else {
+          await supabase.from('staff_hours').insert({
+            user_id: row.user_id,
+            week_start: currentWeekStart,
+            hours: h,
+            notes: row.afgemeld ? "AFGEMELD" : null,
+          });
+        }
+      }
+      setSubmitted(true);
+      loadData();
+    } catch (err) {
+      console.error('Error submitting hours:', err);
     }
-    setNewHours("");
-    setNewNotes("");
-    setShowAdd(false);
-    loadHours();
+    setSubmitting(false);
   };
 
-  const getUsername = (userId: string) => {
-    return staffProfiles.find(p => p.user_id === userId)?.username || "Onbekend";
-  };
-
-  const myCurrentWeek = hours.find(e => e.user_id === currentUserId && e.week_start === currentWeekStart);
-  const weekStart = startOfWeek(new Date(), { weekStartsOn: 1 });
+  const getUsername = (userId: string) => staffProfiles.find(p => p.user_id === userId)?.username || "Onbekend";
 
   if (loading) {
     return <div className="flex justify-center py-12"><div className="w-6 h-6 border-2 border-[#00ff88] border-t-transparent rounded-full animate-spin" /></div>;
@@ -85,96 +117,113 @@ export const StaffHours = ({ isBestuur, currentUserId, staffProfiles }: Props) =
       <div className="flex items-center justify-between">
         <h2 className="text-lg font-bold text-white flex items-center gap-2">
           <Clock className="h-5 w-5 text-[#00ff88]" />
-          Urenregistratie
+          Urenregistratie — Week {format(weekStart, 'w')}
         </h2>
-        {!myCurrentWeek && (
-          <button onClick={() => setShowAdd(true)} className="flex items-center gap-2 px-3 py-2 bg-[#00ff88]/10 text-[#00ff88] rounded-lg text-sm font-medium hover:bg-[#00ff88]/20 transition-colors">
-            <Plus className="h-4 w-4" /> Uren invullen
-          </button>
-        )}
-      </div>
-
-      {/* Current week status */}
-      <div className={`rounded-xl border p-4 ${myCurrentWeek ? 'bg-[#00ff88]/5 border-[#00ff88]/20' : 'bg-amber-500/5 border-amber-500/20'}`}>
-        <p className="text-sm text-[#9ca3af]">
-          Week {format(weekStart, 'w')} — {format(weekStart, 'd MMM', { locale: nl })} t/m {format(addDays(weekStart, 6), 'd MMM', { locale: nl })}
+        <p className="text-sm text-[#6b7280]">
+          {format(weekStart, 'd MMM', { locale: nl })} t/m {format(addDays(weekStart, 6), 'd MMM', { locale: nl })}
         </p>
-        {myCurrentWeek ? (
-          <div className="flex items-center justify-between mt-2">
-            <p className="text-lg font-bold text-[#00ff88]">{myCurrentWeek.hours} uur ingediend</p>
-            <button onClick={() => { setNewHours(String(myCurrentWeek.hours)); setNewNotes(myCurrentWeek.notes || ""); setShowAdd(true); }} className="text-xs text-[#6b7280] hover:text-white transition-colors">
-              Aanpassen
-            </button>
-          </div>
-        ) : (
-          <p className="text-sm text-amber-400 mt-1">⚠️ Je hebt deze week nog geen uren ingediend</p>
-        )}
       </div>
 
-      {showAdd && (
-        <div className="bg-[#111827]/80 border border-[#00ff88]/20 rounded-xl p-5 space-y-4">
-          <div className="flex items-center justify-between">
-            <h3 className="text-sm font-semibold text-white">Uren invullen — Week {format(weekStart, 'w')}</h3>
-            <button onClick={() => setShowAdd(false)} className="text-[#6b7280] hover:text-white"><X className="h-4 w-4" /></button>
-          </div>
-          <div>
-            <label className="text-[#9ca3af] text-sm mb-1 block">Aantal uren *</label>
-            <input
-              type="number"
-              min="0"
-              step="0.5"
-              value={newHours}
-              onChange={e => setNewHours(e.target.value)}
-              placeholder="bijv. 8"
-              className="w-full bg-[#1f2937] border border-[#374151] rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-[#00ff88]/50"
-            />
-          </div>
-          <div>
-            <label className="text-[#9ca3af] text-sm mb-1 block">Toelichting (optioneel)</label>
-            <textarea
-              value={newNotes}
-              onChange={e => setNewNotes(e.target.value)}
-              placeholder="Wat heb je gedaan..."
-              rows={3}
-              className="w-full bg-[#1f2937] border border-[#374151] rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-[#00ff88]/50 resize-none"
-            />
-          </div>
-          <button onClick={handleSubmit} disabled={!newHours} className="flex items-center gap-2 px-4 py-2 bg-[#00ff88] text-[#0a0e1a] rounded-lg text-sm font-semibold disabled:opacity-50 transition-all">
-            <Send className="h-4 w-4" /> Indienen
+      {/* Fill-in table (coordinatie or bestuur) */}
+      <div className="bg-[#111827]/60 border border-[#1f2937] rounded-2xl overflow-hidden">
+        <div className="p-4 border-b border-[#1f2937] flex items-center justify-between">
+          <h3 className="text-sm font-semibold text-white">
+            {submitted ? "✅ Uren ingediend deze week" : "Vul de uren in voor alle leden"}
+          </h3>
+        </div>
+
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-[#1f2937]">
+                <th className="text-left py-3 px-4 text-[#6b7280] font-medium">Naam</th>
+                <th className="text-center py-3 px-4 text-[#6b7280] font-medium w-32">Uren</th>
+                <th className="text-center py-3 px-4 text-[#6b7280] font-medium w-32">Afgemeld</th>
+              </tr>
+            </thead>
+            <tbody>
+              {rows.map(row => (
+                <tr key={row.user_id} className={`border-b border-[#1f2937]/50 ${row.afgemeld ? 'bg-red-500/5' : 'hover:bg-[#1f2937]/30'}`}>
+                  <td className="py-3 px-4">
+                    <span className={`font-medium ${row.afgemeld ? 'text-red-400 line-through' : 'text-white'}`}>
+                      {row.username}
+                    </span>
+                  </td>
+                  <td className="py-3 px-4 text-center">
+                    <input
+                      type="number"
+                      min="0"
+                      step="0.5"
+                      value={row.hours}
+                      onChange={e => updateRow(row.user_id, 'hours', e.target.value)}
+                      disabled={row.afgemeld}
+                      placeholder="0"
+                      className="w-20 bg-[#1f2937] border border-[#374151] rounded-lg px-3 py-1.5 text-white text-sm text-center focus:outline-none focus:border-[#00ff88]/50 disabled:opacity-30"
+                    />
+                  </td>
+                  <td className="py-3 px-4 text-center">
+                    <button
+                      onClick={() => updateRow(row.user_id, 'afgemeld', !row.afgemeld)}
+                      className={`w-8 h-8 rounded-lg flex items-center justify-center transition-colors ${
+                        row.afgemeld
+                          ? 'bg-red-500/20 text-red-400 border border-red-500/30'
+                          : 'bg-[#1f2937] text-[#4b5563] border border-[#374151] hover:border-[#6b7280]'
+                      }`}
+                    >
+                      {row.afgemeld ? <UserX className="h-4 w-4" /> : <Check className="h-4 w-4 opacity-0" />}
+                    </button>
+                  </td>
+                </tr>
+              ))}
+              {rows.length === 0 && (
+                <tr><td colSpan={3} className="py-8 text-center text-[#374151]">Geen staffleden gevonden</td></tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+
+        <div className="p-4 border-t border-[#1f2937] flex justify-end">
+          <button
+            onClick={handleSubmit}
+            disabled={submitting}
+            className="flex items-center gap-2 px-5 py-2.5 bg-[#00ff88] text-[#0a0e1a] rounded-lg text-sm font-semibold disabled:opacity-50 transition-all hover:shadow-[0_0_20px_rgba(0,255,136,0.3)]"
+          >
+            <Send className="h-4 w-4" />
+            {submitting ? "Indienen..." : submitted ? "Bijwerken" : "Indienen"}
           </button>
         </div>
-      )}
+      </div>
 
-      {/* History / Overview */}
-      {isBestuur ? (
-        <BestuurHoursOverview hours={hours} staffProfiles={staffProfiles} />
-      ) : (
-        <div className="space-y-2">
-          <h3 className="text-sm font-medium text-[#6b7280]">Mijn geschiedenis</h3>
-          {hours.filter(h => h.user_id === currentUserId).map(h => (
-            <div key={h.id} className="bg-[#111827]/40 border border-[#1f2937] rounded-xl p-3 flex items-center justify-between">
-              <div>
-                <p className="text-sm text-white">Week {format(new Date(h.week_start + 'T00:00:00'), 'w')} — {format(new Date(h.week_start + 'T00:00:00'), 'd MMM yyyy', { locale: nl })}</p>
-                {h.notes && <p className="text-xs text-[#6b7280] mt-0.5">{h.notes}</p>}
-              </div>
-              <span className="text-sm font-semibold text-[#00ff88]">{h.hours}u</span>
+      {/* Bestuur: history overview */}
+      {isBestuur && (
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <h3 className="text-sm font-semibold text-white">Overzicht alle weken</h3>
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#4b5563]" />
+              <input
+                value={search}
+                onChange={e => setSearch(e.target.value)}
+                placeholder="Zoek persoon..."
+                className="bg-[#1f2937] border border-[#374151] rounded-lg pl-9 pr-3 py-1.5 text-white text-sm focus:outline-none focus:border-[#00ff88]/50 w-48"
+              />
             </div>
-          ))}
+          </div>
+
+          <BestuurOverview hours={existingHours} staffProfiles={staffProfiles} search={search} />
         </div>
       )}
     </div>
   );
 };
 
-// Bestuur-only overview panel
-const BestuurHoursOverview = ({ hours, staffProfiles }: { hours: HourEntry[]; staffProfiles: StaffProfile[] }) => {
-  const [search, setSearch] = useState("");
-
+const BestuurOverview = ({ hours, staffProfiles, search }: { hours: HourEntry[]; staffProfiles: StaffProfile[]; search: string }) => {
   const getUsername = (userId: string) => staffProfiles.find(p => p.user_id === userId)?.username || "Onbekend";
 
   // Group by user
   const userMap = new Map<string, HourEntry[]>();
   hours.forEach(h => {
+    if (h.notes === "AFGEMELD") return; // skip afgemeld entries for totals
     const entries = userMap.get(h.user_id) || [];
     entries.push(h);
     userMap.set(h.user_id, entries);
@@ -186,17 +235,7 @@ const BestuurHoursOverview = ({ hours, staffProfiles }: { hours: HourEntry[]; st
   });
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h3 className="text-sm font-medium text-white">Overzicht alle leden</h3>
-        <input
-          value={search}
-          onChange={e => setSearch(e.target.value)}
-          placeholder="Zoek persoon..."
-          className="bg-[#1f2937] border border-[#374151] rounded-lg px-3 py-1.5 text-white text-sm focus:outline-none focus:border-[#00ff88]/50 w-48"
-        />
-      </div>
-
+    <div className="bg-[#111827]/60 border border-[#1f2937] rounded-2xl overflow-hidden">
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
@@ -204,7 +243,7 @@ const BestuurHoursOverview = ({ hours, staffProfiles }: { hours: HourEntry[]; st
               <th className="text-left py-3 px-4 text-[#6b7280] font-medium">Naam</th>
               <th className="text-right py-3 px-4 text-[#6b7280] font-medium">Totaal uren</th>
               <th className="text-right py-3 px-4 text-[#6b7280] font-medium">Gem. per week</th>
-              <th className="text-right py-3 px-4 text-[#6b7280] font-medium">Weken ingediend</th>
+              <th className="text-right py-3 px-4 text-[#6b7280] font-medium">Weken geregistreerd</th>
             </tr>
           </thead>
           <tbody>
@@ -225,23 +264,6 @@ const BestuurHoursOverview = ({ hours, staffProfiles }: { hours: HourEntry[]; st
             )}
           </tbody>
         </table>
-      </div>
-
-      {/* Detailed entries */}
-      <div className="space-y-2">
-        <h3 className="text-sm font-medium text-[#6b7280]">Recente inzendingen</h3>
-        {hours.slice(0, 20).map(h => (
-          <div key={h.id} className="bg-[#111827]/40 border border-[#1f2937] rounded-lg p-3 flex items-center justify-between">
-            <div>
-              <span className="text-sm text-[#00ff88] font-medium">{getUsername(h.user_id)}</span>
-              <span className="text-xs text-[#4b5563] ml-2">
-                Week {format(new Date(h.week_start + 'T00:00:00'), 'w')} — {format(new Date(h.submitted_at), "d MMM 'om' HH:mm", { locale: nl })}
-              </span>
-              {h.notes && <p className="text-xs text-[#6b7280] mt-0.5">{h.notes}</p>}
-            </div>
-            <span className="text-sm font-bold text-white">{h.hours}u</span>
-          </div>
-        ))}
       </div>
     </div>
   );
