@@ -6,6 +6,48 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
+const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? ''
+const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+const anonKey = Deno.env.get('SUPABASE_ANON_KEY') ?? ''
+
+const findAuthUserByEmail = async (email: string) => {
+  const response = await fetch(`${supabaseUrl}/auth/v1/admin/users?page=1&per_page=1000`, {
+    headers: {
+      Authorization: `Bearer ${serviceRoleKey}`,
+      apikey: serviceRoleKey,
+    },
+  })
+
+  if (!response.ok) {
+    throw new Error('Kon bestaande accounts niet controleren')
+  }
+
+  const payload = await response.json()
+  const users = Array.isArray(payload?.users) ? payload.users : []
+
+  return users.find((user: { email?: string | null }) => user.email?.toLowerCase() === email.toLowerCase()) ?? null
+}
+
+const assignStaffRole = async (
+  supabaseAdmin: ReturnType<typeof createClient>,
+  userId: string,
+  role: 'coordinatie' | 'bestuur'
+) => {
+  const { error: clearRoleError } = await supabaseAdmin
+    .from('user_roles')
+    .delete()
+    .eq('user_id', userId)
+    .in('role', ['coordinatie', 'bestuur'])
+
+  if (clearRoleError) throw clearRoleError
+
+  const { error: roleError } = await supabaseAdmin
+    .from('user_roles')
+    .insert({ user_id: userId, role })
+
+  if (roleError) throw roleError
+}
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders })
@@ -17,13 +59,13 @@ serve(async (req) => {
     if (!authHeader) throw new Error('No authorization header')
 
     const supabaseAdmin = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+      supabaseUrl,
+      serviceRoleKey
     )
 
     const supabaseUser = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_ANON_KEY') ?? ''
+      supabaseUrl,
+      anonKey
     )
 
     const token = authHeader.replace('Bearer ', '')
@@ -35,22 +77,69 @@ serve(async (req) => {
     if (!isAdmin) throw new Error('Only admins can create staff accounts')
 
     const { username, role } = await req.json()
-    if (!username || !role) throw new Error('Username and role are required')
+    const cleanUsername = String(username || '').trim()
+
+    if (!cleanUsername || !role) throw new Error('Username and role are required')
     if (!['coordinatie', 'bestuur'].includes(role)) throw new Error('Invalid role')
 
     // Generate temp password
     const tempPassword = crypto.randomUUID().slice(0, 12) + 'A1!'
 
-    const email = `${username}@hdrp.staff`
+    const email = `${cleanUsername.toLowerCase()}@hdrp.staff`
 
     // Check if user already exists
     const { data: existingProfile } = await supabaseAdmin
       .from('staff_profiles')
       .select('id')
-      .eq('username', username)
-      .single()
+      .eq('username', cleanUsername)
+      .maybeSingle()
 
-    if (existingProfile) throw new Error('Username already exists')
+    if (existingProfile) throw new Error('Gebruikersnaam bestaat al als staffaccount')
+
+    const existingAuthUser = await findAuthUserByEmail(email)
+
+    if (existingAuthUser) {
+      const userId = existingAuthUser.id
+
+      const { error: authUpdateError } = await supabaseAdmin.auth.admin.updateUserById(userId, {
+        password: tempPassword,
+        email_confirm: true,
+      })
+      if (authUpdateError) throw authUpdateError
+
+      const { data: existingUserProfile } = await supabaseAdmin
+        .from('staff_profiles')
+        .select('id')
+        .eq('user_id', userId)
+        .maybeSingle()
+
+      if (existingUserProfile) {
+        const { error: profileUpdateError } = await supabaseAdmin
+          .from('staff_profiles')
+          .update({ username: cleanUsername, must_change_password: true })
+          .eq('user_id', userId)
+
+        if (profileUpdateError) throw profileUpdateError
+      } else {
+        const { error: profileInsertError } = await supabaseAdmin
+          .from('staff_profiles')
+          .insert({ user_id: userId, username: cleanUsername, must_change_password: true })
+
+        if (profileInsertError) throw profileInsertError
+      }
+
+      await assignStaffRole(supabaseAdmin, userId, role)
+
+      return new Response(
+        JSON.stringify({
+          message: 'Staff account reactivated',
+          username: cleanUsername,
+          tempPassword,
+          role,
+        }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
 
     // Create auth user
     const { data: userData, error: createError } = await supabaseAdmin.auth.admin.createUser({
@@ -65,19 +154,16 @@ serve(async (req) => {
     // Create staff profile
     const { error: profileError } = await supabaseAdmin
       .from('staff_profiles')
-      .insert({ user_id: userId, username, must_change_password: true })
+      .insert({ user_id: userId, username: cleanUsername, must_change_password: true })
     if (profileError) throw profileError
 
     // Assign role
-    const { error: roleError } = await supabaseAdmin
-      .from('user_roles')
-      .insert({ user_id: userId, role })
-    if (roleError) throw roleError
+    await assignStaffRole(supabaseAdmin, userId, role)
 
     return new Response(
       JSON.stringify({ 
         message: 'Staff account created',
-        username,
+        username: cleanUsername,
         tempPassword,
         role,
       }),
