@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { format, startOfWeek, addDays, isToday, isSameDay } from "date-fns";
 import { nl } from "date-fns/locale";
 import { Plus, ChevronLeft, ChevronRight, Calendar, Clock, User as UserIcon, CheckCircle2, Circle, AlertCircle, FileText, X, ArrowRightLeft, Hand, Trash2 } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 interface StaffProfile {
   user_id: string;
@@ -41,11 +42,34 @@ interface TaskRequest {
   created_at: string;
 }
 
+interface HourEntry {
+  id: string;
+  user_id: string;
+  week_start: string;
+  hours: number;
+  notes: string | null;
+  submitted_at: string;
+}
+
+interface HourRow {
+  rowId: string;
+  userId: string;
+  hours: string;
+  afgemeld: boolean;
+}
+
 interface WeekPlanningProps {
   isBestuur: boolean;
   currentUserId: string;
   staffProfiles: StaffProfile[];
 }
+
+const createEmptyHourRow = (): HourRow => ({
+  rowId: crypto.randomUUID(),
+  userId: "",
+  hours: "",
+  afgemeld: false,
+});
 
 export const WeekPlanning = ({ isBestuur, currentUserId, staffProfiles }: WeekPlanningProps) => {
   const [weekStart, setWeekStart] = useState(() => startOfWeek(new Date(), { weekStartsOn: 1 }));
@@ -59,6 +83,11 @@ export const WeekPlanning = ({ isBestuur, currentUserId, staffProfiles }: WeekPl
   const [showRequestModal, setShowRequestModal] = useState(false);
   const [requestType, setRequestType] = useState("cannot_do");
   const [requestMessage, setRequestMessage] = useState("");
+  const [showHoursModal, setShowHoursModal] = useState(false);
+  const [hoursLoading, setHoursLoading] = useState(false);
+  const [hoursSubmitting, setHoursSubmitting] = useState(false);
+  const [hourRows, setHourRows] = useState<HourRow[]>([createEmptyHourRow()]);
+  const { toast } = useToast();
 
   // Add task form
   const [newTitle, setNewTitle] = useState("");
@@ -106,6 +135,26 @@ export const WeekPlanning = ({ isBestuur, currentUserId, staffProfiles }: WeekPl
       .eq('task_id', taskId)
       .order('created_at');
     setTaskUpdates((data as TaskUpdate[]) || []);
+  };
+
+  const isHoursTask = (task: Task | null) => Boolean(task && task.title.trim().toLowerCase().startsWith('staff uren'));
+
+  const canManageHoursTask = (task: Task | null) => Boolean(
+    task && isHoursTask(task) && (isBestuur || task.assigned_to === currentUserId)
+  );
+
+  const canClaimHoursTask = (task: Task | null) => Boolean(
+    task && isHoursTask(task) && !task.assigned_to && !isBestuur
+  );
+
+  const getTaskWeekStart = (task: Task) => format(
+    startOfWeek(new Date(`${task.scheduled_date}T00:00:00`), { weekStartsOn: 1 }),
+    'yyyy-MM-dd'
+  );
+
+  const closeHoursModal = () => {
+    setShowHoursModal(false);
+    setHourRows([createEmptyHourRow()]);
   };
 
   const handleAddTask = async () => {
@@ -184,6 +233,184 @@ export const WeekPlanning = ({ isBestuur, currentUserId, staffProfiles }: WeekPl
   const getUsername = (userId: string | null) => {
     if (!userId) return "Niet toegewezen";
     return staffProfiles.find(p => p.user_id === userId)?.username || "Onbekend";
+  };
+
+  const handleClaimHoursTask = async (task: Task) => {
+    const { error } = await supabase
+      .from('staff_tasks')
+      .update({ assigned_to: currentUserId })
+      .eq('id', task.id);
+
+    if (error) {
+      toast({
+        variant: 'destructive',
+        title: 'Fout',
+        description: error.message,
+      });
+      return;
+    }
+
+    const updatedTask = { ...task, assigned_to: currentUserId };
+    setTasks(prev => prev.map(item => item.id === task.id ? updatedTask : item));
+    setSelectedTask(updatedTask);
+    toast({
+      title: 'Taak toegewezen',
+      description: 'De taak staat nu op jouw naam.',
+    });
+  };
+
+  const openHoursEntry = async (task: Task) => {
+    setShowHoursModal(true);
+    setHoursLoading(true);
+
+    const weekStartValue = getTaskWeekStart(task);
+    const { data, error } = await supabase
+      .from('staff_hours')
+      .select('*')
+      .eq('week_start', weekStartValue)
+      .order('created_at');
+
+    if (error) {
+      setHoursLoading(false);
+      toast({
+        variant: 'destructive',
+        title: 'Fout',
+        description: error.message,
+      });
+      return;
+    }
+
+    const existingRows = ((data as HourEntry[]) || []).map((entry) => ({
+      rowId: entry.id,
+      userId: entry.user_id,
+      hours: String(entry.hours),
+      afgemeld: entry.notes === 'AFGEMELD',
+    }));
+
+    setHourRows(existingRows.length > 0 ? existingRows : [createEmptyHourRow()]);
+    setHoursLoading(false);
+  };
+
+  const addHourRow = () => {
+    setHourRows(prev => [...prev, createEmptyHourRow()]);
+  };
+
+  const updateHourRow = (rowId: string, field: 'userId' | 'hours' | 'afgemeld', value: string | boolean) => {
+    setHourRows(prev => prev.map((row) => {
+      if (row.rowId !== rowId) return row;
+
+      if (field === 'afgemeld') {
+        return {
+          ...row,
+          afgemeld: Boolean(value),
+          hours: value ? '0' : row.hours,
+        };
+      }
+
+      return {
+        ...row,
+        [field]: value,
+      };
+    }));
+  };
+
+  const removeHourRow = (rowId: string) => {
+    setHourRows(prev => prev.length === 1 ? [createEmptyHourRow()] : prev.filter(row => row.rowId !== rowId));
+  };
+
+  const handleHoursSubmit = async () => {
+    if (!selectedTask) return;
+
+    const filledRows = hourRows.filter(row => row.userId);
+    if (filledRows.length === 0) {
+      toast({
+        variant: 'destructive',
+        title: 'Geen medewerkers gekozen',
+        description: 'Voeg minimaal één medewerker toe voordat je opslaat.',
+      });
+      return;
+    }
+
+    const seenUsers = new Set<string>();
+    for (const row of filledRows) {
+      if (seenUsers.has(row.userId)) {
+        toast({
+          variant: 'destructive',
+          title: 'Dubbele naam gevonden',
+          description: `${getUsername(row.userId)} staat meer dan één keer in de lijst.`,
+        });
+        return;
+      }
+      seenUsers.add(row.userId);
+    }
+
+    setHoursSubmitting(true);
+
+    try {
+      const weekStartValue = getTaskWeekStart(selectedTask);
+      const { data: existingData, error: existingError } = await supabase
+        .from('staff_hours')
+        .select('*')
+        .eq('week_start', weekStartValue);
+
+      if (existingError) throw existingError;
+
+      const existingRows = (existingData as HourEntry[]) || [];
+
+      for (const row of filledRows) {
+        const parsedHours = row.afgemeld ? 0 : parseFloat(row.hours);
+
+        if (!row.afgemeld && Number.isNaN(parsedHours)) {
+          throw new Error(`Vul geldige uren in voor ${getUsername(row.userId)}.`);
+        }
+
+        const payload = {
+          hours: parsedHours,
+          notes: row.afgemeld ? 'AFGEMELD' : null,
+          submitted_at: new Date().toISOString(),
+        };
+
+        const existingEntry = existingRows.find(entry => entry.user_id === row.userId);
+
+        if (existingEntry) {
+          const { error } = await supabase
+            .from('staff_hours')
+            .update(payload)
+            .eq('id', existingEntry.id);
+
+          if (error) throw error;
+        } else {
+          const { error } = await supabase
+            .from('staff_hours')
+            .insert({
+              user_id: row.userId,
+              week_start: weekStartValue,
+              ...payload,
+            });
+
+          if (error) throw error;
+        }
+      }
+
+      toast({
+        title: 'Uren opgeslagen',
+        description: 'De urenlijst is bijgewerkt voor deze week.',
+      });
+
+      if (selectedTask.status === 'open') {
+        await handleStatusChange(selectedTask, 'in_progress');
+      }
+
+      closeHoursModal();
+    } catch (error: any) {
+      toast({
+        variant: 'destructive',
+        title: 'Opslaan mislukt',
+        description: error?.message || 'De uren konden niet worden opgeslagen.',
+      });
+    } finally {
+      setHoursSubmitting(false);
+    }
   };
 
   const getTasksForDay = (day: Date) => tasks.filter(t => isSameDay(new Date(t.scheduled_date + 'T00:00:00'), day));
@@ -371,6 +598,24 @@ export const WeekPlanning = ({ isBestuur, currentUserId, staffProfiles }: WeekPl
               </span>
             </div>
 
+            {canClaimHoursTask(selectedTask) && (
+              <button
+                onClick={() => handleClaimHoursTask(selectedTask)}
+                className="w-full mb-4 px-4 py-2 bg-[#1f2937] text-white rounded-lg text-sm font-medium hover:border-[#00ff88]/40 border border-[#374151] transition-colors"
+              >
+                Neem taak op mij
+              </button>
+            )}
+
+            {canManageHoursTask(selectedTask) && (
+              <button
+                onClick={() => openHoursEntry(selectedTask)}
+                className="w-full mb-4 px-4 py-2 bg-[#00ff88] text-[#0a0e1a] rounded-lg text-sm font-semibold transition-all hover:shadow-[0_0_20px_rgba(0,255,136,0.2)]"
+              >
+                {isBestuur && selectedTask.assigned_to !== currentUserId ? 'Uren bekijken' : 'Uren invoeren'}
+              </button>
+            )}
+
             {/* Status buttons */}
             {(isBestuur || selectedTask.assigned_to === currentUserId) && (
               <div className="flex gap-2 mb-4">
@@ -411,6 +656,109 @@ export const WeekPlanning = ({ isBestuur, currentUserId, staffProfiles }: WeekPl
                   <button onClick={handleAddUpdate} disabled={!updateMessage.trim()} className="px-4 py-2 bg-[#00ff88] text-[#0a0e1a] rounded-lg text-sm font-medium disabled:opacity-50 transition-all">Verstuur</button>
                 </div>
               )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showHoursModal && selectedTask && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[70] p-4">
+          <div className="bg-[#111827] border border-[#1f2937] rounded-2xl p-6 w-full max-w-3xl shadow-2xl max-h-[85vh] overflow-y-auto">
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <h3 className="text-lg font-bold text-white">Staff uren</h3>
+                <p className="text-sm text-[#6b7280]">
+                  Week {format(new Date(`${getTaskWeekStart(selectedTask)}T00:00:00`), 'w')} — {format(new Date(`${getTaskWeekStart(selectedTask)}T00:00:00`), 'd MMM', { locale: nl })} t/m {format(addDays(new Date(`${getTaskWeekStart(selectedTask)}T00:00:00`), 6), 'd MMM yyyy', { locale: nl })}
+                </p>
+              </div>
+              <button onClick={closeHoursModal} className="text-[#6b7280] hover:text-white"><X className="h-5 w-5" /></button>
+            </div>
+
+            <p className="text-sm text-[#9ca3af] mb-4">
+              Voeg per regel een medewerker toe met het aantal uren, of zet iemand op afgemeld.
+            </p>
+
+            {hoursLoading ? (
+              <div className="flex justify-center py-12">
+                <div className="w-6 h-6 border-2 border-[#00ff88] border-t-transparent rounded-full animate-spin" />
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {hourRows.map((row, index) => (
+                  <div key={row.rowId} className="grid grid-cols-1 md:grid-cols-[1.5fr_0.7fr_auto_auto] gap-3 items-end bg-[#0a0e1a] border border-[#1f2937] rounded-xl p-4">
+                    <div>
+                      <label className="text-xs text-[#6b7280] mb-1 block">Naam {index + 1}</label>
+                      <select
+                        value={row.userId}
+                        onChange={e => updateHourRow(row.rowId, 'userId', e.target.value)}
+                        className="w-full bg-[#1f2937] border border-[#374151] rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-[#00ff88]/50"
+                      >
+                        <option value="">Kies stafflid</option>
+                        {staffProfiles.map((profile) => {
+                          const alreadySelected = hourRows.some(other => other.rowId !== row.rowId && other.userId === profile.user_id);
+                          return (
+                            <option key={profile.user_id} value={profile.user_id} disabled={alreadySelected}>
+                              {profile.username}
+                            </option>
+                          );
+                        })}
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="text-xs text-[#6b7280] mb-1 block">Uren</label>
+                      <input
+                        type="number"
+                        min="0"
+                        step="0.5"
+                        value={row.hours}
+                        onChange={e => updateHourRow(row.rowId, 'hours', e.target.value)}
+                        disabled={row.afgemeld}
+                        placeholder="0"
+                        className="w-full bg-[#1f2937] border border-[#374151] rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-[#00ff88]/50 disabled:opacity-40"
+                      />
+                    </div>
+
+                    <button
+                      onClick={() => updateHourRow(row.rowId, 'afgemeld', !row.afgemeld)}
+                      className={`h-11 px-4 rounded-lg border text-sm font-medium transition-colors ${
+                        row.afgemeld
+                          ? 'border-red-500/30 bg-red-500/10 text-red-400'
+                          : 'border-[#374151] bg-[#1f2937] text-[#9ca3af] hover:text-white'
+                      }`}
+                    >
+                      {row.afgemeld ? 'Afgemeld' : 'Actief'}
+                    </button>
+
+                    <button
+                      onClick={() => removeHourRow(row.rowId)}
+                      className="h-11 w-11 rounded-lg border border-[#374151] bg-[#1f2937] text-[#6b7280] hover:text-red-400 transition-colors flex items-center justify-center"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  </div>
+                ))}
+
+                <button
+                  onClick={addHourRow}
+                  className="w-full border border-dashed border-[#374151] rounded-xl py-3 text-sm font-medium text-[#00ff88] hover:border-[#00ff88]/40 hover:bg-[#00ff88]/5 transition-colors flex items-center justify-center gap-2"
+                >
+                  <Plus className="h-4 w-4" /> Persoon toevoegen
+                </button>
+              </div>
+            )}
+
+            <div className="flex justify-end gap-2 mt-6">
+              <button onClick={closeHoursModal} className="px-4 py-2 text-sm text-[#9ca3af] hover:text-white transition-colors">
+                Sluiten
+              </button>
+              <button
+                onClick={handleHoursSubmit}
+                disabled={hoursSubmitting || hoursLoading}
+                className="px-5 py-2.5 bg-[#00ff88] text-[#0a0e1a] rounded-lg text-sm font-semibold disabled:opacity-50 transition-all"
+              >
+                {hoursSubmitting ? 'Opslaan...' : 'Uren opslaan'}
+              </button>
             </div>
           </div>
         </div>

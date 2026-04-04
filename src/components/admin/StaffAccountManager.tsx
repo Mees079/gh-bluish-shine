@@ -38,6 +38,21 @@ const getRoleMeta = (role?: string) => {
   };
 };
 
+const getCreateAccountErrorMessage = async (error: any) => {
+  if (error?.context && typeof error.context.json === "function") {
+    try {
+      const response = await error.context.json();
+      if (response?.error) {
+        return response.error;
+      }
+    } catch {
+      // Fall back to the generic message below.
+    }
+  }
+
+  return error?.message || "Account aanmaken mislukt";
+};
+
 export const StaffAccountManager = () => {
   const [username, setUsername] = useState("");
   const [role, setRole] = useState<"coordinatie" | "bestuur">("coordinatie");
@@ -117,10 +132,11 @@ export const StaffAccountManager = () => {
         description: `${data.username} is aangemaakt als ${requestedRole === "bestuur" ? "Bestuur" : "Staff Coördinatie"}.`,
       });
     } catch (err: any) {
+      const message = await getCreateAccountErrorMessage(err);
       toast({
         variant: "destructive",
         title: "Fout",
-        description: err.message || "Account aanmaken mislukt",
+        description: message,
       });
     } finally {
       setLoading(false);
