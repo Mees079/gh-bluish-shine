@@ -635,7 +635,9 @@ export type Database = {
           hours: number
           id: string
           notes: string | null
+          person_name: string | null
           submitted_at: string
+          submitted_by: string | null
           user_id: string
           week_start: string
         }
@@ -644,7 +646,9 @@ export type Database = {
           hours?: number
           id?: string
           notes?: string | null
+          person_name?: string | null
           submitted_at?: string
+          submitted_by?: string | null
           user_id: string
           week_start: string
         }
@@ -653,7 +657,9 @@ export type Database = {
           hours?: number
           id?: string
           notes?: string | null
+          person_name?: string | null
           submitted_at?: string
+          submitted_by?: string | null
           user_id?: string
           week_start?: string
         }
