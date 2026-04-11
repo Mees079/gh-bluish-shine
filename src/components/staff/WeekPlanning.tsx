@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { format, startOfWeek, addDays, isToday, isSameDay } from "date-fns";
 import { nl } from "date-fns/locale";
-import { Plus, ChevronLeft, ChevronRight, Calendar, Clock, User as UserIcon, CheckCircle2, Circle, AlertCircle, FileText, X, ArrowRightLeft, Hand, Trash2 } from "lucide-react";
+import { Plus, ChevronLeft, ChevronRight, Calendar, Clock, User as UserIcon, CheckCircle2, Circle, FileText, X, ArrowRightLeft, Hand, Trash2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 interface StaffProfile {
@@ -42,18 +42,9 @@ interface TaskRequest {
   created_at: string;
 }
 
-interface HourEntry {
-  id: string;
-  user_id: string;
-  week_start: string;
-  hours: number;
-  notes: string | null;
-  submitted_at: string;
-}
-
 interface HourRow {
   rowId: string;
-  userId: string;
+  personName: string;
   hours: string;
   afgemeld: boolean;
 }
@@ -66,7 +57,7 @@ interface WeekPlanningProps {
 
 const createEmptyHourRow = (): HourRow => ({
   rowId: crypto.randomUUID(),
-  userId: "",
+  personName: "",
   hours: "",
   afgemeld: false,
 });
@@ -87,15 +78,13 @@ export const WeekPlanning = ({ isBestuur, currentUserId, staffProfiles }: WeekPl
   const [hoursLoading, setHoursLoading] = useState(false);
   const [hoursSubmitting, setHoursSubmitting] = useState(false);
   const [hourRows, setHourRows] = useState<HourRow[]>([createEmptyHourRow()]);
+  const [hoursViewOnly, setHoursViewOnly] = useState(false);
   const { toast } = useToast();
 
-  // Add task form
   const [newTitle, setNewTitle] = useState("");
   const [newDescription, setNewDescription] = useState("");
   const [newAssignedTo, setNewAssignedTo] = useState("");
   const [newPriority, setNewPriority] = useState("normal");
-
-  // Task update form
   const [updateMessage, setUpdateMessage] = useState("");
 
   const days = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i));
@@ -137,15 +126,7 @@ export const WeekPlanning = ({ isBestuur, currentUserId, staffProfiles }: WeekPl
     setTaskUpdates((data as TaskUpdate[]) || []);
   };
 
-  const isHoursTask = (task: Task | null) => Boolean(task && task.title.trim().toLowerCase().startsWith('staff uren'));
-
-  const canManageHoursTask = (task: Task | null) => Boolean(
-    task && isHoursTask(task) && (isBestuur || task.assigned_to === currentUserId)
-  );
-
-  const canClaimHoursTask = (task: Task | null) => Boolean(
-    task && isHoursTask(task) && !task.assigned_to && !isBestuur
-  );
+  const isHoursTask = (task: Task | null) => Boolean(task && task.title.trim().toLowerCase().startsWith('week uren'));
 
   const getTaskWeekStart = (task: Task) => format(
     startOfWeek(new Date(`${task.scheduled_date}T00:00:00`), { weekStartsOn: 1 }),
@@ -155,6 +136,23 @@ export const WeekPlanning = ({ isBestuur, currentUserId, staffProfiles }: WeekPl
   const closeHoursModal = () => {
     setShowHoursModal(false);
     setHourRows([createEmptyHourRow()]);
+    setHoursViewOnly(false);
+  };
+
+  const handleAddWeekUren = async (day: Date) => {
+    await supabase.from('staff_tasks').insert({
+      title: 'Week uren',
+      description: 'Vul de uren in van alle medewerkers voor deze week.',
+      scheduled_date: format(day, 'yyyy-MM-dd'),
+      assigned_to: newAssignedTo || null,
+      created_by: currentUserId,
+      priority: 'normal',
+    });
+    setNewAssignedTo("");
+    setShowAddTask(false);
+    setAddDate(null);
+    loadTasks();
+    toast({ title: 'Week uren taak aangemaakt' });
   };
 
   const handleAddTask = async () => {
@@ -217,9 +215,7 @@ export const WeekPlanning = ({ isBestuur, currentUserId, staffProfiles }: WeekPl
   };
 
   const handleTakeOverTask = async (request: TaskRequest) => {
-    // Update the request
     await supabase.from('staff_task_requests').update({ taken_by: currentUserId, status: 'taken' }).eq('id', request.id);
-    // Reassign the task
     await supabase.from('staff_tasks').update({ assigned_to: currentUserId }).eq('id', request.task_id);
     loadTasks();
     loadTaskRequests();
@@ -235,33 +231,22 @@ export const WeekPlanning = ({ isBestuur, currentUserId, staffProfiles }: WeekPl
     return staffProfiles.find(p => p.user_id === userId)?.username || "Onbekend";
   };
 
-  const handleClaimHoursTask = async (task: Task) => {
-    const { error } = await supabase
-      .from('staff_tasks')
-      .update({ assigned_to: currentUserId })
-      .eq('id', task.id);
-
+  const handleClaimTask = async (task: Task) => {
+    const { error } = await supabase.from('staff_tasks').update({ assigned_to: currentUserId }).eq('id', task.id);
     if (error) {
-      toast({
-        variant: 'destructive',
-        title: 'Fout',
-        description: error.message,
-      });
+      toast({ variant: 'destructive', title: 'Fout', description: error.message });
       return;
     }
-
     const updatedTask = { ...task, assigned_to: currentUserId };
     setTasks(prev => prev.map(item => item.id === task.id ? updatedTask : item));
     setSelectedTask(updatedTask);
-    toast({
-      title: 'Taak toegewezen',
-      description: 'De taak staat nu op jouw naam.',
-    });
+    toast({ title: 'Taak toegewezen', description: 'De taak staat nu op jouw naam.' });
   };
 
-  const openHoursEntry = async (task: Task) => {
+  const openHoursEntry = async (task: Task, viewOnly = false) => {
     setShowHoursModal(true);
     setHoursLoading(true);
+    setHoursViewOnly(viewOnly);
 
     const weekStartValue = getTaskWeekStart(task);
     const { data, error } = await supabase
@@ -272,17 +257,13 @@ export const WeekPlanning = ({ isBestuur, currentUserId, staffProfiles }: WeekPl
 
     if (error) {
       setHoursLoading(false);
-      toast({
-        variant: 'destructive',
-        title: 'Fout',
-        description: error.message,
-      });
+      toast({ variant: 'destructive', title: 'Fout', description: error.message });
       return;
     }
 
-    const existingRows = ((data as HourEntry[]) || []).map((entry) => ({
+    const existingRows = (data || []).map((entry: any) => ({
       rowId: entry.id,
-      userId: entry.user_id,
+      personName: entry.person_name || '',
       hours: String(entry.hours),
       afgemeld: entry.notes === 'AFGEMELD',
     }));
@@ -295,22 +276,13 @@ export const WeekPlanning = ({ isBestuur, currentUserId, staffProfiles }: WeekPl
     setHourRows(prev => [...prev, createEmptyHourRow()]);
   };
 
-  const updateHourRow = (rowId: string, field: 'userId' | 'hours' | 'afgemeld', value: string | boolean) => {
+  const updateHourRow = (rowId: string, field: 'personName' | 'hours' | 'afgemeld', value: string | boolean) => {
     setHourRows(prev => prev.map((row) => {
       if (row.rowId !== rowId) return row;
-
       if (field === 'afgemeld') {
-        return {
-          ...row,
-          afgemeld: Boolean(value),
-          hours: value ? '0' : row.hours,
-        };
+        return { ...row, afgemeld: Boolean(value), hours: value ? '0' : row.hours };
       }
-
-      return {
-        ...row,
-        [field]: value,
-      };
+      return { ...row, [field]: value };
     }));
   };
 
@@ -321,81 +293,33 @@ export const WeekPlanning = ({ isBestuur, currentUserId, staffProfiles }: WeekPl
   const handleHoursSubmit = async () => {
     if (!selectedTask) return;
 
-    const filledRows = hourRows.filter(row => row.userId);
+    const filledRows = hourRows.filter(row => row.personName.trim());
     if (filledRows.length === 0) {
-      toast({
-        variant: 'destructive',
-        title: 'Geen medewerkers gekozen',
-        description: 'Voeg minimaal één medewerker toe voordat je opslaat.',
-      });
+      toast({ variant: 'destructive', title: 'Geen namen ingevuld', description: 'Voeg minimaal één persoon toe.' });
       return;
-    }
-
-    const seenUsers = new Set<string>();
-    for (const row of filledRows) {
-      if (seenUsers.has(row.userId)) {
-        toast({
-          variant: 'destructive',
-          title: 'Dubbele naam gevonden',
-          description: `${getUsername(row.userId)} staat meer dan één keer in de lijst.`,
-        });
-        return;
-      }
-      seenUsers.add(row.userId);
     }
 
     setHoursSubmitting(true);
 
     try {
       const weekStartValue = getTaskWeekStart(selectedTask);
-      const { data: existingData, error: existingError } = await supabase
-        .from('staff_hours')
-        .select('*')
-        .eq('week_start', weekStartValue);
 
-      if (existingError) throw existingError;
+      // Delete existing entries for this week, then re-insert all
+      await supabase.from('staff_hours').delete().eq('week_start', weekStartValue);
 
-      const existingRows = (existingData as HourEntry[]) || [];
+      const inserts = filledRows.map(row => ({
+        user_id: currentUserId,
+        submitted_by: currentUserId,
+        person_name: row.personName.trim(),
+        week_start: weekStartValue,
+        hours: row.afgemeld ? 0 : (parseFloat(row.hours) || 0),
+        notes: row.afgemeld ? 'AFGEMELD' : null,
+      }));
 
-      for (const row of filledRows) {
-        const parsedHours = row.afgemeld ? 0 : parseFloat(row.hours);
+      const { error } = await supabase.from('staff_hours').insert(inserts);
+      if (error) throw error;
 
-        if (!row.afgemeld && Number.isNaN(parsedHours)) {
-          throw new Error(`Vul geldige uren in voor ${getUsername(row.userId)}.`);
-        }
-
-        const payload = {
-          hours: parsedHours,
-          notes: row.afgemeld ? 'AFGEMELD' : null,
-          submitted_at: new Date().toISOString(),
-        };
-
-        const existingEntry = existingRows.find(entry => entry.user_id === row.userId);
-
-        if (existingEntry) {
-          const { error } = await supabase
-            .from('staff_hours')
-            .update(payload)
-            .eq('id', existingEntry.id);
-
-          if (error) throw error;
-        } else {
-          const { error } = await supabase
-            .from('staff_hours')
-            .insert({
-              user_id: row.userId,
-              week_start: weekStartValue,
-              ...payload,
-            });
-
-          if (error) throw error;
-        }
-      }
-
-      toast({
-        title: 'Uren opgeslagen',
-        description: 'De urenlijst is bijgewerkt voor deze week.',
-      });
+      toast({ title: 'Uren opgeslagen', description: 'De urenlijst is bijgewerkt.' });
 
       if (selectedTask.status === 'open') {
         await handleStatusChange(selectedTask, 'in_progress');
@@ -403,11 +327,7 @@ export const WeekPlanning = ({ isBestuur, currentUserId, staffProfiles }: WeekPl
 
       closeHoursModal();
     } catch (error: any) {
-      toast({
-        variant: 'destructive',
-        title: 'Opslaan mislukt',
-        description: error?.message || 'De uren konden niet worden opgeslagen.',
-      });
+      toast({ variant: 'destructive', title: 'Opslaan mislukt', description: error?.message || 'Kon niet opslaan.' });
     } finally {
       setHoursSubmitting(false);
     }
@@ -432,8 +352,15 @@ export const WeekPlanning = ({ isBestuur, currentUserId, staffProfiles }: WeekPl
     }
   };
 
-  // Open task requests for current tasks
   const relevantRequests = taskRequests.filter(r => tasks.some(t => t.id === r.task_id));
+
+  // Determine who can enter hours for this task
+  const canEnterHours = (task: Task | null) => Boolean(
+    task && isHoursTask(task) && task.assigned_to === currentUserId
+  );
+
+  // Everyone can view hours
+  const canViewHours = (task: Task | null) => Boolean(task && isHoursTask(task));
 
   return (
     <div className="space-y-6">
@@ -456,10 +383,7 @@ export const WeekPlanning = ({ isBestuur, currentUserId, staffProfiles }: WeekPl
                     </p>
                   </div>
                   {r.requested_by !== currentUserId && (
-                    <button
-                      onClick={() => handleTakeOverTask(r)}
-                      className="px-3 py-1.5 bg-[#00ff88]/10 text-[#00ff88] rounded-lg text-xs font-medium hover:bg-[#00ff88]/20 transition-colors flex items-center gap-1"
-                    >
+                    <button onClick={() => handleTakeOverTask(r)} className="px-3 py-1.5 bg-[#00ff88]/10 text-[#00ff88] rounded-lg text-xs font-medium hover:bg-[#00ff88]/20 transition-colors flex items-center gap-1">
                       <Hand className="h-3 w-3" /> Overnemen
                     </button>
                   )}
@@ -535,9 +459,35 @@ export const WeekPlanning = ({ isBestuur, currentUserId, staffProfiles }: WeekPl
           <div className="bg-[#111827] border border-[#1f2937] rounded-2xl p-6 w-full max-w-md shadow-2xl">
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-lg font-bold text-white">Taak Toevoegen</h3>
-              <button onClick={() => { setShowAddTask(false); setAddDate(null); }} className="text-[#6b7280] hover:text-white"><X className="h-5 w-5" /></button>
+              <button onClick={() => { setShowAddTask(false); setAddDate(null); setNewTitle(""); setNewDescription(""); setNewAssignedTo(""); setNewPriority("normal"); }} className="text-[#6b7280] hover:text-white"><X className="h-5 w-5" /></button>
             </div>
             <p className="text-sm text-[#00ff88] mb-4">{format(addDate, 'EEEE d MMMM yyyy', { locale: nl })}</p>
+
+            {/* Quick action: Week uren */}
+            <div className="mb-4 p-3 bg-[#00ff88]/5 border border-[#00ff88]/20 rounded-xl">
+              <p className="text-sm font-medium text-[#00ff88] mb-2 flex items-center gap-2"><Clock className="h-4 w-4" /> Snelactie</p>
+              <div className="flex gap-2 items-end">
+                <div className="flex-1">
+                  <label className="text-xs text-[#6b7280] mb-1 block">Toewijzen aan</label>
+                  <select value={newAssignedTo} onChange={e => setNewAssignedTo(e.target.value)} className="w-full bg-[#1f2937] border border-[#374151] rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-[#00ff88]/50">
+                    <option value="">Kies stafflid</option>
+                    {staffProfiles.map(sp => (
+                      <option key={sp.user_id} value={sp.user_id}>{sp.username}</option>
+                    ))}
+                  </select>
+                </div>
+                <button onClick={() => handleAddWeekUren(addDate)} className="px-4 py-2 bg-[#00ff88] text-[#0a0e1a] rounded-lg text-sm font-semibold whitespace-nowrap">
+                  + Week uren
+                </button>
+              </div>
+            </div>
+
+            <div className="relative flex items-center gap-2 mb-4">
+              <div className="flex-1 h-px bg-[#1f2937]" />
+              <span className="text-xs text-[#4b5563]">of maak een gewone taak</span>
+              <div className="flex-1 h-px bg-[#1f2937]" />
+            </div>
+
             <div className="space-y-4">
               <div>
                 <label className="text-[#9ca3af] text-sm mb-1 block">Titel *</label>
@@ -598,21 +548,24 @@ export const WeekPlanning = ({ isBestuur, currentUserId, staffProfiles }: WeekPl
               </span>
             </div>
 
-            {canClaimHoursTask(selectedTask) && (
-              <button
-                onClick={() => handleClaimHoursTask(selectedTask)}
-                className="w-full mb-4 px-4 py-2 bg-[#1f2937] text-white rounded-lg text-sm font-medium hover:border-[#00ff88]/40 border border-[#374151] transition-colors"
-              >
+            {/* Hours task: claim if unassigned and not bestuur */}
+            {isHoursTask(selectedTask) && !selectedTask.assigned_to && !isBestuur && (
+              <button onClick={() => handleClaimTask(selectedTask)} className="w-full mb-4 px-4 py-2 bg-[#1f2937] text-white rounded-lg text-sm font-medium hover:border-[#00ff88]/40 border border-[#374151] transition-colors">
                 Neem taak op mij
               </button>
             )}
 
-            {canManageHoursTask(selectedTask) && (
-              <button
-                onClick={() => openHoursEntry(selectedTask)}
-                className="w-full mb-4 px-4 py-2 bg-[#00ff88] text-[#0a0e1a] rounded-lg text-sm font-semibold transition-all hover:shadow-[0_0_20px_rgba(0,255,136,0.2)]"
-              >
-                {isBestuur && selectedTask.assigned_to !== currentUserId ? 'Uren bekijken' : 'Uren invoeren'}
+            {/* Hours task: enter hours (only assigned person) */}
+            {canEnterHours(selectedTask) && (
+              <button onClick={() => openHoursEntry(selectedTask, false)} className="w-full mb-4 px-4 py-2 bg-[#00ff88] text-[#0a0e1a] rounded-lg text-sm font-semibold transition-all hover:shadow-[0_0_20px_rgba(0,255,136,0.2)]">
+                Uren invullen
+              </button>
+            )}
+
+            {/* Hours task: view hours (everyone except the one who can edit) */}
+            {canViewHours(selectedTask) && !canEnterHours(selectedTask) && (
+              <button onClick={() => openHoursEntry(selectedTask, true)} className="w-full mb-4 px-4 py-2 bg-[#1f2937] text-white rounded-lg text-sm font-medium border border-[#374151] hover:border-[#00ff88]/40 transition-colors">
+                Uren bekijken
               </button>
             )}
 
@@ -627,7 +580,7 @@ export const WeekPlanning = ({ isBestuur, currentUserId, staffProfiles }: WeekPl
               </div>
             )}
 
-            {/* Request transfer button (for coordinatie) */}
+            {/* Request transfer */}
             {selectedTask.assigned_to === currentUserId && selectedTask.status !== 'done' && (
               <button onClick={() => setShowRequestModal(true)} className="w-full mb-4 px-4 py-2 bg-amber-500/10 text-amber-400 rounded-lg text-xs font-medium hover:bg-amber-500/20 transition-colors flex items-center justify-center gap-2">
                 <ArrowRightLeft className="h-3.5 w-3.5" /> Kan niet / overdragen
@@ -661,12 +614,13 @@ export const WeekPlanning = ({ isBestuur, currentUserId, staffProfiles }: WeekPl
         </div>
       )}
 
+      {/* Hours Entry/View Modal */}
       {showHoursModal && selectedTask && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[70] p-4">
-          <div className="bg-[#111827] border border-[#1f2937] rounded-2xl p-6 w-full max-w-3xl shadow-2xl max-h-[85vh] overflow-y-auto">
+          <div className="bg-[#111827] border border-[#1f2937] rounded-2xl p-6 w-full max-w-2xl shadow-2xl max-h-[85vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-4">
               <div>
-                <h3 className="text-lg font-bold text-white">Staff uren</h3>
+                <h3 className="text-lg font-bold text-white">{hoursViewOnly ? 'Uren overzicht' : 'Uren invullen'}</h3>
                 <p className="text-sm text-[#6b7280]">
                   Week {format(new Date(`${getTaskWeekStart(selectedTask)}T00:00:00`), 'w')} — {format(new Date(`${getTaskWeekStart(selectedTask)}T00:00:00`), 'd MMM', { locale: nl })} t/m {format(addDays(new Date(`${getTaskWeekStart(selectedTask)}T00:00:00`), 6), 'd MMM yyyy', { locale: nl })}
                 </p>
@@ -674,54 +628,68 @@ export const WeekPlanning = ({ isBestuur, currentUserId, staffProfiles }: WeekPl
               <button onClick={closeHoursModal} className="text-[#6b7280] hover:text-white"><X className="h-5 w-5" /></button>
             </div>
 
-            <p className="text-sm text-[#9ca3af] mb-4">
-              Voeg per regel een medewerker toe met het aantal uren, of zet iemand op afgemeld.
-            </p>
-
             {hoursLoading ? (
               <div className="flex justify-center py-12">
                 <div className="w-6 h-6 border-2 border-[#00ff88] border-t-transparent rounded-full animate-spin" />
               </div>
+            ) : hoursViewOnly ? (
+              /* View-only mode */
+              <div className="space-y-2">
+                {hourRows.length === 0 || (hourRows.length === 1 && !hourRows[0].personName) ? (
+                  <p className="text-sm text-[#374151] text-center py-8">Nog geen uren ingevuld voor deze week.</p>
+                ) : (
+                  <>
+                    <div className="grid grid-cols-[1fr_80px_80px] gap-2 px-3 py-2 text-xs font-medium text-[#6b7280] uppercase tracking-wider">
+                      <span>Naam</span>
+                      <span className="text-center">Uren</span>
+                      <span className="text-center">Status</span>
+                    </div>
+                    {hourRows.filter(r => r.personName).map(row => (
+                      <div key={row.rowId} className="grid grid-cols-[1fr_80px_80px] gap-2 items-center bg-[#0a0e1a] border border-[#1f2937] rounded-lg px-3 py-3">
+                        <span className="text-sm text-white font-medium">{row.personName}</span>
+                        <span className={`text-sm text-center ${row.afgemeld ? 'text-[#374151]' : 'text-white'}`}>{row.afgemeld ? '-' : row.hours}</span>
+                        <span className={`text-xs text-center px-2 py-1 rounded ${row.afgemeld ? 'bg-red-500/10 text-red-400' : 'bg-[#00ff88]/10 text-[#00ff88]'}`}>
+                          {row.afgemeld ? 'Afgemeld' : 'Actief'}
+                        </span>
+                      </div>
+                    ))}
+                    <div className="flex justify-between items-center bg-[#1f2937] rounded-lg px-3 py-3 mt-2">
+                      <span className="text-sm font-medium text-[#9ca3af]">Totaal uren</span>
+                      <span className="text-sm font-bold text-[#00ff88]">
+                        {hourRows.filter(r => !r.afgemeld && r.personName).reduce((sum, r) => sum + (parseFloat(r.hours) || 0), 0)}
+                      </span>
+                    </div>
+                  </>
+                )}
+              </div>
             ) : (
+              /* Edit mode */
               <div className="space-y-3">
+                <p className="text-sm text-[#9ca3af] mb-2">
+                  Vul per persoon de naam in, het aantal uren, en of diegene afgemeld is.
+                </p>
                 {hourRows.map((row, index) => (
-                  <div key={row.rowId} className="grid grid-cols-1 md:grid-cols-[1.5fr_0.7fr_auto_auto] gap-3 items-end bg-[#0a0e1a] border border-[#1f2937] rounded-xl p-4">
-                    <div>
-                      <label className="text-xs text-[#6b7280] mb-1 block">Naam {index + 1}</label>
-                      <select
-                        value={row.userId}
-                        onChange={e => updateHourRow(row.rowId, 'userId', e.target.value)}
-                        className="w-full bg-[#1f2937] border border-[#374151] rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-[#00ff88]/50"
-                      >
-                        <option value="">Kies stafflid</option>
-                        {staffProfiles.map((profile) => {
-                          const alreadySelected = hourRows.some(other => other.rowId !== row.rowId && other.userId === profile.user_id);
-                          return (
-                            <option key={profile.user_id} value={profile.user_id} disabled={alreadySelected}>
-                              {profile.username}
-                            </option>
-                          );
-                        })}
-                      </select>
-                    </div>
-
-                    <div>
-                      <label className="text-xs text-[#6b7280] mb-1 block">Uren</label>
-                      <input
-                        type="number"
-                        min="0"
-                        step="0.5"
-                        value={row.hours}
-                        onChange={e => updateHourRow(row.rowId, 'hours', e.target.value)}
-                        disabled={row.afgemeld}
-                        placeholder="0"
-                        className="w-full bg-[#1f2937] border border-[#374151] rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-[#00ff88]/50 disabled:opacity-40"
-                      />
-                    </div>
-
+                  <div key={row.rowId} className="grid grid-cols-[1fr_80px_auto_auto] gap-2 items-center bg-[#0a0e1a] border border-[#1f2937] rounded-xl p-3">
+                    <input
+                      type="text"
+                      value={row.personName}
+                      onChange={e => updateHourRow(row.rowId, 'personName', e.target.value)}
+                      placeholder={`Naam ${index + 1}`}
+                      className="bg-[#1f2937] border border-[#374151] rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-[#00ff88]/50"
+                    />
+                    <input
+                      type="number"
+                      min="0"
+                      step="0.5"
+                      value={row.hours}
+                      onChange={e => updateHourRow(row.rowId, 'hours', e.target.value)}
+                      disabled={row.afgemeld}
+                      placeholder="0"
+                      className="bg-[#1f2937] border border-[#374151] rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-[#00ff88]/50 disabled:opacity-40 text-center"
+                    />
                     <button
                       onClick={() => updateHourRow(row.rowId, 'afgemeld', !row.afgemeld)}
-                      className={`h-11 px-4 rounded-lg border text-sm font-medium transition-colors ${
+                      className={`h-9 px-3 rounded-lg border text-xs font-medium transition-colors whitespace-nowrap ${
                         row.afgemeld
                           ? 'border-red-500/30 bg-red-500/10 text-red-400'
                           : 'border-[#374151] bg-[#1f2937] text-[#9ca3af] hover:text-white'
@@ -729,12 +697,11 @@ export const WeekPlanning = ({ isBestuur, currentUserId, staffProfiles }: WeekPl
                     >
                       {row.afgemeld ? 'Afgemeld' : 'Actief'}
                     </button>
-
                     <button
                       onClick={() => removeHourRow(row.rowId)}
-                      className="h-11 w-11 rounded-lg border border-[#374151] bg-[#1f2937] text-[#6b7280] hover:text-red-400 transition-colors flex items-center justify-center"
+                      className="h-9 w-9 rounded-lg border border-[#374151] bg-[#1f2937] text-[#6b7280] hover:text-red-400 transition-colors flex items-center justify-center"
                     >
-                      <Trash2 className="h-4 w-4" />
+                      <Trash2 className="h-3.5 w-3.5" />
                     </button>
                   </div>
                 ))}
@@ -748,18 +715,18 @@ export const WeekPlanning = ({ isBestuur, currentUserId, staffProfiles }: WeekPl
               </div>
             )}
 
-            <div className="flex justify-end gap-2 mt-6">
-              <button onClick={closeHoursModal} className="px-4 py-2 text-sm text-[#9ca3af] hover:text-white transition-colors">
-                Sluiten
-              </button>
-              <button
-                onClick={handleHoursSubmit}
-                disabled={hoursSubmitting || hoursLoading}
-                className="px-5 py-2.5 bg-[#00ff88] text-[#0a0e1a] rounded-lg text-sm font-semibold disabled:opacity-50 transition-all"
-              >
-                {hoursSubmitting ? 'Opslaan...' : 'Uren opslaan'}
-              </button>
-            </div>
+            {!hoursViewOnly && (
+              <div className="flex justify-end gap-2 mt-6">
+                <button onClick={closeHoursModal} className="px-4 py-2 text-sm text-[#9ca3af] hover:text-white transition-colors">Sluiten</button>
+                <button
+                  onClick={handleHoursSubmit}
+                  disabled={hoursSubmitting || hoursLoading}
+                  className="px-5 py-2.5 bg-[#00ff88] text-[#0a0e1a] rounded-lg text-sm font-semibold disabled:opacity-50 transition-all"
+                >
+                  {hoursSubmitting ? 'Opslaan...' : 'Uren opslaan'}
+                </button>
+              </div>
+            )}
           </div>
         </div>
       )}
