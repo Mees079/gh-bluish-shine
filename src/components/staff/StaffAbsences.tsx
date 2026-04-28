@@ -274,7 +274,7 @@ export const StaffAbsences = ({ isBestuur, currentUserId, staffProfiles }: Props
                     {getCleanReason(a) && <p className="text-xs text-[#6b7280] mt-0.5">{getCleanReason(a)}</p>}
                   </div>
                   <span className="text-xs text-[#4b5563]">
-                    {format(parseISO(a.start_date), 'd MMM', { locale: nl })} – {format(parseISO(a.end_date), 'd MMM yyyy', { locale: nl })}
+                    {fmt(a.start_date, 'd MMM')} – {fmt(a.end_date, 'd MMM yyyy')}
                   </span>
                 </div>
               </div>
