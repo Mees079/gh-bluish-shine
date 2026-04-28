@@ -214,7 +214,7 @@ export const StaffAbsences = ({ isBestuur, currentUserId, staffProfiles }: Props
           </h3>
           <div className="space-y-2">
             {activeAbsences.map(a => {
-              const absStart = parseISO(a.start_date);
+              const absStart = a.start_date ? parseISO(a.start_date) : parseISO(a.end_date);
               const absEnd = parseISO(a.end_date);
               const requiredHours = calculateRequiredHours(absStart, absEnd);
               const cleanReason = getCleanReason(a);
