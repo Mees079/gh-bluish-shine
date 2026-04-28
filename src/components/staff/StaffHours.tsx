@@ -1,8 +1,20 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { format, startOfWeek, addDays } from "date-fns";
+import { format, startOfWeek, addDays, parseISO, max as dateMax, min as dateMin, endOfWeek, differenceInCalendarDays } from "date-fns";
 import { nl } from "date-fns/locale";
-import { Clock, ChevronLeft, ChevronRight, Calendar } from "lucide-react";
+import { Clock, ChevronLeft, ChevronRight, Calendar, AlertTriangle, TrendingUp, Check } from "lucide-react";
+
+const MINUTES_PER_DAY = 45;
+const DEFAULT_REQUIRED = (7 * MINUTES_PER_DAY) / 60;
+
+interface AbsenceRecord {
+  id: string;
+  user_id: string;
+  reason: string | null;
+  start_date: string;
+  end_date: string;
+  active: boolean;
+}
 
 interface StaffProfile {
   user_id: string;
