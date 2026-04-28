@@ -106,6 +106,7 @@ export const WeekPlanning = ({ isBestuur, currentUserId, staffProfiles }: WeekPl
   const [hoursSubmitting, setHoursSubmitting] = useState(false);
   const [hourRows, setHourRows] = useState<HourRow[]>([createEmptyHourRow()]);
   const [hoursViewOnly, setHoursViewOnly] = useState(false);
+  const [absences, setAbsences] = useState<AbsenceRecord[]>([]);
   const { toast } = useToast();
 
   const [newTitle, setNewTitle] = useState("");
@@ -119,7 +120,13 @@ export const WeekPlanning = ({ isBestuur, currentUserId, staffProfiles }: WeekPl
   useEffect(() => {
     loadTasks();
     loadTaskRequests();
+    loadAbsences();
   }, [weekStart]);
+
+  const loadAbsences = async () => {
+    const { data } = await supabase.from('staff_absences').select('*').eq('active', true);
+    setAbsences((data as AbsenceRecord[]) || []);
+  };
 
   const loadTasks = async () => {
     setLoading(true);
