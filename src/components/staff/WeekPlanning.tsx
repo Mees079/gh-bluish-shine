@@ -737,7 +737,7 @@ export const WeekPlanning = ({ isBestuur, currentUserId, staffProfiles }: WeekPl
                         <div key={row.rowId} className="bg-[#0a0e1a] border border-[#1f2937] rounded-lg px-3 py-3">
                           <div className="grid grid-cols-[1fr_80px_80px] gap-2 items-center">
                             <span className="text-sm text-white font-medium">{row.personName}</span>
-                            <span className={`text-sm text-center ${row.afgemeld ? 'text-[#374151]' : 'text-white'}`}>{row.afgemeld ? '-' : row.hours}</span>
+                            <span className={`text-sm text-center ${row.afgemeld ? 'text-[#374151]' : 'text-white'}`}>{row.afgemeld ? '-' : (parseFloat(row.hours) || 0).toFixed(1).replace('.', ',')}</span>
                             <span className={`text-xs text-center px-2 py-1 rounded ${row.afgemeld ? 'bg-red-500/10 text-red-400' : 'bg-[#00ff88]/10 text-[#00ff88]'}`}>
                               {row.afgemeld ? 'Afgemeld' : 'Actief'}
                             </span>
