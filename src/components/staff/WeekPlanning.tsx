@@ -730,15 +730,35 @@ export const WeekPlanning = ({ isBestuur, currentUserId, staffProfiles }: WeekPl
                       <span className="text-center">Uren</span>
                       <span className="text-center">Status</span>
                     </div>
-                    {hourRows.filter(r => r.personName).map(row => (
-                      <div key={row.rowId} className="grid grid-cols-[1fr_80px_80px] gap-2 items-center bg-[#0a0e1a] border border-[#1f2937] rounded-lg px-3 py-3">
-                        <span className="text-sm text-white font-medium">{row.personName}</span>
-                        <span className={`text-sm text-center ${row.afgemeld ? 'text-[#374151]' : 'text-white'}`}>{row.afgemeld ? '-' : row.hours}</span>
-                        <span className={`text-xs text-center px-2 py-1 rounded ${row.afgemeld ? 'bg-red-500/10 text-red-400' : 'bg-[#00ff88]/10 text-[#00ff88]'}`}>
-                          {row.afgemeld ? 'Afgemeld' : 'Actief'}
-                        </span>
-                      </div>
-                    ))}
+                    {hourRows.filter(r => r.personName).map(row => {
+                      const status = getRowStatus(row, getTaskWeekStart(selectedTask));
+                      const required = getRequiredHoursForRow(row, getTaskWeekStart(selectedTask));
+                      return (
+                        <div key={row.rowId} className="bg-[#0a0e1a] border border-[#1f2937] rounded-lg px-3 py-3">
+                          <div className="grid grid-cols-[1fr_80px_80px] gap-2 items-center">
+                            <span className="text-sm text-white font-medium">{row.personName}</span>
+                            <span className={`text-sm text-center ${row.afgemeld ? 'text-[#374151]' : 'text-white'}`}>{row.afgemeld ? '-' : row.hours}</span>
+                            <span className={`text-xs text-center px-2 py-1 rounded ${row.afgemeld ? 'bg-red-500/10 text-red-400' : 'bg-[#00ff88]/10 text-[#00ff88]'}`}>
+                              {row.afgemeld ? 'Afgemeld' : 'Actief'}
+                            </span>
+                          </div>
+                          {!row.afgemeld && status && (
+                            <div className={`mt-2 inline-flex items-center gap-1.5 px-2 py-1 rounded-md text-xs font-medium ${
+                              status === 'inactivity' ? 'bg-red-500/10 text-red-400' :
+                              status === 'promotion' ? 'bg-amber-400/10 text-amber-300' :
+                              'bg-[#00ff88]/10 text-[#00ff88]'
+                            }`}>
+                              {status === 'inactivity' && <><AlertTriangle className="h-3 w-3" /> Inactiviteit waarschuwing — onder de {Math.min(5, required).toFixed(2).replace('.', ',')} uur</>}
+                              {status === 'ok' && <><Check className="h-3 w-3" /> In orde</>}
+                              {status === 'promotion' && <><TrendingUp className="h-3 w-3" /> Promotie — boven de 7 uur</>}
+                            </div>
+                          )}
+                          {row.afgemeld && (
+                            <p className="text-[10px] text-[#6b7280] mt-1.5">Moet deze week nog {required.toFixed(2).replace('.', ',')} uur halen</p>
+                          )}
+                        </div>
+                      );
+                    })}
                     <div className="flex justify-between items-center bg-[#1f2937] rounded-lg px-3 py-3 mt-2">
                       <span className="text-sm font-medium text-[#9ca3af]">Totaal uren</span>
                       <span className="text-sm font-bold text-[#00ff88]">
