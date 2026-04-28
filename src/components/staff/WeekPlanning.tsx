@@ -772,45 +772,66 @@ export const WeekPlanning = ({ isBestuur, currentUserId, staffProfiles }: WeekPl
               /* Edit mode */
               <div className="space-y-3">
                 <p className="text-sm text-[#9ca3af] mb-2">
-                  Vul per persoon de naam in, het aantal uren, en of diegene afgemeld is.
+                  Vul per persoon de naam in, het aantal uren, en of diegene afgemeld is. Afgemelde personen worden automatisch herkend.
                 </p>
-                {hourRows.map((row, index) => (
-                  <div key={row.rowId} className="grid grid-cols-[1fr_80px_auto_auto] gap-2 items-center bg-[#0a0e1a] border border-[#1f2937] rounded-xl p-3">
-                    <input
-                      type="text"
-                      value={row.personName}
-                      onChange={e => updateHourRow(row.rowId, 'personName', e.target.value)}
-                      placeholder={`Naam ${index + 1}`}
-                      className="bg-[#1f2937] border border-[#374151] rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-[#00ff88]/50"
-                    />
-                    <input
-                      type="number"
-                      min="0"
-                      step="0.5"
-                      value={row.hours}
-                      onChange={e => updateHourRow(row.rowId, 'hours', e.target.value)}
-                      disabled={row.afgemeld}
-                      placeholder="0"
-                      className="bg-[#1f2937] border border-[#374151] rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-[#00ff88]/50 disabled:opacity-40 text-center"
-                    />
-                    <button
-                      onClick={() => updateHourRow(row.rowId, 'afgemeld', !row.afgemeld)}
-                      className={`h-9 px-3 rounded-lg border text-xs font-medium transition-colors whitespace-nowrap ${
-                        row.afgemeld
-                          ? 'border-red-500/30 bg-red-500/10 text-red-400'
-                          : 'border-[#374151] bg-[#1f2937] text-[#9ca3af] hover:text-white'
-                      }`}
-                    >
-                      {row.afgemeld ? 'Afgemeld' : 'Actief'}
-                    </button>
-                    <button
-                      onClick={() => removeHourRow(row.rowId)}
-                      className="h-9 w-9 rounded-lg border border-[#374151] bg-[#1f2937] text-[#6b7280] hover:text-red-400 transition-colors flex items-center justify-center"
-                    >
-                      <Trash2 className="h-3.5 w-3.5" />
-                    </button>
-                  </div>
-                ))}
+                {hourRows.map((row, index) => {
+                  const weekStartValue = getTaskWeekStart(selectedTask);
+                  const status = getRowStatus(row, weekStartValue);
+                  const required = getRequiredHoursForRow(row, weekStartValue);
+                  return (
+                    <div key={row.rowId} className="bg-[#0a0e1a] border border-[#1f2937] rounded-xl p-3 space-y-2">
+                      <div className="grid grid-cols-[1fr_80px_auto_auto] gap-2 items-center">
+                        <input
+                          type="text"
+                          value={row.personName}
+                          onChange={e => updateHourRow(row.rowId, 'personName', e.target.value)}
+                          placeholder={`Naam ${index + 1}`}
+                          className="bg-[#1f2937] border border-[#374151] rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-[#00ff88]/50"
+                        />
+                        <input
+                          type="number"
+                          min="0"
+                          step="0.5"
+                          value={row.hours}
+                          onChange={e => updateHourRow(row.rowId, 'hours', e.target.value)}
+                          disabled={row.afgemeld}
+                          placeholder="0"
+                          className="bg-[#1f2937] border border-[#374151] rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-[#00ff88]/50 disabled:opacity-40 text-center"
+                        />
+                        <button
+                          onClick={() => updateHourRow(row.rowId, 'afgemeld', !row.afgemeld)}
+                          className={`h-9 px-3 rounded-lg border text-xs font-medium transition-colors whitespace-nowrap ${
+                            row.afgemeld
+                              ? 'border-red-500/30 bg-red-500/10 text-red-400'
+                              : 'border-[#374151] bg-[#1f2937] text-[#9ca3af] hover:text-white'
+                          }`}
+                        >
+                          {row.afgemeld ? 'Afgemeld' : 'Actief'}
+                        </button>
+                        <button
+                          onClick={() => removeHourRow(row.rowId)}
+                          className="h-9 w-9 rounded-lg border border-[#374151] bg-[#1f2937] text-[#6b7280] hover:text-red-400 transition-colors flex items-center justify-center"
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </button>
+                      </div>
+                      {!row.afgemeld && status && (
+                        <div className={`inline-flex items-center gap-1.5 px-2 py-1 rounded-md text-xs font-medium ${
+                          status === 'inactivity' ? 'bg-red-500/10 text-red-400' :
+                          status === 'promotion' ? 'bg-amber-400/10 text-amber-300' :
+                          'bg-[#00ff88]/10 text-[#00ff88]'
+                        }`}>
+                          {status === 'inactivity' && <><AlertTriangle className="h-3 w-3" /> Inactiviteit waarschuwing — onder de {Math.min(5, required).toFixed(2).replace('.', ',')} uur</>}
+                          {status === 'ok' && <><Check className="h-3 w-3" /> In orde</>}
+                          {status === 'promotion' && <><TrendingUp className="h-3 w-3" /> Promotie — boven de 7 uur</>}
+                        </div>
+                      )}
+                      {row.afgemeld && row.personName && (
+                        <p className="text-[10px] text-[#6b7280]">Afgemeld — moet deze week alsnog {required.toFixed(2).replace('.', ',')} uur halen</p>
+                      )}
+                    </div>
+                  );
+                })}
 
                 <button
                   onClick={addHourRow}
