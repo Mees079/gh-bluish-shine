@@ -306,10 +306,6 @@ export const WeekPlanning = ({ isBestuur, currentUserId, staffProfiles }: WeekPl
     setHoursLoading(false);
   };
 
-  const addHourRow = () => {
-    setHourRows(prev => [...prev, createEmptyHourRow()]);
-  };
-
   // Match a typed name to a known absence (case-insensitive). Returns absence record or null.
   const findAbsenceForName = (name: string, weekStartValue: string): AbsenceRecord | null => {
     if (!name.trim()) return null;
