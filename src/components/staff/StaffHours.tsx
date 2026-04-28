@@ -143,7 +143,7 @@ export const StaffHours = ({ isBestuur, currentUserId, staffProfiles }: Props) =
               <p className="text-xs text-[#6b7280]">Afgemeld</p>
             </div>
             <div className="bg-[#111827]/60 border border-[#1f2937] rounded-xl p-4 text-center">
-              <p className="text-2xl font-bold text-white">{totalHours}</p>
+              <p className="text-2xl font-bold text-white">{fmtH(totalHours)}</p>
               <p className="text-xs text-[#6b7280]">Totaal uren</p>
             </div>
           </div>
