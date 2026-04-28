@@ -188,7 +188,7 @@ export const StaffHours = ({ isBestuur, currentUserId, staffProfiles }: Props) =
             })}
             <div className="flex justify-between items-center px-4 py-3 bg-[#1f2937]/30">
               <span className="text-sm font-medium text-[#9ca3af]">Totaal uren</span>
-              <span className="text-sm font-bold text-[#00ff88]">{totalHours}</span>
+              <span className="text-sm font-bold text-[#00ff88]">{fmtH(totalHours)}</span>
             </div>
           </div>
 
