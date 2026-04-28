@@ -116,8 +116,24 @@ export const StaffAbsences = ({ isBestuur, currentUserId, staffProfiles }: Props
     return a.reason?.replace(/^\[([^\]]+)\]\s*/, '') || '';
   };
 
-  const activeAbsences = absences.filter(a => a.active && !isPast(parseISO(a.end_date)));
-  const pastAbsences = absences.filter(a => !a.active || isPast(parseISO(a.end_date)));
+  const safeParse = (d?: string | null): Date | null => {
+    if (!d) return null;
+    const parsed = parseISO(d);
+    return isNaN(parsed.getTime()) ? null : parsed;
+  };
+  const fmt = (d?: string | null, pattern = 'd MMM yyyy') => {
+    const p = safeParse(d);
+    return p ? format(p, pattern, { locale: nl }) : '—';
+  };
+
+  const activeAbsences = absences.filter(a => {
+    const end = safeParse(a.end_date);
+    return a.active && (!end || !isPast(end));
+  });
+  const pastAbsences = absences.filter(a => {
+    const end = safeParse(a.end_date);
+    return !a.active || (end && isPast(end));
+  });
 
   if (loading) {
     return <div className="flex justify-center py-12"><div className="w-6 h-6 border-2 border-[#00ff88] border-t-transparent rounded-full animate-spin" /></div>;
