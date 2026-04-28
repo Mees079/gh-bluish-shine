@@ -153,17 +153,38 @@ export const StaffHours = ({ isBestuur, currentUserId, staffProfiles }: Props) =
               <span className="text-center">Uren</span>
               <span className="text-center">Status</span>
             </div>
-            {hours.map(entry => (
-              <div key={entry.id} className="grid grid-cols-[1fr_80px_80px] gap-2 items-center px-4 py-3 border-b border-[#1f2937]/50 last:border-0">
-                <span className="text-sm text-white font-medium">{entry.person_name || getUsername(entry.user_id)}</span>
-                <span className={`text-sm text-center ${entry.notes === 'AFGEMELD' ? 'text-[#374151]' : 'text-white'}`}>
-                  {entry.notes === 'AFGEMELD' ? '-' : entry.hours}
-                </span>
-                <span className={`text-xs text-center px-2 py-1 rounded ${entry.notes === 'AFGEMELD' ? 'bg-red-500/10 text-red-400' : 'bg-[#00ff88]/10 text-[#00ff88]'}`}>
-                  {entry.notes === 'AFGEMELD' ? 'Afgemeld' : 'Actief'}
-                </span>
-              </div>
-            ))}
+            {hours.map(entry => {
+              const status = getStatus(entry);
+              const name = entry.person_name || getUsername(entry.user_id);
+              const required = getRequiredHours(name);
+              return (
+                <div key={entry.id} className="px-4 py-3 border-b border-[#1f2937]/50 last:border-0">
+                  <div className="grid grid-cols-[1fr_80px_80px] gap-2 items-center">
+                    <span className="text-sm text-white font-medium">{name}</span>
+                    <span className={`text-sm text-center ${entry.notes === 'AFGEMELD' ? 'text-[#374151]' : 'text-white'}`}>
+                      {entry.notes === 'AFGEMELD' ? '-' : entry.hours}
+                    </span>
+                    <span className={`text-xs text-center px-2 py-1 rounded ${entry.notes === 'AFGEMELD' ? 'bg-red-500/10 text-red-400' : 'bg-[#00ff88]/10 text-[#00ff88]'}`}>
+                      {entry.notes === 'AFGEMELD' ? 'Afgemeld' : 'Actief'}
+                    </span>
+                  </div>
+                  {status && (
+                    <div className={`mt-2 inline-flex items-center gap-1.5 px-2 py-1 rounded-md text-xs font-medium ${
+                      status === 'inactivity' ? 'bg-red-500/10 text-red-400' :
+                      status === 'promotion' ? 'bg-amber-400/10 text-amber-300' :
+                      'bg-[#00ff88]/10 text-[#00ff88]'
+                    }`}>
+                      {status === 'inactivity' && <><AlertTriangle className="h-3 w-3" /> Inactiviteit waarschuwing — onder de {Math.min(5, required).toFixed(2).replace('.', ',')} uur</>}
+                      {status === 'ok' && <><Check className="h-3 w-3" /> In orde</>}
+                      {status === 'promotion' && <><TrendingUp className="h-3 w-3" /> Promotie — boven de 7 uur</>}
+                    </div>
+                  )}
+                  {entry.notes === 'AFGEMELD' && (
+                    <p className="text-[10px] text-[#6b7280] mt-1.5">Moet deze week alsnog {required.toFixed(2).replace('.', ',')} uur halen</p>
+                  )}
+                </div>
+              );
+            })}
             <div className="flex justify-between items-center px-4 py-3 bg-[#1f2937]/30">
               <span className="text-sm font-medium text-[#9ca3af]">Totaal uren</span>
               <span className="text-sm font-bold text-[#00ff88]">{totalHours}</span>
