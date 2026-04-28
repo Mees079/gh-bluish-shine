@@ -1,9 +1,36 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { format, startOfWeek, addDays, isToday, isSameDay } from "date-fns";
+import { format, startOfWeek, addDays, isToday, isSameDay, parseISO, max as dateMax, min as dateMin, differenceInCalendarDays, endOfWeek } from "date-fns";
 import { nl } from "date-fns/locale";
-import { Plus, ChevronLeft, ChevronRight, Calendar, Clock, User as UserIcon, CheckCircle2, Circle, FileText, X, ArrowRightLeft, Hand, Trash2 } from "lucide-react";
+import { Plus, ChevronLeft, ChevronRight, Calendar, Clock, User as UserIcon, CheckCircle2, Circle, FileText, X, ArrowRightLeft, Hand, Trash2, AlertTriangle, TrendingUp, Check } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+
+const MINUTES_PER_DAY = 45;
+
+interface AbsenceRecord {
+  id: string;
+  user_id: string;
+  reason: string | null;
+  start_date: string;
+  end_date: string;
+  active: boolean;
+}
+
+// Calculate required hours for a given week given an absence
+const calculateRequiredHoursForWeek = (weekStartDate: Date, absStart: Date, absEnd: Date): number => {
+  const weekEndDate = endOfWeek(weekStartDate, { weekStartsOn: 1 });
+  const overlapStart = dateMax([absStart, weekStartDate]);
+  const overlapEnd = dateMin([absEnd, weekEndDate]);
+  let absentDays = 0;
+  if (overlapStart <= overlapEnd) {
+    absentDays = differenceInCalendarDays(overlapEnd, overlapStart) + 1;
+  }
+  const presentDays = Math.max(0, 7 - absentDays);
+  return (presentDays * MINUTES_PER_DAY) / 60;
+};
+
+// Default required hours when not absent: 7 days × 45 min
+const DEFAULT_REQUIRED_HOURS = (7 * MINUTES_PER_DAY) / 60; // 5.25h
 
 interface StaffProfile {
   user_id: string;
