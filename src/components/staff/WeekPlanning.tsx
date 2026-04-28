@@ -762,7 +762,7 @@ export const WeekPlanning = ({ isBestuur, currentUserId, staffProfiles }: WeekPl
                     <div className="flex justify-between items-center bg-[#1f2937] rounded-lg px-3 py-3 mt-2">
                       <span className="text-sm font-medium text-[#9ca3af]">Totaal uren</span>
                       <span className="text-sm font-bold text-[#00ff88]">
-                        {hourRows.filter(r => !r.afgemeld && r.personName).reduce((sum, r) => sum + (parseFloat(r.hours) || 0), 0)}
+                        {hourRows.filter(r => !r.afgemeld && r.personName).reduce((sum, r) => sum + (parseFloat(r.hours) || 0), 0).toFixed(1).replace('.', ',')}
                       </span>
                     </div>
                   </>
