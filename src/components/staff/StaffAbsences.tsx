@@ -246,7 +246,7 @@ export const StaffAbsences = ({ isBestuur, currentUserId, staffProfiles }: Props
                       </p>
                       <div className="mt-2 inline-flex items-center gap-1.5 px-2 py-1 rounded-md bg-[#00ff88]/10 text-[#00ff88] text-xs font-medium">
                         <Clock className="h-3 w-3" />
-                        Moet deze week nog {requiredHours.toFixed(2).replace('.', ',')} uur halen
+                        Moet deze week nog {requiredHours.toFixed(1).replace('.', ',')} uur halen
                       </div>
                     </div>
                     {(isBestuur || a.user_id === currentUserId) && (
