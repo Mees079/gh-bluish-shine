@@ -116,8 +116,24 @@ export const StaffAbsences = ({ isBestuur, currentUserId, staffProfiles }: Props
     return a.reason?.replace(/^\[([^\]]+)\]\s*/, '') || '';
   };
 
-  const activeAbsences = absences.filter(a => a.active && !isPast(parseISO(a.end_date)));
-  const pastAbsences = absences.filter(a => !a.active || isPast(parseISO(a.end_date)));
+  const safeParse = (d?: string | null): Date | null => {
+    if (!d) return null;
+    const parsed = parseISO(d);
+    return isNaN(parsed.getTime()) ? null : parsed;
+  };
+  const fmt = (d?: string | null, pattern = 'd MMM yyyy') => {
+    const p = safeParse(d);
+    return p ? format(p, pattern, { locale: nl }) : '—';
+  };
+
+  const activeAbsences = absences.filter(a => {
+    const end = safeParse(a.end_date);
+    return a.active && (!end || !isPast(end));
+  });
+  const pastAbsences = absences.filter(a => {
+    const end = safeParse(a.end_date);
+    return !a.active || (end && isPast(end));
+  });
 
   if (loading) {
     return <div className="flex justify-center py-12"><div className="w-6 h-6 border-2 border-[#00ff88] border-t-transparent rounded-full animate-spin" /></div>;
@@ -214,8 +230,9 @@ export const StaffAbsences = ({ isBestuur, currentUserId, staffProfiles }: Props
           </h3>
           <div className="space-y-2">
             {activeAbsences.map(a => {
-              const absStart = a.start_date ? parseISO(a.start_date) : parseISO(a.end_date);
-              const absEnd = parseISO(a.end_date);
+              const absStart = safeParse(a.start_date) || safeParse(a.end_date);
+              const absEnd = safeParse(a.end_date);
+              if (!absStart || !absEnd) return null;
               const requiredHours = calculateRequiredHours(absStart, absEnd);
               const cleanReason = getCleanReason(a);
               return (
@@ -258,7 +275,7 @@ export const StaffAbsences = ({ isBestuur, currentUserId, staffProfiles }: Props
                     {getCleanReason(a) && <p className="text-xs text-[#6b7280] mt-0.5">{getCleanReason(a)}</p>}
                   </div>
                   <span className="text-xs text-[#4b5563]">
-                    {format(parseISO(a.start_date), 'd MMM', { locale: nl })} – {format(parseISO(a.end_date), 'd MMM yyyy', { locale: nl })}
+                    {fmt(a.start_date, 'd MMM')} – {fmt(a.end_date, 'd MMM yyyy')}
                   </span>
                 </div>
               </div>
