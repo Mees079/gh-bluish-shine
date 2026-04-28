@@ -41,27 +41,64 @@ interface Props {
 export const StaffHours = ({ isBestuur, currentUserId, staffProfiles }: Props) => {
   const [weekStart, setWeekStart] = useState(() => startOfWeek(new Date(), { weekStartsOn: 1 }));
   const [hours, setHours] = useState<HourEntry[]>([]);
+  const [absences, setAbsences] = useState<AbsenceRecord[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    loadHours();
+    loadAll();
   }, [weekStart]);
 
-  const loadHours = async () => {
+  const loadAll = async () => {
     setLoading(true);
     const ws = format(weekStart, 'yyyy-MM-dd');
-    const { data } = await supabase
-      .from('staff_hours')
-      .select('*')
-      .eq('week_start', ws)
-      .order('created_at');
-    setHours((data as HourEntry[]) || []);
+    const [{ data: h }, { data: a }] = await Promise.all([
+      supabase.from('staff_hours').select('*').eq('week_start', ws).order('created_at'),
+      supabase.from('staff_absences').select('*').eq('active', true),
+    ]);
+    setHours((h as HourEntry[]) || []);
+    setAbsences((a as AbsenceRecord[]) || []);
     setLoading(false);
   };
 
   const getUsername = (userId: string | null) => {
     if (!userId) return "Onbekend";
     return staffProfiles.find(p => p.user_id === userId)?.username || "Onbekend";
+  };
+
+  const findAbsence = (name: string): AbsenceRecord | null => {
+    if (!name) return null;
+    const lower = name.trim().toLowerCase();
+    const weekEndDate = endOfWeek(weekStart, { weekStartsOn: 1 });
+    return absences.find(a => {
+      const profile = staffProfiles.find(p => p.user_id === a.user_id);
+      const customMatch = a.reason?.match(/^\[([^\]]+)\]/);
+      const matchesByProfile = profile && profile.username.toLowerCase() === lower;
+      const matchesByCustom = customMatch && customMatch[1].toLowerCase() === lower;
+      if (!matchesByProfile && !matchesByCustom) return false;
+      const absStart = parseISO(a.start_date);
+      const absEnd = parseISO(a.end_date);
+      return absStart <= weekEndDate && absEnd >= weekStart;
+    }) || null;
+  };
+
+  const getRequiredHours = (name: string): number => {
+    const a = findAbsence(name);
+    if (!a) return DEFAULT_REQUIRED;
+    const overlapStart = dateMax([parseISO(a.start_date), weekStart]);
+    const overlapEnd = dateMin([parseISO(a.end_date), endOfWeek(weekStart, { weekStartsOn: 1 })]);
+    let absentDays = 0;
+    if (overlapStart <= overlapEnd) absentDays = differenceInCalendarDays(overlapEnd, overlapStart) + 1;
+    return (Math.max(0, 7 - absentDays) * MINUTES_PER_DAY) / 60;
+  };
+
+  const getStatus = (entry: HourEntry): 'inactivity' | 'ok' | 'promotion' | null => {
+    if (entry.notes === 'AFGEMELD') return null;
+    const name = entry.person_name || getUsername(entry.user_id);
+    const required = getRequiredHours(name);
+    const inactivityThreshold = Math.min(5, required);
+    if (entry.hours < inactivityThreshold) return 'inactivity';
+    if (entry.hours > 7) return 'promotion';
+    return 'ok';
   };
 
   const activeEntries = hours.filter(h => h.notes !== 'AFGEMELD');
