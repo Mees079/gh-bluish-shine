@@ -1,9 +1,36 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { format, startOfWeek, addDays, isToday, isSameDay } from "date-fns";
+import { format, startOfWeek, addDays, isToday, isSameDay, parseISO, max as dateMax, min as dateMin, differenceInCalendarDays, endOfWeek } from "date-fns";
 import { nl } from "date-fns/locale";
-import { Plus, ChevronLeft, ChevronRight, Calendar, Clock, User as UserIcon, CheckCircle2, Circle, FileText, X, ArrowRightLeft, Hand, Trash2 } from "lucide-react";
+import { Plus, ChevronLeft, ChevronRight, Calendar, Clock, User as UserIcon, CheckCircle2, Circle, FileText, X, ArrowRightLeft, Hand, Trash2, AlertTriangle, TrendingUp, Check } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+
+const MINUTES_PER_DAY = 45;
+
+interface AbsenceRecord {
+  id: string;
+  user_id: string;
+  reason: string | null;
+  start_date: string;
+  end_date: string;
+  active: boolean;
+}
+
+// Calculate required hours for a given week given an absence
+const calculateRequiredHoursForWeek = (weekStartDate: Date, absStart: Date, absEnd: Date): number => {
+  const weekEndDate = endOfWeek(weekStartDate, { weekStartsOn: 1 });
+  const overlapStart = dateMax([absStart, weekStartDate]);
+  const overlapEnd = dateMin([absEnd, weekEndDate]);
+  let absentDays = 0;
+  if (overlapStart <= overlapEnd) {
+    absentDays = differenceInCalendarDays(overlapEnd, overlapStart) + 1;
+  }
+  const presentDays = Math.max(0, 7 - absentDays);
+  return (presentDays * MINUTES_PER_DAY) / 60;
+};
+
+// Default required hours when not absent: 7 days × 45 min
+const DEFAULT_REQUIRED_HOURS = (7 * MINUTES_PER_DAY) / 60; // 5.25h
 
 interface StaffProfile {
   user_id: string;
@@ -79,6 +106,7 @@ export const WeekPlanning = ({ isBestuur, currentUserId, staffProfiles }: WeekPl
   const [hoursSubmitting, setHoursSubmitting] = useState(false);
   const [hourRows, setHourRows] = useState<HourRow[]>([createEmptyHourRow()]);
   const [hoursViewOnly, setHoursViewOnly] = useState(false);
+  const [absences, setAbsences] = useState<AbsenceRecord[]>([]);
   const { toast } = useToast();
 
   const [newTitle, setNewTitle] = useState("");
@@ -92,7 +120,13 @@ export const WeekPlanning = ({ isBestuur, currentUserId, staffProfiles }: WeekPl
   useEffect(() => {
     loadTasks();
     loadTaskRequests();
+    loadAbsences();
   }, [weekStart]);
+
+  const loadAbsences = async () => {
+    const { data } = await supabase.from('staff_absences').select('*').eq('active', true);
+    setAbsences((data as AbsenceRecord[]) || []);
+  };
 
   const loadTasks = async () => {
     setLoading(true);
@@ -272,17 +306,69 @@ export const WeekPlanning = ({ isBestuur, currentUserId, staffProfiles }: WeekPl
     setHoursLoading(false);
   };
 
+  // Match a typed name to a known absence (case-insensitive). Returns absence record or null.
+  const findAbsenceForName = (name: string, weekStartValue: string): AbsenceRecord | null => {
+    if (!name.trim()) return null;
+    const lower = name.trim().toLowerCase();
+    const weekStartDate = parseISO(`${weekStartValue}T00:00:00`);
+    const weekEndDate = endOfWeek(weekStartDate, { weekStartsOn: 1 });
+
+    return absences.find(a => {
+      const profile = staffProfiles.find(p => p.user_id === a.user_id);
+      const customMatch = a.reason?.match(/^\[([^\]]+)\]/);
+      const matchesByProfile = profile && profile.username.toLowerCase() === lower;
+      const matchesByCustom = customMatch && customMatch[1].toLowerCase() === lower;
+      if (!matchesByProfile && !matchesByCustom) return false;
+      const absStart = parseISO(a.start_date);
+      const absEnd = parseISO(a.end_date);
+      return absStart <= weekEndDate && absEnd >= weekStartDate;
+    }) || null;
+  };
+
+  // Required hours for a person in this week (default 5.25h, less if absent)
+  const getRequiredHoursForRow = (row: HourRow, weekStartValue: string): number => {
+    const absence = findAbsenceForName(row.personName, weekStartValue);
+    if (!absence) return DEFAULT_REQUIRED_HOURS;
+    return calculateRequiredHoursForWeek(
+      parseISO(`${weekStartValue}T00:00:00`),
+      parseISO(absence.start_date),
+      parseISO(absence.end_date)
+    );
+  };
+
+  // Status: 'inactivity' | 'ok' | 'promotion' | null (afgemeld/leeg)
+  const getRowStatus = (row: HourRow, weekStartValue: string): 'inactivity' | 'ok' | 'promotion' | null => {
+    if (!row.personName.trim() || row.afgemeld) return null;
+    const hours = parseFloat(row.hours);
+    if (isNaN(hours) || hours === 0) return null;
+    const required = getRequiredHoursForRow(row, weekStartValue);
+    const inactivityThreshold = Math.min(5, required);
+    if (hours < inactivityThreshold) return 'inactivity';
+    if (hours > 7) return 'promotion';
+    return 'ok';
+  };
+
   const addHourRow = () => {
     setHourRows(prev => [...prev, createEmptyHourRow()]);
   };
 
   const updateHourRow = (rowId: string, field: 'personName' | 'hours' | 'afgemeld', value: string | boolean) => {
+    const weekStartValue = selectedTask ? getTaskWeekStart(selectedTask) : '';
     setHourRows(prev => prev.map((row) => {
       if (row.rowId !== rowId) return row;
       if (field === 'afgemeld') {
         return { ...row, afgemeld: Boolean(value), hours: value ? '0' : row.hours };
       }
-      return { ...row, [field]: value };
+      const updated = { ...row, [field]: value };
+      // Auto-set afgemeld when a typed name matches a known absence
+      if (field === 'personName' && weekStartValue) {
+        const absence = findAbsenceForName(value as string, weekStartValue);
+        if (absence) {
+          updated.afgemeld = true;
+          updated.hours = '0';
+        }
+      }
+      return updated;
     }));
   };
 
@@ -644,15 +730,35 @@ export const WeekPlanning = ({ isBestuur, currentUserId, staffProfiles }: WeekPl
                       <span className="text-center">Uren</span>
                       <span className="text-center">Status</span>
                     </div>
-                    {hourRows.filter(r => r.personName).map(row => (
-                      <div key={row.rowId} className="grid grid-cols-[1fr_80px_80px] gap-2 items-center bg-[#0a0e1a] border border-[#1f2937] rounded-lg px-3 py-3">
-                        <span className="text-sm text-white font-medium">{row.personName}</span>
-                        <span className={`text-sm text-center ${row.afgemeld ? 'text-[#374151]' : 'text-white'}`}>{row.afgemeld ? '-' : row.hours}</span>
-                        <span className={`text-xs text-center px-2 py-1 rounded ${row.afgemeld ? 'bg-red-500/10 text-red-400' : 'bg-[#00ff88]/10 text-[#00ff88]'}`}>
-                          {row.afgemeld ? 'Afgemeld' : 'Actief'}
-                        </span>
-                      </div>
-                    ))}
+                    {hourRows.filter(r => r.personName).map(row => {
+                      const status = getRowStatus(row, getTaskWeekStart(selectedTask));
+                      const required = getRequiredHoursForRow(row, getTaskWeekStart(selectedTask));
+                      return (
+                        <div key={row.rowId} className="bg-[#0a0e1a] border border-[#1f2937] rounded-lg px-3 py-3">
+                          <div className="grid grid-cols-[1fr_80px_80px] gap-2 items-center">
+                            <span className="text-sm text-white font-medium">{row.personName}</span>
+                            <span className={`text-sm text-center ${row.afgemeld ? 'text-[#374151]' : 'text-white'}`}>{row.afgemeld ? '-' : row.hours}</span>
+                            <span className={`text-xs text-center px-2 py-1 rounded ${row.afgemeld ? 'bg-red-500/10 text-red-400' : 'bg-[#00ff88]/10 text-[#00ff88]'}`}>
+                              {row.afgemeld ? 'Afgemeld' : 'Actief'}
+                            </span>
+                          </div>
+                          {!row.afgemeld && status && (
+                            <div className={`mt-2 inline-flex items-center gap-1.5 px-2 py-1 rounded-md text-xs font-medium ${
+                              status === 'inactivity' ? 'bg-red-500/10 text-red-400' :
+                              status === 'promotion' ? 'bg-amber-400/10 text-amber-300' :
+                              'bg-[#00ff88]/10 text-[#00ff88]'
+                            }`}>
+                              {status === 'inactivity' && <><AlertTriangle className="h-3 w-3" /> Inactiviteit waarschuwing — onder de {Math.min(5, required).toFixed(2).replace('.', ',')} uur</>}
+                              {status === 'ok' && <><Check className="h-3 w-3" /> In orde</>}
+                              {status === 'promotion' && <><TrendingUp className="h-3 w-3" /> Promotie — boven de 7 uur</>}
+                            </div>
+                          )}
+                          {row.afgemeld && (
+                            <p className="text-[10px] text-[#6b7280] mt-1.5">Moet deze week nog {required.toFixed(2).replace('.', ',')} uur halen</p>
+                          )}
+                        </div>
+                      );
+                    })}
                     <div className="flex justify-between items-center bg-[#1f2937] rounded-lg px-3 py-3 mt-2">
                       <span className="text-sm font-medium text-[#9ca3af]">Totaal uren</span>
                       <span className="text-sm font-bold text-[#00ff88]">
@@ -666,45 +772,66 @@ export const WeekPlanning = ({ isBestuur, currentUserId, staffProfiles }: WeekPl
               /* Edit mode */
               <div className="space-y-3">
                 <p className="text-sm text-[#9ca3af] mb-2">
-                  Vul per persoon de naam in, het aantal uren, en of diegene afgemeld is.
+                  Vul per persoon de naam in, het aantal uren, en of diegene afgemeld is. Afgemelde personen worden automatisch herkend.
                 </p>
-                {hourRows.map((row, index) => (
-                  <div key={row.rowId} className="grid grid-cols-[1fr_80px_auto_auto] gap-2 items-center bg-[#0a0e1a] border border-[#1f2937] rounded-xl p-3">
-                    <input
-                      type="text"
-                      value={row.personName}
-                      onChange={e => updateHourRow(row.rowId, 'personName', e.target.value)}
-                      placeholder={`Naam ${index + 1}`}
-                      className="bg-[#1f2937] border border-[#374151] rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-[#00ff88]/50"
-                    />
-                    <input
-                      type="number"
-                      min="0"
-                      step="0.5"
-                      value={row.hours}
-                      onChange={e => updateHourRow(row.rowId, 'hours', e.target.value)}
-                      disabled={row.afgemeld}
-                      placeholder="0"
-                      className="bg-[#1f2937] border border-[#374151] rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-[#00ff88]/50 disabled:opacity-40 text-center"
-                    />
-                    <button
-                      onClick={() => updateHourRow(row.rowId, 'afgemeld', !row.afgemeld)}
-                      className={`h-9 px-3 rounded-lg border text-xs font-medium transition-colors whitespace-nowrap ${
-                        row.afgemeld
-                          ? 'border-red-500/30 bg-red-500/10 text-red-400'
-                          : 'border-[#374151] bg-[#1f2937] text-[#9ca3af] hover:text-white'
-                      }`}
-                    >
-                      {row.afgemeld ? 'Afgemeld' : 'Actief'}
-                    </button>
-                    <button
-                      onClick={() => removeHourRow(row.rowId)}
-                      className="h-9 w-9 rounded-lg border border-[#374151] bg-[#1f2937] text-[#6b7280] hover:text-red-400 transition-colors flex items-center justify-center"
-                    >
-                      <Trash2 className="h-3.5 w-3.5" />
-                    </button>
-                  </div>
-                ))}
+                {hourRows.map((row, index) => {
+                  const weekStartValue = getTaskWeekStart(selectedTask);
+                  const status = getRowStatus(row, weekStartValue);
+                  const required = getRequiredHoursForRow(row, weekStartValue);
+                  return (
+                    <div key={row.rowId} className="bg-[#0a0e1a] border border-[#1f2937] rounded-xl p-3 space-y-2">
+                      <div className="grid grid-cols-[1fr_80px_auto_auto] gap-2 items-center">
+                        <input
+                          type="text"
+                          value={row.personName}
+                          onChange={e => updateHourRow(row.rowId, 'personName', e.target.value)}
+                          placeholder={`Naam ${index + 1}`}
+                          className="bg-[#1f2937] border border-[#374151] rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-[#00ff88]/50"
+                        />
+                        <input
+                          type="number"
+                          min="0"
+                          step="0.5"
+                          value={row.hours}
+                          onChange={e => updateHourRow(row.rowId, 'hours', e.target.value)}
+                          disabled={row.afgemeld}
+                          placeholder="0"
+                          className="bg-[#1f2937] border border-[#374151] rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-[#00ff88]/50 disabled:opacity-40 text-center"
+                        />
+                        <button
+                          onClick={() => updateHourRow(row.rowId, 'afgemeld', !row.afgemeld)}
+                          className={`h-9 px-3 rounded-lg border text-xs font-medium transition-colors whitespace-nowrap ${
+                            row.afgemeld
+                              ? 'border-red-500/30 bg-red-500/10 text-red-400'
+                              : 'border-[#374151] bg-[#1f2937] text-[#9ca3af] hover:text-white'
+                          }`}
+                        >
+                          {row.afgemeld ? 'Afgemeld' : 'Actief'}
+                        </button>
+                        <button
+                          onClick={() => removeHourRow(row.rowId)}
+                          className="h-9 w-9 rounded-lg border border-[#374151] bg-[#1f2937] text-[#6b7280] hover:text-red-400 transition-colors flex items-center justify-center"
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </button>
+                      </div>
+                      {!row.afgemeld && status && (
+                        <div className={`inline-flex items-center gap-1.5 px-2 py-1 rounded-md text-xs font-medium ${
+                          status === 'inactivity' ? 'bg-red-500/10 text-red-400' :
+                          status === 'promotion' ? 'bg-amber-400/10 text-amber-300' :
+                          'bg-[#00ff88]/10 text-[#00ff88]'
+                        }`}>
+                          {status === 'inactivity' && <><AlertTriangle className="h-3 w-3" /> Inactiviteit waarschuwing — onder de {Math.min(5, required).toFixed(2).replace('.', ',')} uur</>}
+                          {status === 'ok' && <><Check className="h-3 w-3" /> In orde</>}
+                          {status === 'promotion' && <><TrendingUp className="h-3 w-3" /> Promotie — boven de 7 uur</>}
+                        </div>
+                      )}
+                      {row.afgemeld && row.personName && (
+                        <p className="text-[10px] text-[#6b7280]">Afgemeld — moet deze week alsnog {required.toFixed(2).replace('.', ',')} uur halen</p>
+                      )}
+                    </div>
+                  );
+                })}
 
                 <button
                   onClick={addHourRow}

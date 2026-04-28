@@ -1,8 +1,20 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { format, startOfWeek, addDays } from "date-fns";
+import { format, startOfWeek, addDays, parseISO, max as dateMax, min as dateMin, endOfWeek, differenceInCalendarDays } from "date-fns";
 import { nl } from "date-fns/locale";
-import { Clock, ChevronLeft, ChevronRight, Calendar } from "lucide-react";
+import { Clock, ChevronLeft, ChevronRight, Calendar, AlertTriangle, TrendingUp, Check } from "lucide-react";
+
+const MINUTES_PER_DAY = 45;
+const DEFAULT_REQUIRED = (7 * MINUTES_PER_DAY) / 60;
+
+interface AbsenceRecord {
+  id: string;
+  user_id: string;
+  reason: string | null;
+  start_date: string;
+  end_date: string;
+  active: boolean;
+}
 
 interface StaffProfile {
   user_id: string;
@@ -29,27 +41,64 @@ interface Props {
 export const StaffHours = ({ isBestuur, currentUserId, staffProfiles }: Props) => {
   const [weekStart, setWeekStart] = useState(() => startOfWeek(new Date(), { weekStartsOn: 1 }));
   const [hours, setHours] = useState<HourEntry[]>([]);
+  const [absences, setAbsences] = useState<AbsenceRecord[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    loadHours();
+    loadAll();
   }, [weekStart]);
 
-  const loadHours = async () => {
+  const loadAll = async () => {
     setLoading(true);
     const ws = format(weekStart, 'yyyy-MM-dd');
-    const { data } = await supabase
-      .from('staff_hours')
-      .select('*')
-      .eq('week_start', ws)
-      .order('created_at');
-    setHours((data as HourEntry[]) || []);
+    const [{ data: h }, { data: a }] = await Promise.all([
+      supabase.from('staff_hours').select('*').eq('week_start', ws).order('created_at'),
+      supabase.from('staff_absences').select('*').eq('active', true),
+    ]);
+    setHours((h as HourEntry[]) || []);
+    setAbsences((a as AbsenceRecord[]) || []);
     setLoading(false);
   };
 
   const getUsername = (userId: string | null) => {
     if (!userId) return "Onbekend";
     return staffProfiles.find(p => p.user_id === userId)?.username || "Onbekend";
+  };
+
+  const findAbsence = (name: string): AbsenceRecord | null => {
+    if (!name) return null;
+    const lower = name.trim().toLowerCase();
+    const weekEndDate = endOfWeek(weekStart, { weekStartsOn: 1 });
+    return absences.find(a => {
+      const profile = staffProfiles.find(p => p.user_id === a.user_id);
+      const customMatch = a.reason?.match(/^\[([^\]]+)\]/);
+      const matchesByProfile = profile && profile.username.toLowerCase() === lower;
+      const matchesByCustom = customMatch && customMatch[1].toLowerCase() === lower;
+      if (!matchesByProfile && !matchesByCustom) return false;
+      const absStart = parseISO(a.start_date);
+      const absEnd = parseISO(a.end_date);
+      return absStart <= weekEndDate && absEnd >= weekStart;
+    }) || null;
+  };
+
+  const getRequiredHours = (name: string): number => {
+    const a = findAbsence(name);
+    if (!a) return DEFAULT_REQUIRED;
+    const overlapStart = dateMax([parseISO(a.start_date), weekStart]);
+    const overlapEnd = dateMin([parseISO(a.end_date), endOfWeek(weekStart, { weekStartsOn: 1 })]);
+    let absentDays = 0;
+    if (overlapStart <= overlapEnd) absentDays = differenceInCalendarDays(overlapEnd, overlapStart) + 1;
+    return (Math.max(0, 7 - absentDays) * MINUTES_PER_DAY) / 60;
+  };
+
+  const getStatus = (entry: HourEntry): 'inactivity' | 'ok' | 'promotion' | null => {
+    if (entry.notes === 'AFGEMELD') return null;
+    const name = entry.person_name || getUsername(entry.user_id);
+    const required = getRequiredHours(name);
+    const inactivityThreshold = Math.min(5, required);
+    if (entry.hours < inactivityThreshold) return 'inactivity';
+    if (entry.hours > 7) return 'promotion';
+    return 'ok';
   };
 
   const activeEntries = hours.filter(h => h.notes !== 'AFGEMELD');
@@ -104,17 +153,38 @@ export const StaffHours = ({ isBestuur, currentUserId, staffProfiles }: Props) =
               <span className="text-center">Uren</span>
               <span className="text-center">Status</span>
             </div>
-            {hours.map(entry => (
-              <div key={entry.id} className="grid grid-cols-[1fr_80px_80px] gap-2 items-center px-4 py-3 border-b border-[#1f2937]/50 last:border-0">
-                <span className="text-sm text-white font-medium">{entry.person_name || getUsername(entry.user_id)}</span>
-                <span className={`text-sm text-center ${entry.notes === 'AFGEMELD' ? 'text-[#374151]' : 'text-white'}`}>
-                  {entry.notes === 'AFGEMELD' ? '-' : entry.hours}
-                </span>
-                <span className={`text-xs text-center px-2 py-1 rounded ${entry.notes === 'AFGEMELD' ? 'bg-red-500/10 text-red-400' : 'bg-[#00ff88]/10 text-[#00ff88]'}`}>
-                  {entry.notes === 'AFGEMELD' ? 'Afgemeld' : 'Actief'}
-                </span>
-              </div>
-            ))}
+            {hours.map(entry => {
+              const status = getStatus(entry);
+              const name = entry.person_name || getUsername(entry.user_id);
+              const required = getRequiredHours(name);
+              return (
+                <div key={entry.id} className="px-4 py-3 border-b border-[#1f2937]/50 last:border-0">
+                  <div className="grid grid-cols-[1fr_80px_80px] gap-2 items-center">
+                    <span className="text-sm text-white font-medium">{name}</span>
+                    <span className={`text-sm text-center ${entry.notes === 'AFGEMELD' ? 'text-[#374151]' : 'text-white'}`}>
+                      {entry.notes === 'AFGEMELD' ? '-' : entry.hours}
+                    </span>
+                    <span className={`text-xs text-center px-2 py-1 rounded ${entry.notes === 'AFGEMELD' ? 'bg-red-500/10 text-red-400' : 'bg-[#00ff88]/10 text-[#00ff88]'}`}>
+                      {entry.notes === 'AFGEMELD' ? 'Afgemeld' : 'Actief'}
+                    </span>
+                  </div>
+                  {status && (
+                    <div className={`mt-2 inline-flex items-center gap-1.5 px-2 py-1 rounded-md text-xs font-medium ${
+                      status === 'inactivity' ? 'bg-red-500/10 text-red-400' :
+                      status === 'promotion' ? 'bg-amber-400/10 text-amber-300' :
+                      'bg-[#00ff88]/10 text-[#00ff88]'
+                    }`}>
+                      {status === 'inactivity' && <><AlertTriangle className="h-3 w-3" /> Inactiviteit waarschuwing — onder de {Math.min(5, required).toFixed(2).replace('.', ',')} uur</>}
+                      {status === 'ok' && <><Check className="h-3 w-3" /> In orde</>}
+                      {status === 'promotion' && <><TrendingUp className="h-3 w-3" /> Promotie — boven de 7 uur</>}
+                    </div>
+                  )}
+                  {entry.notes === 'AFGEMELD' && (
+                    <p className="text-[10px] text-[#6b7280] mt-1.5">Moet deze week alsnog {required.toFixed(2).replace('.', ',')} uur halen</p>
+                  )}
+                </div>
+              );
+            })}
             <div className="flex justify-between items-center px-4 py-3 bg-[#1f2937]/30">
               <span className="text-sm font-medium text-[#9ca3af]">Totaal uren</span>
               <span className="text-sm font-bold text-[#00ff88]">{totalHours}</span>
