@@ -104,6 +104,7 @@ export const StaffHours = ({ isBestuur, currentUserId, staffProfiles }: Props) =
   const activeEntries = hours.filter(h => h.notes !== 'AFGEMELD');
   const afgemeldEntries = hours.filter(h => h.notes === 'AFGEMELD');
   const totalHours = activeEntries.reduce((sum, h) => sum + h.hours, 0);
+  const fmtH = (n: number) => n.toFixed(1).replace('.', ',');
 
   return (
     <div className="space-y-6">
