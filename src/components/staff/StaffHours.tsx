@@ -163,7 +163,7 @@ export const StaffHours = ({ isBestuur, currentUserId, staffProfiles }: Props) =
                   <div className="grid grid-cols-[1fr_80px_80px] gap-2 items-center">
                     <span className="text-sm text-white font-medium">{name}</span>
                     <span className={`text-sm text-center ${entry.notes === 'AFGEMELD' ? 'text-[#374151]' : 'text-white'}`}>
-                      {entry.notes === 'AFGEMELD' ? '-' : entry.hours}
+                      {entry.notes === 'AFGEMELD' ? '-' : fmtH(entry.hours)}
                     </span>
                     <span className={`text-xs text-center px-2 py-1 rounded ${entry.notes === 'AFGEMELD' ? 'bg-red-500/10 text-red-400' : 'bg-[#00ff88]/10 text-[#00ff88]'}`}>
                       {entry.notes === 'AFGEMELD' ? 'Afgemeld' : 'Actief'}
