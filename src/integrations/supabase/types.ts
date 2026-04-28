@@ -582,6 +582,7 @@ export type Database = {
           end_date: string
           id: string
           reason: string | null
+          start_date: string
           user_id: string
         }
         Insert: {
@@ -590,6 +591,7 @@ export type Database = {
           end_date: string
           id?: string
           reason?: string | null
+          start_date?: string
           user_id: string
         }
         Update: {
@@ -598,6 +600,7 @@ export type Database = {
           end_date?: string
           id?: string
           reason?: string | null
+          start_date?: string
           user_id?: string
         }
         Relationships: []
@@ -917,6 +920,7 @@ export type Database = {
       is_admin: { Args: { _user_id: string }; Returns: boolean }
       is_bestuur: { Args: { _user_id: string }; Returns: boolean }
       is_staff_member: { Args: { _user_id: string }; Returns: boolean }
+      schedule_weekly_uren_tasks: { Args: never; Returns: undefined }
     }
     Enums: {
       app_role: "admin" | "super_admin" | "coordinatie" | "bestuur"
