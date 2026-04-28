@@ -104,6 +104,7 @@ export const StaffHours = ({ isBestuur, currentUserId, staffProfiles }: Props) =
   const activeEntries = hours.filter(h => h.notes !== 'AFGEMELD');
   const afgemeldEntries = hours.filter(h => h.notes === 'AFGEMELD');
   const totalHours = activeEntries.reduce((sum, h) => sum + h.hours, 0);
+  const fmtH = (n: number) => n.toFixed(1).replace('.', ',');
 
   return (
     <div className="space-y-6">
@@ -142,7 +143,7 @@ export const StaffHours = ({ isBestuur, currentUserId, staffProfiles }: Props) =
               <p className="text-xs text-[#6b7280]">Afgemeld</p>
             </div>
             <div className="bg-[#111827]/60 border border-[#1f2937] rounded-xl p-4 text-center">
-              <p className="text-2xl font-bold text-white">{totalHours}</p>
+              <p className="text-2xl font-bold text-white">{fmtH(totalHours)}</p>
               <p className="text-xs text-[#6b7280]">Totaal uren</p>
             </div>
           </div>
@@ -162,7 +163,7 @@ export const StaffHours = ({ isBestuur, currentUserId, staffProfiles }: Props) =
                   <div className="grid grid-cols-[1fr_80px_80px] gap-2 items-center">
                     <span className="text-sm text-white font-medium">{name}</span>
                     <span className={`text-sm text-center ${entry.notes === 'AFGEMELD' ? 'text-[#374151]' : 'text-white'}`}>
-                      {entry.notes === 'AFGEMELD' ? '-' : entry.hours}
+                      {entry.notes === 'AFGEMELD' ? '-' : fmtH(entry.hours)}
                     </span>
                     <span className={`text-xs text-center px-2 py-1 rounded ${entry.notes === 'AFGEMELD' ? 'bg-red-500/10 text-red-400' : 'bg-[#00ff88]/10 text-[#00ff88]'}`}>
                       {entry.notes === 'AFGEMELD' ? 'Afgemeld' : 'Actief'}
@@ -174,20 +175,20 @@ export const StaffHours = ({ isBestuur, currentUserId, staffProfiles }: Props) =
                       status === 'promotion' ? 'bg-amber-400/10 text-amber-300' :
                       'bg-[#00ff88]/10 text-[#00ff88]'
                     }`}>
-                      {status === 'inactivity' && <><AlertTriangle className="h-3 w-3" /> Inactiviteit waarschuwing — onder de {Math.min(5, required).toFixed(2).replace('.', ',')} uur</>}
+                      {status === 'inactivity' && <><AlertTriangle className="h-3 w-3" /> Inactiviteit waarschuwing — onder de {Math.min(5, required).toFixed(1).replace('.', ',')} uur</>}
                       {status === 'ok' && <><Check className="h-3 w-3" /> In orde</>}
                       {status === 'promotion' && <><TrendingUp className="h-3 w-3" /> Promotie — boven de 7 uur</>}
                     </div>
                   )}
                   {entry.notes === 'AFGEMELD' && (
-                    <p className="text-[10px] text-[#6b7280] mt-1.5">Moet deze week alsnog {required.toFixed(2).replace('.', ',')} uur halen</p>
+                    <p className="text-[10px] text-[#6b7280] mt-1.5">Moet deze week alsnog {required.toFixed(1).replace('.', ',')} uur halen</p>
                   )}
                 </div>
               );
             })}
             <div className="flex justify-between items-center px-4 py-3 bg-[#1f2937]/30">
               <span className="text-sm font-medium text-[#9ca3af]">Totaal uren</span>
-              <span className="text-sm font-bold text-[#00ff88]">{totalHours}</span>
+              <span className="text-sm font-bold text-[#00ff88]">{fmtH(totalHours)}</span>
             </div>
           </div>
 

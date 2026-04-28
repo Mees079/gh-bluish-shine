@@ -737,7 +737,7 @@ export const WeekPlanning = ({ isBestuur, currentUserId, staffProfiles }: WeekPl
                         <div key={row.rowId} className="bg-[#0a0e1a] border border-[#1f2937] rounded-lg px-3 py-3">
                           <div className="grid grid-cols-[1fr_80px_80px] gap-2 items-center">
                             <span className="text-sm text-white font-medium">{row.personName}</span>
-                            <span className={`text-sm text-center ${row.afgemeld ? 'text-[#374151]' : 'text-white'}`}>{row.afgemeld ? '-' : row.hours}</span>
+                            <span className={`text-sm text-center ${row.afgemeld ? 'text-[#374151]' : 'text-white'}`}>{row.afgemeld ? '-' : (parseFloat(row.hours) || 0).toFixed(1).replace('.', ',')}</span>
                             <span className={`text-xs text-center px-2 py-1 rounded ${row.afgemeld ? 'bg-red-500/10 text-red-400' : 'bg-[#00ff88]/10 text-[#00ff88]'}`}>
                               {row.afgemeld ? 'Afgemeld' : 'Actief'}
                             </span>
@@ -748,13 +748,13 @@ export const WeekPlanning = ({ isBestuur, currentUserId, staffProfiles }: WeekPl
                               status === 'promotion' ? 'bg-amber-400/10 text-amber-300' :
                               'bg-[#00ff88]/10 text-[#00ff88]'
                             }`}>
-                              {status === 'inactivity' && <><AlertTriangle className="h-3 w-3" /> Inactiviteit waarschuwing — onder de {Math.min(5, required).toFixed(2).replace('.', ',')} uur</>}
+                              {status === 'inactivity' && <><AlertTriangle className="h-3 w-3" /> Inactiviteit waarschuwing — onder de {Math.min(5, required).toFixed(1).replace('.', ',')} uur</>}
                               {status === 'ok' && <><Check className="h-3 w-3" /> In orde</>}
                               {status === 'promotion' && <><TrendingUp className="h-3 w-3" /> Promotie — boven de 7 uur</>}
                             </div>
                           )}
                           {row.afgemeld && (
-                            <p className="text-[10px] text-[#6b7280] mt-1.5">Moet deze week nog {required.toFixed(2).replace('.', ',')} uur halen</p>
+                            <p className="text-[10px] text-[#6b7280] mt-1.5">Moet deze week nog {required.toFixed(1).replace('.', ',')} uur halen</p>
                           )}
                         </div>
                       );
@@ -762,7 +762,7 @@ export const WeekPlanning = ({ isBestuur, currentUserId, staffProfiles }: WeekPl
                     <div className="flex justify-between items-center bg-[#1f2937] rounded-lg px-3 py-3 mt-2">
                       <span className="text-sm font-medium text-[#9ca3af]">Totaal uren</span>
                       <span className="text-sm font-bold text-[#00ff88]">
-                        {hourRows.filter(r => !r.afgemeld && r.personName).reduce((sum, r) => sum + (parseFloat(r.hours) || 0), 0)}
+                        {hourRows.filter(r => !r.afgemeld && r.personName).reduce((sum, r) => sum + (parseFloat(r.hours) || 0), 0).toFixed(1).replace('.', ',')}
                       </span>
                     </div>
                   </>
@@ -821,13 +821,13 @@ export const WeekPlanning = ({ isBestuur, currentUserId, staffProfiles }: WeekPl
                           status === 'promotion' ? 'bg-amber-400/10 text-amber-300' :
                           'bg-[#00ff88]/10 text-[#00ff88]'
                         }`}>
-                          {status === 'inactivity' && <><AlertTriangle className="h-3 w-3" /> Inactiviteit waarschuwing — onder de {Math.min(5, required).toFixed(2).replace('.', ',')} uur</>}
+                          {status === 'inactivity' && <><AlertTriangle className="h-3 w-3" /> Inactiviteit waarschuwing — onder de {Math.min(5, required).toFixed(1).replace('.', ',')} uur</>}
                           {status === 'ok' && <><Check className="h-3 w-3" /> In orde</>}
                           {status === 'promotion' && <><TrendingUp className="h-3 w-3" /> Promotie — boven de 7 uur</>}
                         </div>
                       )}
                       {row.afgemeld && row.personName && (
-                        <p className="text-[10px] text-[#6b7280]">Afgemeld — moet deze week alsnog {required.toFixed(2).replace('.', ',')} uur halen</p>
+                        <p className="text-[10px] text-[#6b7280]">Afgemeld — moet deze week alsnog {required.toFixed(1).replace('.', ',')} uur halen</p>
                       )}
                     </div>
                   );
