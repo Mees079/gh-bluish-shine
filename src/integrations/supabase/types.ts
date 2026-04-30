@@ -923,7 +923,13 @@ export type Database = {
       schedule_weekly_uren_tasks: { Args: never; Returns: undefined }
     }
     Enums: {
-      app_role: "admin" | "super_admin" | "coordinatie" | "bestuur"
+      app_role:
+        | "admin"
+        | "super_admin"
+        | "coordinatie"
+        | "bestuur"
+        | "head_developer"
+        | "developer"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1051,7 +1057,14 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["admin", "super_admin", "coordinatie", "bestuur"],
+      app_role: [
+        "admin",
+        "super_admin",
+        "coordinatie",
+        "bestuur",
+        "head_developer",
+        "developer",
+      ],
     },
   },
 } as const
