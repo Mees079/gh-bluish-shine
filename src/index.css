@@ -21,7 +21,24 @@
   background: hsl(var(--primary) / 0.8);
 }
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
+/* Developer panel input */
+.dev-input {
+  width: 100%;
+  background-color: #0f1a2e;
+  border: 1px solid rgb(51 65 85);
+  border-radius: 0.5rem;
+  padding: 0.625rem 0.75rem;
+  color: white;
+  font-size: 0.875rem;
+  outline: none;
+  transition: all 150ms;
+}
+.dev-input::placeholder { color: rgb(71 85 105); }
+.dev-input:focus {
+  border-color: rgba(59, 130, 246, 0.6);
+  box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.4);
+}
+
 All colors MUST be HSL.
 */
 
