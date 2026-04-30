@@ -130,6 +130,154 @@ export type Database = {
           },
         ]
       }
+      dev_task_comments: {
+        Row: {
+          created_at: string
+          id: string
+          is_head_dev: boolean
+          message: string
+          task_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_head_dev?: boolean
+          message: string
+          task_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_head_dev?: boolean
+          message?: string
+          task_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "dev_task_comments_task_id_fkey"
+            columns: ["task_id"]
+            isOneToOne: false
+            referencedRelation: "dev_tasks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      dev_task_unclaim_requests: {
+        Row: {
+          created_at: string
+          id: string
+          reason: string | null
+          requested_by: string
+          resolved_at: string | null
+          resolved_by: string | null
+          status: string
+          task_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          reason?: string | null
+          requested_by: string
+          resolved_at?: string | null
+          resolved_by?: string | null
+          status?: string
+          task_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          reason?: string | null
+          requested_by?: string
+          resolved_at?: string | null
+          resolved_by?: string | null
+          status?: string
+          task_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "dev_task_unclaim_requests_task_id_fkey"
+            columns: ["task_id"]
+            isOneToOne: false
+            referencedRelation: "dev_tasks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      dev_tasks: {
+        Row: {
+          additions: string | null
+          attachment_link: string | null
+          attachment_path: string | null
+          claimed_at: string | null
+          claimed_by: string | null
+          created_at: string
+          created_by: string | null
+          deadline: string | null
+          description: string | null
+          id: string
+          paid_at: string | null
+          payment_amount: number | null
+          payment_currency: string
+          status: string
+          submission_link: string | null
+          submission_notes: string | null
+          submission_path: string | null
+          submission_payment_link: string | null
+          submitted_at: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          additions?: string | null
+          attachment_link?: string | null
+          attachment_path?: string | null
+          claimed_at?: string | null
+          claimed_by?: string | null
+          created_at?: string
+          created_by?: string | null
+          deadline?: string | null
+          description?: string | null
+          id?: string
+          paid_at?: string | null
+          payment_amount?: number | null
+          payment_currency?: string
+          status?: string
+          submission_link?: string | null
+          submission_notes?: string | null
+          submission_path?: string | null
+          submission_payment_link?: string | null
+          submitted_at?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          additions?: string | null
+          attachment_link?: string | null
+          attachment_path?: string | null
+          claimed_at?: string | null
+          claimed_by?: string | null
+          created_at?: string
+          created_by?: string | null
+          deadline?: string | null
+          description?: string | null
+          id?: string
+          paid_at?: string | null
+          payment_amount?: number | null
+          payment_currency?: string
+          status?: string
+          submission_link?: string | null
+          submission_notes?: string | null
+          submission_path?: string | null
+          submission_payment_link?: string | null
+          submitted_at?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       discounts: {
         Row: {
           active: boolean | null
@@ -919,11 +1067,19 @@ export type Database = {
       }
       is_admin: { Args: { _user_id: string }; Returns: boolean }
       is_bestuur: { Args: { _user_id: string }; Returns: boolean }
+      is_developer_member: { Args: { _user_id: string }; Returns: boolean }
+      is_head_developer: { Args: { _user_id: string }; Returns: boolean }
       is_staff_member: { Args: { _user_id: string }; Returns: boolean }
       schedule_weekly_uren_tasks: { Args: never; Returns: undefined }
     }
     Enums: {
-      app_role: "admin" | "super_admin" | "coordinatie" | "bestuur"
+      app_role:
+        | "admin"
+        | "super_admin"
+        | "coordinatie"
+        | "bestuur"
+        | "head_developer"
+        | "developer"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1051,7 +1207,14 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["admin", "super_admin", "coordinatie", "bestuur"],
+      app_role: [
+        "admin",
+        "super_admin",
+        "coordinatie",
+        "bestuur",
+        "head_developer",
+        "developer",
+      ],
     },
   },
 } as const
