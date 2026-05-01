@@ -452,6 +452,25 @@ export const WeekPlanning = ({ isBestuur, currentUserId, staffProfiles }: WeekPl
 
   return (
     <div className="space-y-6">
+      {isBestuur && (
+        <div className="flex justify-end">
+          <button
+            onClick={() => setShowPlanningPanel(true)}
+            className="flex items-center gap-2 bg-gradient-to-r from-[#00ff88] to-emerald-400 hover:from-emerald-400 hover:to-[#00ff88] text-[#0a0e1a] text-sm font-semibold px-4 py-2 rounded-lg shadow-[0_0_20px_rgba(0,255,136,0.25)] transition-all"
+          >
+            <LayoutGrid className="h-4 w-4" /> Planning Beheer
+          </button>
+        </div>
+      )}
+
+      {showPlanningPanel && (
+        <BestuurPlanningPanel
+          currentUserId={currentUserId}
+          staffProfiles={staffProfiles}
+          onClose={() => { setShowPlanningPanel(false); loadTasks(); }}
+        />
+      )}
+
       {/* Open transfer requests banner */}
       {relevantRequests.length > 0 && (
         <div className="bg-amber-500/5 border border-amber-500/20 rounded-xl p-4">
