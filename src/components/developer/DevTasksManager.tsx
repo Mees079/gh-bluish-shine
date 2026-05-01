@@ -398,8 +398,8 @@ const Timeline = ({
 
 // ---------------- Create Modal ----------------
 const CreateTaskModal = ({
-  onClose, currentUserId, onCreated,
-}: { onClose: () => void; currentUserId: string; onCreated: () => void }) => {
+  onClose, currentUserId, currentUsername, onCreated,
+}: { onClose: () => void; currentUserId: string; currentUsername: string; onCreated: () => void }) => {
   const { toast } = useToast();
   const [saving, setSaving] = useState(false);
   const [title, setTitle] = useState("");
@@ -437,15 +437,12 @@ const CreateTaskModal = ({
 
       // Fire Discord notification (non-blocking)
       try {
-        const taskUrl = `${window.location.origin}/developer/dashboard`;
+        const taskUrl = `${window.location.origin}/developer`;
         await supabase.functions.invoke("notify-new-dev-task", {
           body: {
             task_id: inserted.id,
             title: inserted.title,
-            description: inserted.description,
-            deadline: inserted.deadline,
-            payment_amount: inserted.payment_amount,
-            payment_currency: inserted.payment_currency,
+            created_by_username: currentUsername,
             task_url: taskUrl,
           },
         });
