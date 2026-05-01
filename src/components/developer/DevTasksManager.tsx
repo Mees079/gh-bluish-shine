@@ -594,24 +594,39 @@ const TaskDetail = ({
             <Section label="Toevoegingen"><p className="text-sm text-slate-300 whitespace-pre-wrap">{task.additions}</p></Section>
           )}
 
-          {(task.attachment_path || task.attachment_link) && (
-            <Section label="Bijlagen">
-              <div className="flex flex-col gap-2">
-                {task.attachment_path && (
-                  <button onClick={() => downloadAttachment(task.attachment_path!)}
-                    className="flex items-center gap-2 text-sm text-blue-300 hover:text-blue-200 bg-blue-500/5 hover:bg-blue-500/10 border border-blue-500/20 rounded-lg px-3 py-2">
-                    <Paperclip className="h-4 w-4" /> Download bestand <Download className="h-3 w-3 ml-auto" />
-                  </button>
-                )}
-                {task.attachment_link && (
-                  <a href={task.attachment_link} target="_blank" rel="noreferrer"
-                    className="flex items-center gap-2 text-sm text-blue-300 hover:text-blue-200 bg-blue-500/5 hover:bg-blue-500/10 border border-blue-500/20 rounded-lg px-3 py-2">
-                    <LinkIcon className="h-4 w-4" /> {task.attachment_link} <ExternalLink className="h-3 w-3 ml-auto" />
-                  </a>
-                )}
-              </div>
-            </Section>
-          )}
+          {(() => {
+            const canSeeAttachments = isHead || isClaimer;
+            const hasAttachments = task.attachment_path || task.attachment_link;
+            if (!hasAttachments) return null;
+            if (!canSeeAttachments) {
+              return (
+                <Section label="Bijlagen">
+                  <div className="flex items-center gap-2 text-sm text-slate-400 bg-slate-800/40 border border-slate-700/60 border-dashed rounded-lg px-3 py-2">
+                    <Paperclip className="h-4 w-4" />
+                    Bijlagen worden zichtbaar zodra je deze taak claimt.
+                  </div>
+                </Section>
+              );
+            }
+            return (
+              <Section label="Bijlagen">
+                <div className="flex flex-col gap-2">
+                  {task.attachment_path && (
+                    <button onClick={() => downloadAttachment(task.attachment_path!)}
+                      className="flex items-center gap-2 text-sm text-blue-300 hover:text-blue-200 bg-blue-500/5 hover:bg-blue-500/10 border border-blue-500/20 rounded-lg px-3 py-2">
+                      <Paperclip className="h-4 w-4" /> Download bestand <Download className="h-3 w-3 ml-auto" />
+                    </button>
+                  )}
+                  {task.attachment_link && (
+                    <a href={task.attachment_link} target="_blank" rel="noreferrer"
+                      className="flex items-center gap-2 text-sm text-blue-300 hover:text-blue-200 bg-blue-500/5 hover:bg-blue-500/10 border border-blue-500/20 rounded-lg px-3 py-2">
+                      <LinkIcon className="h-4 w-4" /> {task.attachment_link} <ExternalLink className="h-3 w-3 ml-auto" />
+                    </a>
+                  )}
+                </div>
+              </Section>
+            );
+          })()}
 
           {/* Submission section */}
           {(task.status === "submitted" || task.status === "paid") && (
