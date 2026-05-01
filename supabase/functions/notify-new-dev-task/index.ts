@@ -10,10 +10,7 @@ const ROLE_ID = "1323375204822417408";
 interface Payload {
   task_id: string;
   title: string;
-  description?: string | null;
-  deadline?: string | null;
-  payment_amount?: number | null;
-  payment_currency?: string | null;
+  created_by_username?: string | null;
   task_url: string;
 }
 
@@ -30,21 +27,13 @@ Deno.serve(async (req) => {
       });
     }
 
-    const fields: any[] = [];
-    if (body.payment_amount != null) {
-      const sym = body.payment_currency === 'ROBUX' ? 'R$' : '€';
-      fields.push({ name: '💰 Beloning', value: `**${sym}${body.payment_amount}**`, inline: true });
-    }
-    if (body.deadline) {
-      fields.push({ name: '📅 Deadline', value: new Date(body.deadline).toLocaleDateString('nl-NL', { day: 'numeric', month: 'long', year: 'numeric' }), inline: true });
-    }
-    fields.push({ name: '🔗 Taak', value: `[Open in Developer Portal](${body.task_url})`, inline: false });
-
     const embed = {
-      title: `🛠️ Nieuwe Developer Taak`,
-      description: `**${body.title}**${body.description ? `\n\n${body.description.slice(0, 400)}${body.description.length > 400 ? '…' : ''}` : ''}`,
+      title: `🛠️ ${body.title}`,
+      url: body.task_url,
       color: 0x3b82f6,
-      fields,
+      fields: [
+        { name: 'Door', value: body.created_by_username || 'Head Developer', inline: true },
+      ],
       footer: { text: 'HDRP Developer Portal' },
       timestamp: new Date().toISOString(),
     };
@@ -53,7 +42,7 @@ Deno.serve(async (req) => {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        content: `<@&${ROLE_ID}> — Er staat een nieuwe taak open!`,
+        content: `<@&${ROLE_ID}>`,
         allowed_mentions: { roles: [ROLE_ID] },
         embeds: [embed],
       }),
