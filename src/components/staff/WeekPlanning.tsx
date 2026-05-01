@@ -2,8 +2,9 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { format, startOfWeek, addDays, isToday, isSameDay, parseISO, max as dateMax, min as dateMin, differenceInCalendarDays, endOfWeek } from "date-fns";
 import { nl } from "date-fns/locale";
-import { Plus, ChevronLeft, ChevronRight, Calendar, Clock, User as UserIcon, CheckCircle2, Circle, FileText, X, ArrowRightLeft, Hand, Trash2, AlertTriangle, TrendingUp, Check } from "lucide-react";
+import { Plus, ChevronLeft, ChevronRight, Calendar, Clock, User as UserIcon, CheckCircle2, Circle, FileText, X, ArrowRightLeft, Hand, Trash2, AlertTriangle, TrendingUp, Check, LayoutGrid } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { BestuurPlanningPanel } from "./BestuurPlanningPanel";
 
 const MINUTES_PER_DAY = 45;
 
