@@ -421,7 +421,7 @@ const CreateTaskModal = ({
         if (upErr) throw upErr;
         attachment_path = path;
       }
-      const { error } = await supabase.from("dev_tasks").insert({
+      const { data: inserted, error } = await supabase.from("dev_tasks").insert({
         title: title.trim(),
         description: description.trim() || null,
         additions: additions.trim() || null,
@@ -431,8 +431,27 @@ const CreateTaskModal = ({
         payment_amount: amount ? Number(amount) : null,
         payment_currency: currency,
         created_by: currentUserId,
-      });
+      }).select().single();
       if (error) throw error;
+
+      // Fire Discord notification (non-blocking)
+      try {
+        const taskUrl = `${window.location.origin}/developer/dashboard`;
+        await supabase.functions.invoke("notify-new-dev-task", {
+          body: {
+            task_id: inserted.id,
+            title: inserted.title,
+            description: inserted.description,
+            deadline: inserted.deadline,
+            payment_amount: inserted.payment_amount,
+            payment_currency: inserted.payment_currency,
+            task_url: taskUrl,
+          },
+        });
+      } catch (notifyErr) {
+        console.warn("Discord notify failed:", notifyErr);
+      }
+
       toast({ title: "Taak aangemaakt" });
       onCreated();
       onClose();
