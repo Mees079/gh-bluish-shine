@@ -483,30 +483,29 @@ const CreateTaskModal = ({
           </Field>
           <Field label="Betaling">
             <div className="flex gap-2">
-              <input
-                type="number"
-                inputMode="decimal"
-                value={amount}
-                onChange={e => setAmount(e.target.value)}
-                placeholder="0"
-                className="dev-input flex-1"
-              />
+              <div className="relative flex-1">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-emerald-300 font-semibold pointer-events-none select-none">
+                  {currency === "ROBUX" ? "R$" : "€"}
+                </span>
+                <input
+                  type="number"
+                  inputMode="decimal"
+                  value={amount}
+                  onChange={e => setAmount(e.target.value)}
+                  placeholder="0"
+                  className="dev-input w-full pl-9 font-semibold text-emerald-200"
+                />
+              </div>
               <select
                 value={currency}
                 onChange={e => setCurrency(e.target.value as any)}
                 className="dev-input w-28"
                 style={{ colorScheme: "dark" }}
               >
-                <option value="EUR" style={{ background: "#0f1a2e", color: "white" }}>€ EUR</option>
-                <option value="ROBUX" style={{ background: "#0f1a2e", color: "white" }}>R$ Robux</option>
+                <option value="EUR" style={{ background: "#0f1a2e", color: "white" }}>EUR</option>
+                <option value="ROBUX" style={{ background: "#0f1a2e", color: "white" }}>Robux</option>
               </select>
             </div>
-            {amount && !isNaN(Number(amount)) && Number(amount) > 0 && (
-              <div className="mt-2 inline-flex items-center gap-1.5 text-sm font-semibold text-emerald-300 bg-emerald-500/10 border border-emerald-500/30 rounded-md px-2.5 py-1">
-                {currency === "ROBUX" ? <Coins className="h-3.5 w-3.5" /> : <Euro className="h-3.5 w-3.5" />}
-                {currency === "ROBUX" ? `R$ ${Number(amount)}` : `€ ${Number(amount).toFixed(2).replace(".", ",")}`}
-              </div>
-            )}
           </Field>
         </div>
         <Field label="Bijlage (link)">
