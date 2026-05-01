@@ -257,6 +257,7 @@ export const DevTasksManager = ({ isHead, currentUserId, profiles }: Props) => {
         <CreateTaskModal
           onClose={() => setShowCreate(false)}
           currentUserId={currentUserId}
+          currentUsername={profileMap.get(currentUserId) || "Head Developer"}
           onCreated={load}
         />
       )}
