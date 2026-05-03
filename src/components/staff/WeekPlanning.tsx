@@ -410,7 +410,7 @@ export const WeekPlanning = ({ isBestuur, currentUserId, staffProfiles }: WeekPl
         person_name: row.personName.trim(),
         week_start: weekStartValue,
         hours: row.afgemeld ? 0 : (parseFloat(row.hours) || 0),
-        notes: row.afgemeld ? 'AFGEMELD' : null,
+        notes: row.afgemeld ? 'AFGEMELD' : (row.aangemeldDezeWeek ? 'AANGEMELD_DEZE_WEEK' : null),
       }));
 
       const { error } = await supabase.from('staff_hours').insert(inserts);
