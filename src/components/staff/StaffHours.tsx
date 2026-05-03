@@ -93,6 +93,7 @@ export const StaffHours = ({ isBestuur, currentUserId, staffProfiles }: Props) =
 
   const getStatus = (entry: HourEntry): 'inactivity' | 'ok' | 'promotion' | null => {
     if (entry.notes === 'AFGEMELD') return null;
+    if (entry.notes === 'AANGEMELD_DEZE_WEEK') return 'ok';
     const name = entry.person_name || getUsername(entry.user_id);
     const required = getRequiredHours(name);
     const inactivityThreshold = Math.min(5, required);
