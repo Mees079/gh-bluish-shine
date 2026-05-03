@@ -178,12 +178,23 @@ export const BestuurPlanningPanel = ({ currentUserId, staffProfiles, onClose }: 
   };
 
   const deleteTask = async (t: Task) => {
-    if (!confirm(`'${t.title}' verwijderen?`)) return;
+    // optimistic — geen extra confirm
+    setTasks(prev => prev.filter(x => x.id !== t.id));
+    if (editing?.id === t.id) setEditing(null);
     const { error } = await supabase.from("staff_tasks").delete().eq("id", t.id);
-    if (error) { toast({ variant: "destructive", title: "Fout", description: error.message }); return; }
-    toast({ title: "Verwijderd" });
-    setEditing(null);
-    load();
+    if (error) { toast({ variant: "destructive", title: "Fout", description: error.message }); load(); return; }
+    toast({ title: "Verwijderd", description: t.title });
+  };
+
+  const bulkDelete = async () => {
+    if (!search.trim() || matchedTasks.length === 0) return;
+    if (!confirm(`${matchedTasks.length} taken verwijderen die matchen op "${search}"?`)) return;
+    const ids = matchedTasks.map(t => t.id);
+    setTasks(prev => prev.filter(t => !ids.includes(t.id)));
+    const { error } = await supabase.from("staff_tasks").delete().in("id", ids);
+    if (error) { toast({ variant: "destructive", title: "Fout", description: error.message }); load(); return; }
+    toast({ title: `${ids.length} taken verwijderd` });
+    setSearch("");
   };
 
   return (
