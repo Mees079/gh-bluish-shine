@@ -16,6 +16,7 @@ import {
   CheckCircle2,
   Circle,
   Clock,
+  Search,
 } from "lucide-react";
 
 interface StaffProfile {
@@ -62,6 +63,7 @@ export const BestuurPlanningPanel = ({ currentUserId, staffProfiles, onClose }: 
   const [editing, setEditing] = useState<Task | null>(null);
   const [draggedId, setDraggedId] = useState<string | null>(null);
   const [dragOverDate, setDragOverDate] = useState<string | null>(null);
+  const [search, setSearch] = useState("");
 
   // Quick add per day
   const [addOpen, setAddOpen] = useState<string | null>(null);
@@ -97,10 +99,23 @@ export const BestuurPlanningPanel = ({ currentUserId, staffProfiles, onClose }: 
     setLoading(false);
   };
 
+  const matchesSearch = (t: Task) => {
+    if (!search.trim()) return true;
+    const q = search.trim().toLowerCase();
+    const assignee = t.assigned_to ? (staffProfiles.find(p => p.user_id === t.assigned_to)?.username || "") : "";
+    return (
+      t.title.toLowerCase().includes(q) ||
+      (t.description || "").toLowerCase().includes(q) ||
+      assignee.toLowerCase().includes(q)
+    );
+  };
+
   const tasksFor = (d: Date) => {
     const ds = format(d, "yyyy-MM-dd");
-    return tasks.filter(t => t.scheduled_date === ds);
+    return tasks.filter(t => t.scheduled_date === ds && matchesSearch(t));
   };
+
+  const matchedTasks = tasks.filter(matchesSearch);
 
   const usernameOf = (uid: string | null) =>
     uid ? (staffProfiles.find(p => p.user_id === uid)?.username || "?") : "Niemand";
@@ -163,12 +178,23 @@ export const BestuurPlanningPanel = ({ currentUserId, staffProfiles, onClose }: 
   };
 
   const deleteTask = async (t: Task) => {
-    if (!confirm(`'${t.title}' verwijderen?`)) return;
+    // optimistic — geen extra confirm
+    setTasks(prev => prev.filter(x => x.id !== t.id));
+    if (editing?.id === t.id) setEditing(null);
     const { error } = await supabase.from("staff_tasks").delete().eq("id", t.id);
-    if (error) { toast({ variant: "destructive", title: "Fout", description: error.message }); return; }
-    toast({ title: "Verwijderd" });
-    setEditing(null);
-    load();
+    if (error) { toast({ variant: "destructive", title: "Fout", description: error.message }); load(); return; }
+    toast({ title: "Verwijderd", description: t.title });
+  };
+
+  const bulkDelete = async () => {
+    if (!search.trim() || matchedTasks.length === 0) return;
+    if (!confirm(`${matchedTasks.length} taken verwijderen die matchen op "${search}"?`)) return;
+    const ids = matchedTasks.map(t => t.id);
+    setTasks(prev => prev.filter(t => !ids.includes(t.id)));
+    const { error } = await supabase.from("staff_tasks").delete().in("id", ids);
+    if (error) { toast({ variant: "destructive", title: "Fout", description: error.message }); load(); return; }
+    toast({ title: `${ids.length} taken verwijderd` });
+    setSearch("");
   };
 
   return (
@@ -210,6 +236,37 @@ export const BestuurPlanningPanel = ({ currentUserId, staffProfiles, onClose }: 
           >
             <X className="h-4 w-4" /> Sluiten
           </button>
+        </div>
+
+        {/* Search + bulk delete */}
+        <div className="max-w-[1600px] mx-auto px-4 sm:px-6 pb-3 flex items-center gap-2 flex-wrap">
+          <div className="relative flex-1 min-w-[220px] max-w-md">
+            <Search className="h-4 w-4 text-[#6b7280] absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+            <input
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              placeholder="Zoek op taaknaam, beschrijving of persoon..."
+              className="w-full bg-[#0a0e1a] border border-[#1f2937] rounded-lg pl-9 pr-9 py-2 text-sm text-white placeholder:text-[#4b5563] focus:outline-none focus:border-[#00ff88]/40"
+            />
+            {search && (
+              <button onClick={() => setSearch("")} className="absolute right-2 top-1/2 -translate-y-1/2 text-[#6b7280] hover:text-white">
+                <X className="h-4 w-4" />
+              </button>
+            )}
+          </div>
+          {search.trim() && (
+            <>
+              <span className="text-xs text-[#6b7280]">{matchedTasks.length} match{matchedTasks.length === 1 ? "" : "es"}</span>
+              {matchedTasks.length > 0 && (
+                <button
+                  onClick={bulkDelete}
+                  className="flex items-center gap-1.5 text-xs font-medium text-red-300 hover:text-white bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 px-3 py-1.5 rounded-lg transition-colors"
+                >
+                  <Trash2 className="h-3.5 w-3.5" /> Verwijder alle ({matchedTasks.length})
+                </button>
+              )}
+            </>
+          )}
         </div>
       </header>
 
@@ -270,7 +327,14 @@ export const BestuurPlanningPanel = ({ currentUserId, staffProfiles, onClose }: 
                           onClick={() => setEditing(t)}
                           className={`group relative cursor-grab active:cursor-grabbing bg-[#0a0e1a] border ${pm.ring} rounded-lg p-2.5 hover:border-[#00ff88]/40 transition-all ${dragging ? "opacity-40" : ""}`}
                         >
-                          <div className="flex items-start gap-2">
+                          <button
+                            onClick={(e) => { e.stopPropagation(); deleteTask(t); }}
+                            title="Verwijder taak"
+                            className="absolute top-1.5 right-1.5 z-10 p-1 rounded-md text-[#374151] hover:text-red-400 hover:bg-red-500/10 opacity-0 group-hover:opacity-100 transition-all"
+                          >
+                            <Trash2 className="h-3.5 w-3.5" />
+                          </button>
+                          <div className="flex items-start gap-2 pr-6">
                             <GripVertical className="h-4 w-4 text-[#374151] mt-0.5 flex-shrink-0 group-hover:text-[#6b7280]" />
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center gap-1.5 mb-1">

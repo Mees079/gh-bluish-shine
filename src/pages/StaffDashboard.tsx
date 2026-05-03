@@ -65,7 +65,7 @@ const StaffDashboard = () => {
 
     // Load staff profiles
     const { data: profiles } = await supabase.from('staff_profiles').select('user_id, username');
-    setStaffProfiles((profiles as StaffProfile[]) || []);
+    let allProfiles = (profiles as StaffProfile[]) || [];
 
     // Load absences
     const { data: absData } = await supabase.from('staff_absences').select('id, user_id, end_date, active');
@@ -85,9 +85,17 @@ const StaffDashboard = () => {
     if (profileData) {
       setProfile(profileData);
       setMustChangePassword(profileData.must_change_password);
+      if (!allProfiles.some(p => p.user_id === userId)) {
+        allProfiles = [...allProfiles, { user_id: userId, username: profileData.username }];
+      }
     } else {
       setMustChangePassword(false);
+      if (!allProfiles.some(p => p.user_id === userId)) {
+        allProfiles = [...allProfiles, { user_id: userId, username: session.user.email?.split('@')[0] || 'Ik' }];
+      }
     }
+
+    setStaffProfiles(allProfiles);
 
     setLoading(false);
   };

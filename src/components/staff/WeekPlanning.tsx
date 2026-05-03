@@ -75,6 +75,7 @@ interface HourRow {
   personName: string;
   hours: string;
   afgemeld: boolean;
+  aangemeldDezeWeek: boolean;
 }
 
 interface WeekPlanningProps {
@@ -88,6 +89,7 @@ const createEmptyHourRow = (): HourRow => ({
   personName: "",
   hours: "",
   afgemeld: false,
+  aangemeldDezeWeek: false,
 });
 
 export const WeekPlanning = ({ isBestuur, currentUserId, staffProfiles }: WeekPlanningProps) => {
@@ -108,6 +110,7 @@ export const WeekPlanning = ({ isBestuur, currentUserId, staffProfiles }: WeekPl
   const [hourRows, setHourRows] = useState<HourRow[]>([createEmptyHourRow()]);
   const [hoursViewOnly, setHoursViewOnly] = useState(false);
   const [absences, setAbsences] = useState<AbsenceRecord[]>([]);
+  const [historyByName, setHistoryByName] = useState<Record<string, { promotions: number; warnings: number }>>({});
   const { toast } = useToast();
   const [showPlanningPanel, setShowPlanningPanel] = useState(false);
 
@@ -302,9 +305,27 @@ export const WeekPlanning = ({ isBestuur, currentUserId, staffProfiles }: WeekPl
       personName: entry.person_name || '',
       hours: String(entry.hours),
       afgemeld: entry.notes === 'AFGEMELD',
+      aangemeldDezeWeek: entry.notes === 'AANGEMELD_DEZE_WEEK',
     }));
 
     setHourRows(existingRows.length > 0 ? existingRows : [createEmptyHourRow()]);
+
+    // Build historical promotion/warning counts per person across past weeks (excluding current)
+    const { data: history } = await supabase
+      .from('staff_hours')
+      .select('person_name, hours, notes, week_start')
+      .neq('week_start', weekStartValue);
+    const counts: Record<string, { promotions: number; warnings: number }> = {};
+    (history || []).forEach((h: any) => {
+      const name = (h.person_name || '').trim();
+      if (!name) return;
+      if (h.notes === 'AFGEMELD' || h.notes === 'AANGEMELD_DEZE_WEEK') return;
+      const hrs = Number(h.hours) || 0;
+      counts[name] = counts[name] || { promotions: 0, warnings: 0 };
+      if (hrs > 7) counts[name].promotions += 1;
+      else if (hrs < 5) counts[name].warnings += 1;
+    });
+    setHistoryByName(counts);
     setHoursLoading(false);
   };
 
@@ -327,8 +348,9 @@ export const WeekPlanning = ({ isBestuur, currentUserId, staffProfiles }: WeekPl
     }) || null;
   };
 
-  // Required hours for a person in this week (default 5.25h, less if absent)
+  // Required hours for a person in this week (default 5.25h, less if absent, 0 if aangemeld-deze-week)
   const getRequiredHoursForRow = (row: HourRow, weekStartValue: string): number => {
+    if (row.aangemeldDezeWeek) return 0;
     const absence = findAbsenceForName(row.personName, weekStartValue);
     if (!absence) return DEFAULT_REQUIRED_HOURS;
     return calculateRequiredHoursForWeek(
@@ -338,12 +360,14 @@ export const WeekPlanning = ({ isBestuur, currentUserId, staffProfiles }: WeekPl
     );
   };
 
-  // Status: 'inactivity' | 'ok' | 'promotion' | null (afgemeld/leeg)
+  // Status: 'inactivity' | 'ok' | 'promotion' | null
   const getRowStatus = (row: HourRow, weekStartValue: string): 'inactivity' | 'ok' | 'promotion' | null => {
     if (!row.personName.trim() || row.afgemeld) return null;
-    const hours = parseFloat(row.hours);
-    if (isNaN(hours) || hours === 0) return null;
     const required = getRequiredHoursForRow(row, weekStartValue);
+    // 0 required (aangemeld deze week) → altijd OK
+    if (required === 0) return 'ok';
+    const hours = parseFloat(row.hours);
+    if (isNaN(hours)) return null;
     const inactivityThreshold = Math.min(5, required);
     if (hours < inactivityThreshold) return 'inactivity';
     if (hours > 7) return 'promotion';
@@ -354,12 +378,15 @@ export const WeekPlanning = ({ isBestuur, currentUserId, staffProfiles }: WeekPl
     setHourRows(prev => [...prev, createEmptyHourRow()]);
   };
 
-  const updateHourRow = (rowId: string, field: 'personName' | 'hours' | 'afgemeld', value: string | boolean) => {
+  const updateHourRow = (rowId: string, field: 'personName' | 'hours' | 'afgemeld' | 'aangemeldDezeWeek', value: string | boolean) => {
     const weekStartValue = selectedTask ? getTaskWeekStart(selectedTask) : '';
     setHourRows(prev => prev.map((row) => {
       if (row.rowId !== rowId) return row;
       if (field === 'afgemeld') {
-        return { ...row, afgemeld: Boolean(value), hours: value ? '0' : row.hours };
+        return { ...row, afgemeld: Boolean(value), aangemeldDezeWeek: false, hours: value ? '0' : row.hours };
+      }
+      if (field === 'aangemeldDezeWeek') {
+        return { ...row, aangemeldDezeWeek: Boolean(value), afgemeld: false };
       }
       const updated = { ...row, [field]: value };
       // Auto-set afgemeld when a typed name matches a known absence
@@ -401,7 +428,7 @@ export const WeekPlanning = ({ isBestuur, currentUserId, staffProfiles }: WeekPl
         person_name: row.personName.trim(),
         week_start: weekStartValue,
         hours: row.afgemeld ? 0 : (parseFloat(row.hours) || 0),
-        notes: row.afgemeld ? 'AFGEMELD' : null,
+        notes: row.afgemeld ? 'AFGEMELD' : (row.aangemeldDezeWeek ? 'AANGEMELD_DEZE_WEEK' : null),
       }));
 
       const { error } = await supabase.from('staff_hours').insert(inserts);
@@ -741,11 +768,63 @@ export const WeekPlanning = ({ isBestuur, currentUserId, staffProfiles }: WeekPl
               </div>
             ) : hoursViewOnly ? (
               /* View-only mode */
-              <div className="space-y-2">
+              <div className="space-y-3">
                 {hourRows.length === 0 || (hourRows.length === 1 && !hourRows[0].personName) ? (
                   <p className="text-sm text-[#374151] text-center py-8">Nog geen uren ingevuld voor deze week.</p>
                 ) : (
                   <>
+                    {/* Summary overview */}
+                    {(() => {
+                      const ws = getTaskWeekStart(selectedTask);
+                      const filled = hourRows.filter(r => r.personName);
+                      const promotions = filled.filter(r => getRowStatus(r, ws) === 'promotion');
+                      const warnings = filled.filter(r => getRowStatus(r, ws) === 'inactivity');
+                      const ok = filled.filter(r => getRowStatus(r, ws) === 'ok' && !r.aangemeldDezeWeek);
+                      const newThisWeek = filled.filter(r => r.aangemeldDezeWeek);
+                      const afgemeld = filled.filter(r => r.afgemeld);
+                      const Section = ({ title, color, items, icon: Ico, kind }: any) => (
+                        items.length === 0 ? null : (
+                          <div className={`rounded-xl border ${color.border} ${color.bg} p-3`}>
+                            <div className={`flex items-center gap-2 mb-2 ${color.text}`}>
+                              <Ico className="h-4 w-4" />
+                              <span className="text-sm font-semibold">{title}</span>
+                              <span className="text-xs opacity-70">({items.length})</span>
+                            </div>
+                            <ul className="space-y-1">
+                              {items.map((r: HourRow) => {
+                                const h = parseFloat(r.hours) || 0;
+                                const hist = historyByName[r.personName.trim()] || { promotions: 0, warnings: 0 };
+                                const ord = (n: number) => `${n}e`;
+                                let suffix = '';
+                                if (kind === 'promotion') {
+                                  const nth = hist.promotions + 1;
+                                  suffix = ` — ${ord(nth)} keer promotie`;
+                                } else if (kind === 'warning') {
+                                  const nth = hist.warnings + 1;
+                                  suffix = ` — ${ord(nth)} keer waarschuwing`;
+                                }
+                                return (
+                                  <li key={r.rowId} className="flex items-center justify-between text-xs">
+                                    <span className="text-white">{r.personName}{suffix && <span className="opacity-70">{suffix}</span>}</span>
+                                    <span className="opacity-80">{r.afgemeld || r.aangemeldDezeWeek ? '-' : `${h.toFixed(1).replace('.', ',')} u`}</span>
+                                  </li>
+                                );
+                              })}
+                            </ul>
+                          </div>
+                        )
+                      );
+                      return (
+                        <div className="space-y-2 mb-3">
+                          <Section title="Promoties" kind="promotion" items={promotions} icon={TrendingUp} color={{ border: 'border-amber-400/30', bg: 'bg-amber-400/5', text: 'text-amber-300' }} />
+                          <Section title="Inactiviteit waarschuwingen" kind="warning" items={warnings} icon={AlertTriangle} color={{ border: 'border-red-500/30', bg: 'bg-red-500/5', text: 'text-red-400' }} />
+                          <Section title="In orde" kind="ok" items={ok} icon={Check} color={{ border: 'border-[#00ff88]/30', bg: 'bg-[#00ff88]/5', text: 'text-[#00ff88]' }} />
+                          <Section title="Nieuw deze week" kind="new" items={newThisWeek} icon={Check} color={{ border: 'border-blue-400/30', bg: 'bg-blue-400/5', text: 'text-blue-300' }} />
+                          <Section title="Afgemeld" kind="afgemeld" items={afgemeld} icon={UserIcon} color={{ border: 'border-[#374151]', bg: 'bg-[#1f2937]/40', text: 'text-[#9ca3af]' }} />
+                        </div>
+                      );
+                    })()}
+
                     <div className="grid grid-cols-[1fr_80px_80px] gap-2 px-3 py-2 text-xs font-medium text-[#6b7280] uppercase tracking-wider">
                       <span>Naam</span>
                       <span className="text-center">Uren</span>
@@ -758,9 +837,15 @@ export const WeekPlanning = ({ isBestuur, currentUserId, staffProfiles }: WeekPl
                         <div key={row.rowId} className="bg-[#0a0e1a] border border-[#1f2937] rounded-lg px-3 py-3">
                           <div className="grid grid-cols-[1fr_80px_80px] gap-2 items-center">
                             <span className="text-sm text-white font-medium">{row.personName}</span>
-                            <span className={`text-sm text-center ${row.afgemeld ? 'text-[#374151]' : 'text-white'}`}>{row.afgemeld ? '-' : (parseFloat(row.hours) || 0).toFixed(1).replace('.', ',')}</span>
-                            <span className={`text-xs text-center px-2 py-1 rounded ${row.afgemeld ? 'bg-red-500/10 text-red-400' : 'bg-[#00ff88]/10 text-[#00ff88]'}`}>
-                              {row.afgemeld ? 'Afgemeld' : 'Actief'}
+                            <span className={`text-sm text-center ${row.afgemeld || row.aangemeldDezeWeek ? 'text-[#374151]' : 'text-white'}`}>
+                              {row.afgemeld || row.aangemeldDezeWeek ? '-' : (parseFloat(row.hours) || 0).toFixed(1).replace('.', ',')}
+                            </span>
+                            <span className={`text-xs text-center px-2 py-1 rounded ${
+                              row.afgemeld ? 'bg-red-500/10 text-red-400' :
+                              row.aangemeldDezeWeek ? 'bg-blue-400/10 text-blue-300' :
+                              'bg-[#00ff88]/10 text-[#00ff88]'
+                            }`}>
+                              {row.afgemeld ? 'Afgemeld' : row.aangemeldDezeWeek ? 'Nieuw' : 'Actief'}
                             </span>
                           </div>
                           {!row.afgemeld && status && (
@@ -770,12 +855,16 @@ export const WeekPlanning = ({ isBestuur, currentUserId, staffProfiles }: WeekPl
                               'bg-[#00ff88]/10 text-[#00ff88]'
                             }`}>
                               {status === 'inactivity' && <><AlertTriangle className="h-3 w-3" /> Inactiviteit waarschuwing — onder de {Math.min(5, required).toFixed(1).replace('.', ',')} uur</>}
-                              {status === 'ok' && <><Check className="h-3 w-3" /> In orde</>}
+                              {status === 'ok' && <><Check className="h-3 w-3" /> {row.aangemeldDezeWeek ? 'Nieuw deze week — 0 uur vereist' : 'In orde'}</>}
                               {status === 'promotion' && <><TrendingUp className="h-3 w-3" /> Promotie — boven de 7 uur</>}
                             </div>
                           )}
                           {row.afgemeld && (
-                            <p className="text-[10px] text-[#6b7280] mt-1.5">Moet deze week nog {required.toFixed(1).replace('.', ',')} uur halen</p>
+                            <p className="text-[10px] text-[#6b7280] mt-1.5">
+                              {findAbsenceForName(row.personName, getTaskWeekStart(selectedTask))
+                                ? `Moet deze week nog ${required.toFixed(1).replace('.', ',')} uur halen`
+                                : 'Geen uren vereist deze week'}
+                            </p>
                           )}
                         </div>
                       );
@@ -783,7 +872,7 @@ export const WeekPlanning = ({ isBestuur, currentUserId, staffProfiles }: WeekPl
                     <div className="flex justify-between items-center bg-[#1f2937] rounded-lg px-3 py-3 mt-2">
                       <span className="text-sm font-medium text-[#9ca3af]">Totaal uren</span>
                       <span className="text-sm font-bold text-[#00ff88]">
-                        {hourRows.filter(r => !r.afgemeld && r.personName).reduce((sum, r) => sum + (parseFloat(r.hours) || 0), 0).toFixed(1).replace('.', ',')}
+                        {hourRows.filter(r => !r.afgemeld && !r.aangemeldDezeWeek && r.personName).reduce((sum, r) => sum + (parseFloat(r.hours) || 0), 0).toFixed(1).replace('.', ',')}
                       </span>
                     </div>
                   </>
@@ -801,7 +890,7 @@ export const WeekPlanning = ({ isBestuur, currentUserId, staffProfiles }: WeekPl
                   const required = getRequiredHoursForRow(row, weekStartValue);
                   return (
                     <div key={row.rowId} className="bg-[#0a0e1a] border border-[#1f2937] rounded-xl p-3 space-y-2">
-                      <div className="grid grid-cols-[1fr_80px_auto_auto] gap-2 items-center">
+                      <div className="grid grid-cols-[1fr_80px_auto_auto_auto] gap-2 items-center">
                         <input
                           type="text"
                           value={row.personName}
@@ -830,6 +919,17 @@ export const WeekPlanning = ({ isBestuur, currentUserId, staffProfiles }: WeekPl
                           {row.afgemeld ? 'Afgemeld' : 'Actief'}
                         </button>
                         <button
+                          onClick={() => updateHourRow(row.rowId, 'aangemeldDezeWeek', !row.aangemeldDezeWeek)}
+                          title="Persoon is deze week pas aangemeld — geen uren vereist"
+                          className={`h-9 px-3 rounded-lg border text-xs font-medium transition-colors whitespace-nowrap ${
+                            row.aangemeldDezeWeek
+                              ? 'border-blue-400/40 bg-blue-400/10 text-blue-300'
+                              : 'border-[#374151] bg-[#1f2937] text-[#9ca3af] hover:text-white'
+                          }`}
+                        >
+                          Deze week aangemeld
+                        </button>
+                        <button
                           onClick={() => removeHourRow(row.rowId)}
                           className="h-9 w-9 rounded-lg border border-[#374151] bg-[#1f2937] text-[#6b7280] hover:text-red-400 transition-colors flex items-center justify-center"
                         >
@@ -843,12 +943,16 @@ export const WeekPlanning = ({ isBestuur, currentUserId, staffProfiles }: WeekPl
                           'bg-[#00ff88]/10 text-[#00ff88]'
                         }`}>
                           {status === 'inactivity' && <><AlertTriangle className="h-3 w-3" /> Inactiviteit waarschuwing — onder de {Math.min(5, required).toFixed(1).replace('.', ',')} uur</>}
-                          {status === 'ok' && <><Check className="h-3 w-3" /> In orde</>}
+                          {status === 'ok' && <><Check className="h-3 w-3" /> {row.aangemeldDezeWeek ? 'Nieuw deze week — 0 uur vereist' : 'In orde'}</>}
                           {status === 'promotion' && <><TrendingUp className="h-3 w-3" /> Promotie — boven de 7 uur</>}
                         </div>
                       )}
                       {row.afgemeld && row.personName && (
-                        <p className="text-[10px] text-[#6b7280]">Afgemeld — moet deze week alsnog {required.toFixed(1).replace('.', ',')} uur halen</p>
+                        <p className="text-[10px] text-[#6b7280]">
+                          {findAbsenceForName(row.personName, getTaskWeekStart(selectedTask))
+                            ? `Afgemeld — moet deze week alsnog ${required.toFixed(1).replace('.', ',')} uur halen`
+                            : 'Afgemeld — geen uren vereist deze week'}
+                        </p>
                       )}
                     </div>
                   );
