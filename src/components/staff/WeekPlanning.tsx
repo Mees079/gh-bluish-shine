@@ -768,11 +768,63 @@ export const WeekPlanning = ({ isBestuur, currentUserId, staffProfiles }: WeekPl
               </div>
             ) : hoursViewOnly ? (
               /* View-only mode */
-              <div className="space-y-2">
+              <div className="space-y-3">
                 {hourRows.length === 0 || (hourRows.length === 1 && !hourRows[0].personName) ? (
                   <p className="text-sm text-[#374151] text-center py-8">Nog geen uren ingevuld voor deze week.</p>
                 ) : (
                   <>
+                    {/* Summary overview */}
+                    {(() => {
+                      const ws = getTaskWeekStart(selectedTask);
+                      const filled = hourRows.filter(r => r.personName);
+                      const promotions = filled.filter(r => getRowStatus(r, ws) === 'promotion');
+                      const warnings = filled.filter(r => getRowStatus(r, ws) === 'inactivity');
+                      const ok = filled.filter(r => getRowStatus(r, ws) === 'ok' && !r.aangemeldDezeWeek);
+                      const newThisWeek = filled.filter(r => r.aangemeldDezeWeek);
+                      const afgemeld = filled.filter(r => r.afgemeld);
+                      const Section = ({ title, color, items, icon: Ico, kind }: any) => (
+                        items.length === 0 ? null : (
+                          <div className={`rounded-xl border ${color.border} ${color.bg} p-3`}>
+                            <div className={`flex items-center gap-2 mb-2 ${color.text}`}>
+                              <Ico className="h-4 w-4" />
+                              <span className="text-sm font-semibold">{title}</span>
+                              <span className="text-xs opacity-70">({items.length})</span>
+                            </div>
+                            <ul className="space-y-1">
+                              {items.map((r: HourRow) => {
+                                const h = parseFloat(r.hours) || 0;
+                                const hist = historyByName[r.personName.trim()] || { promotions: 0, warnings: 0 };
+                                const ord = (n: number) => `${n}e`;
+                                let suffix = '';
+                                if (kind === 'promotion') {
+                                  const nth = hist.promotions + 1;
+                                  suffix = ` — ${ord(nth)} keer promotie`;
+                                } else if (kind === 'warning') {
+                                  const nth = hist.warnings + 1;
+                                  suffix = ` — ${ord(nth)} keer waarschuwing`;
+                                }
+                                return (
+                                  <li key={r.rowId} className="flex items-center justify-between text-xs">
+                                    <span className="text-white">{r.personName}{suffix && <span className="opacity-70">{suffix}</span>}</span>
+                                    <span className="opacity-80">{r.afgemeld || r.aangemeldDezeWeek ? '-' : `${h.toFixed(1).replace('.', ',')} u`}</span>
+                                  </li>
+                                );
+                              })}
+                            </ul>
+                          </div>
+                        )
+                      );
+                      return (
+                        <div className="space-y-2 mb-3">
+                          <Section title="Promoties" kind="promotion" items={promotions} icon={TrendingUp} color={{ border: 'border-amber-400/30', bg: 'bg-amber-400/5', text: 'text-amber-300' }} />
+                          <Section title="Inactiviteit waarschuwingen" kind="warning" items={warnings} icon={AlertTriangle} color={{ border: 'border-red-500/30', bg: 'bg-red-500/5', text: 'text-red-400' }} />
+                          <Section title="In orde" kind="ok" items={ok} icon={Check} color={{ border: 'border-[#00ff88]/30', bg: 'bg-[#00ff88]/5', text: 'text-[#00ff88]' }} />
+                          <Section title="Nieuw deze week" kind="new" items={newThisWeek} icon={Check} color={{ border: 'border-blue-400/30', bg: 'bg-blue-400/5', text: 'text-blue-300' }} />
+                          <Section title="Afgemeld" kind="afgemeld" items={afgemeld} icon={UserIcon} color={{ border: 'border-[#374151]', bg: 'bg-[#1f2937]/40', text: 'text-[#9ca3af]' }} />
+                        </div>
+                      );
+                    })()}
+
                     <div className="grid grid-cols-[1fr_80px_80px] gap-2 px-3 py-2 text-xs font-medium text-[#6b7280] uppercase tracking-wider">
                       <span>Naam</span>
                       <span className="text-center">Uren</span>
@@ -785,9 +837,15 @@ export const WeekPlanning = ({ isBestuur, currentUserId, staffProfiles }: WeekPl
                         <div key={row.rowId} className="bg-[#0a0e1a] border border-[#1f2937] rounded-lg px-3 py-3">
                           <div className="grid grid-cols-[1fr_80px_80px] gap-2 items-center">
                             <span className="text-sm text-white font-medium">{row.personName}</span>
-                            <span className={`text-sm text-center ${row.afgemeld ? 'text-[#374151]' : 'text-white'}`}>{row.afgemeld ? '-' : (parseFloat(row.hours) || 0).toFixed(1).replace('.', ',')}</span>
-                            <span className={`text-xs text-center px-2 py-1 rounded ${row.afgemeld ? 'bg-red-500/10 text-red-400' : 'bg-[#00ff88]/10 text-[#00ff88]'}`}>
-                              {row.afgemeld ? 'Afgemeld' : 'Actief'}
+                            <span className={`text-sm text-center ${row.afgemeld || row.aangemeldDezeWeek ? 'text-[#374151]' : 'text-white'}`}>
+                              {row.afgemeld || row.aangemeldDezeWeek ? '-' : (parseFloat(row.hours) || 0).toFixed(1).replace('.', ',')}
+                            </span>
+                            <span className={`text-xs text-center px-2 py-1 rounded ${
+                              row.afgemeld ? 'bg-red-500/10 text-red-400' :
+                              row.aangemeldDezeWeek ? 'bg-blue-400/10 text-blue-300' :
+                              'bg-[#00ff88]/10 text-[#00ff88]'
+                            }`}>
+                              {row.afgemeld ? 'Afgemeld' : row.aangemeldDezeWeek ? 'Nieuw' : 'Actief'}
                             </span>
                           </div>
                           {!row.afgemeld && status && (
@@ -797,12 +855,16 @@ export const WeekPlanning = ({ isBestuur, currentUserId, staffProfiles }: WeekPl
                               'bg-[#00ff88]/10 text-[#00ff88]'
                             }`}>
                               {status === 'inactivity' && <><AlertTriangle className="h-3 w-3" /> Inactiviteit waarschuwing — onder de {Math.min(5, required).toFixed(1).replace('.', ',')} uur</>}
-                              {status === 'ok' && <><Check className="h-3 w-3" /> In orde</>}
+                              {status === 'ok' && <><Check className="h-3 w-3" /> {row.aangemeldDezeWeek ? 'Nieuw deze week — 0 uur vereist' : 'In orde'}</>}
                               {status === 'promotion' && <><TrendingUp className="h-3 w-3" /> Promotie — boven de 7 uur</>}
                             </div>
                           )}
                           {row.afgemeld && (
-                            <p className="text-[10px] text-[#6b7280] mt-1.5">Moet deze week nog {required.toFixed(1).replace('.', ',')} uur halen</p>
+                            <p className="text-[10px] text-[#6b7280] mt-1.5">
+                              {findAbsenceForName(row.personName, getTaskWeekStart(selectedTask))
+                                ? `Moet deze week nog ${required.toFixed(1).replace('.', ',')} uur halen`
+                                : 'Geen uren vereist deze week'}
+                            </p>
                           )}
                         </div>
                       );
@@ -810,7 +872,7 @@ export const WeekPlanning = ({ isBestuur, currentUserId, staffProfiles }: WeekPl
                     <div className="flex justify-between items-center bg-[#1f2937] rounded-lg px-3 py-3 mt-2">
                       <span className="text-sm font-medium text-[#9ca3af]">Totaal uren</span>
                       <span className="text-sm font-bold text-[#00ff88]">
-                        {hourRows.filter(r => !r.afgemeld && r.personName).reduce((sum, r) => sum + (parseFloat(r.hours) || 0), 0).toFixed(1).replace('.', ',')}
+                        {hourRows.filter(r => !r.afgemeld && !r.aangemeldDezeWeek && r.personName).reduce((sum, r) => sum + (parseFloat(r.hours) || 0), 0).toFixed(1).replace('.', ',')}
                       </span>
                     </div>
                   </>
