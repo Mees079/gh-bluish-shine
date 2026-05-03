@@ -63,6 +63,7 @@ export const BestuurPlanningPanel = ({ currentUserId, staffProfiles, onClose }: 
   const [editing, setEditing] = useState<Task | null>(null);
   const [draggedId, setDraggedId] = useState<string | null>(null);
   const [dragOverDate, setDragOverDate] = useState<string | null>(null);
+  const [search, setSearch] = useState("");
 
   // Quick add per day
   const [addOpen, setAddOpen] = useState<string | null>(null);
