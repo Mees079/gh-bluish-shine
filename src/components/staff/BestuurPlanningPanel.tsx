@@ -99,10 +99,23 @@ export const BestuurPlanningPanel = ({ currentUserId, staffProfiles, onClose }: 
     setLoading(false);
   };
 
+  const matchesSearch = (t: Task) => {
+    if (!search.trim()) return true;
+    const q = search.trim().toLowerCase();
+    const assignee = t.assigned_to ? (staffProfiles.find(p => p.user_id === t.assigned_to)?.username || "") : "";
+    return (
+      t.title.toLowerCase().includes(q) ||
+      (t.description || "").toLowerCase().includes(q) ||
+      assignee.toLowerCase().includes(q)
+    );
+  };
+
   const tasksFor = (d: Date) => {
     const ds = format(d, "yyyy-MM-dd");
-    return tasks.filter(t => t.scheduled_date === ds);
+    return tasks.filter(t => t.scheduled_date === ds && matchesSearch(t));
   };
+
+  const matchedTasks = tasks.filter(matchesSearch);
 
   const usernameOf = (uid: string | null) =>
     uid ? (staffProfiles.find(p => p.user_id === uid)?.username || "?") : "Niemand";
