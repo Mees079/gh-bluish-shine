@@ -308,12 +308,12 @@ const Home = () => {
               return (
                 <Card 
                   key={stat.id}
-                  className="bg-background/80 backdrop-blur-md border-primary/30 p-4 lg:p-6 hover:border-primary hover:shadow-glow transition-all duration-300 animate-fade-in"
+                  className="bg-background/80 backdrop-blur-md border-primary/30 p-3 lg:p-4 hover:border-primary hover:shadow-glow transition-all duration-300 animate-fade-in"
                   style={{ animationDelay: `${idx * 0.1 + 0.3}s` }}
                 >
-                  <IconComponent className="h-8 w-8 text-primary mx-auto mb-2" />
-                  <p className="text-2xl lg:text-3xl font-bold text-foreground">{stat.value}</p>
-                  <p className="text-xs lg:text-sm text-muted-foreground">{stat.label}</p>
+                  <IconComponent className="h-6 w-6 lg:h-7 lg:w-7 text-primary mx-auto mb-2" />
+                  <p className="text-xl lg:text-2xl font-bold text-foreground">{stat.value}</p>
+                  <p className="text-[11px] lg:text-xs text-muted-foreground">{stat.label}</p>
                 </Card>
               );
             })}
