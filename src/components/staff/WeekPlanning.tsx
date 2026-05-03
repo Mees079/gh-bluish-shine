@@ -330,8 +330,9 @@ export const WeekPlanning = ({ isBestuur, currentUserId, staffProfiles }: WeekPl
     }) || null;
   };
 
-  // Required hours for a person in this week (default 5.25h, less if absent)
+  // Required hours for a person in this week (default 5.25h, less if absent, 0 if aangemeld-deze-week)
   const getRequiredHoursForRow = (row: HourRow, weekStartValue: string): number => {
+    if (row.aangemeldDezeWeek) return 0;
     const absence = findAbsenceForName(row.personName, weekStartValue);
     if (!absence) return DEFAULT_REQUIRED_HOURS;
     return calculateRequiredHoursForWeek(
@@ -341,12 +342,14 @@ export const WeekPlanning = ({ isBestuur, currentUserId, staffProfiles }: WeekPl
     );
   };
 
-  // Status: 'inactivity' | 'ok' | 'promotion' | null (afgemeld/leeg)
+  // Status: 'inactivity' | 'ok' | 'promotion' | null
   const getRowStatus = (row: HourRow, weekStartValue: string): 'inactivity' | 'ok' | 'promotion' | null => {
     if (!row.personName.trim() || row.afgemeld) return null;
-    const hours = parseFloat(row.hours);
-    if (isNaN(hours) || hours === 0) return null;
     const required = getRequiredHoursForRow(row, weekStartValue);
+    // 0 required (aangemeld deze week) → altijd OK
+    if (required === 0) return 'ok';
+    const hours = parseFloat(row.hours);
+    if (isNaN(hours)) return null;
     const inactivityThreshold = Math.min(5, required);
     if (hours < inactivityThreshold) return 'inactivity';
     if (hours > 7) return 'promotion';
@@ -357,12 +360,15 @@ export const WeekPlanning = ({ isBestuur, currentUserId, staffProfiles }: WeekPl
     setHourRows(prev => [...prev, createEmptyHourRow()]);
   };
 
-  const updateHourRow = (rowId: string, field: 'personName' | 'hours' | 'afgemeld', value: string | boolean) => {
+  const updateHourRow = (rowId: string, field: 'personName' | 'hours' | 'afgemeld' | 'aangemeldDezeWeek', value: string | boolean) => {
     const weekStartValue = selectedTask ? getTaskWeekStart(selectedTask) : '';
     setHourRows(prev => prev.map((row) => {
       if (row.rowId !== rowId) return row;
       if (field === 'afgemeld') {
-        return { ...row, afgemeld: Boolean(value), hours: value ? '0' : row.hours };
+        return { ...row, afgemeld: Boolean(value), aangemeldDezeWeek: false, hours: value ? '0' : row.hours };
+      }
+      if (field === 'aangemeldDezeWeek') {
+        return { ...row, aangemeldDezeWeek: Boolean(value), afgemeld: false };
       }
       const updated = { ...row, [field]: value };
       // Auto-set afgemeld when a typed name matches a known absence
