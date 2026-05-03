@@ -237,6 +237,37 @@ export const BestuurPlanningPanel = ({ currentUserId, staffProfiles, onClose }: 
             <X className="h-4 w-4" /> Sluiten
           </button>
         </div>
+
+        {/* Search + bulk delete */}
+        <div className="max-w-[1600px] mx-auto px-4 sm:px-6 pb-3 flex items-center gap-2 flex-wrap">
+          <div className="relative flex-1 min-w-[220px] max-w-md">
+            <Search className="h-4 w-4 text-[#6b7280] absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+            <input
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              placeholder="Zoek op taaknaam, beschrijving of persoon..."
+              className="w-full bg-[#0a0e1a] border border-[#1f2937] rounded-lg pl-9 pr-9 py-2 text-sm text-white placeholder:text-[#4b5563] focus:outline-none focus:border-[#00ff88]/40"
+            />
+            {search && (
+              <button onClick={() => setSearch("")} className="absolute right-2 top-1/2 -translate-y-1/2 text-[#6b7280] hover:text-white">
+                <X className="h-4 w-4" />
+              </button>
+            )}
+          </div>
+          {search.trim() && (
+            <>
+              <span className="text-xs text-[#6b7280]">{matchedTasks.length} match{matchedTasks.length === 1 ? "" : "es"}</span>
+              {matchedTasks.length > 0 && (
+                <button
+                  onClick={bulkDelete}
+                  className="flex items-center gap-1.5 text-xs font-medium text-red-300 hover:text-white bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 px-3 py-1.5 rounded-lg transition-colors"
+                >
+                  <Trash2 className="h-3.5 w-3.5" /> Verwijder alle ({matchedTasks.length})
+                </button>
+              )}
+            </>
+          )}
+        </div>
       </header>
 
       {/* 7-day grid */}
