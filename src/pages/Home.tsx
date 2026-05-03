@@ -293,13 +293,13 @@ const Home = () => {
             )}
           </div>
 
-          {/* Stats cards */}
+          {/* Stats cards - auto-fit so any count fits on screen */}
           <div
-            className="grid grid-cols-2 sm:grid-cols-3 gap-3 lg:gap-5 pt-8 max-w-6xl mx-auto"
+            className="grid grid-cols-2 sm:grid-cols-3 gap-3 lg:gap-4 pt-8 max-w-6xl mx-auto"
             style={{
               gridTemplateColumns:
-                stats.length > 0 && typeof window !== "undefined" && window.innerWidth >= 1024
-                  ? `repeat(${Math.min(stats.length, 5)}, minmax(0, 1fr))`
+                stats.length > 0
+                  ? `repeat(auto-fit, minmax(160px, 1fr))`
                   : undefined,
             }}
           >
