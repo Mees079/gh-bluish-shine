@@ -309,6 +309,23 @@ export const WeekPlanning = ({ isBestuur, currentUserId, staffProfiles }: WeekPl
     }));
 
     setHourRows(existingRows.length > 0 ? existingRows : [createEmptyHourRow()]);
+
+    // Build historical promotion/warning counts per person across past weeks (excluding current)
+    const { data: history } = await supabase
+      .from('staff_hours')
+      .select('person_name, hours, notes, week_start')
+      .neq('week_start', weekStartValue);
+    const counts: Record<string, { promotions: number; warnings: number }> = {};
+    (history || []).forEach((h: any) => {
+      const name = (h.person_name || '').trim();
+      if (!name) return;
+      if (h.notes === 'AFGEMELD' || h.notes === 'AANGEMELD_DEZE_WEEK') return;
+      const hrs = Number(h.hours) || 0;
+      counts[name] = counts[name] || { promotions: 0, warnings: 0 };
+      if (hrs > 7) counts[name].promotions += 1;
+      else if (hrs < 5) counts[name].warnings += 1;
+    });
+    setHistoryByName(counts);
     setHoursLoading(false);
   };
 
