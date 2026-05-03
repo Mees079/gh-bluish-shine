@@ -304,6 +304,7 @@ export const WeekPlanning = ({ isBestuur, currentUserId, staffProfiles }: WeekPl
       personName: entry.person_name || '',
       hours: String(entry.hours),
       afgemeld: entry.notes === 'AFGEMELD',
+      aangemeldDezeWeek: entry.notes === 'AANGEMELD_DEZE_WEEK',
     }));
 
     setHourRows(existingRows.length > 0 ? existingRows : [createEmptyHourRow()]);
