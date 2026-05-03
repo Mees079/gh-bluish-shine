@@ -327,7 +327,14 @@ export const BestuurPlanningPanel = ({ currentUserId, staffProfiles, onClose }: 
                           onClick={() => setEditing(t)}
                           className={`group relative cursor-grab active:cursor-grabbing bg-[#0a0e1a] border ${pm.ring} rounded-lg p-2.5 hover:border-[#00ff88]/40 transition-all ${dragging ? "opacity-40" : ""}`}
                         >
-                          <div className="flex items-start gap-2">
+                          <button
+                            onClick={(e) => { e.stopPropagation(); deleteTask(t); }}
+                            title="Verwijder taak"
+                            className="absolute top-1.5 right-1.5 z-10 p-1 rounded-md text-[#374151] hover:text-red-400 hover:bg-red-500/10 opacity-0 group-hover:opacity-100 transition-all"
+                          >
+                            <Trash2 className="h-3.5 w-3.5" />
+                          </button>
+                          <div className="flex items-start gap-2 pr-6">
                             <GripVertical className="h-4 w-4 text-[#374151] mt-0.5 flex-shrink-0 group-hover:text-[#6b7280]" />
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center gap-1.5 mb-1">
