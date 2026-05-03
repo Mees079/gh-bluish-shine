@@ -810,7 +810,7 @@ export const WeekPlanning = ({ isBestuur, currentUserId, staffProfiles }: WeekPl
                   const required = getRequiredHoursForRow(row, weekStartValue);
                   return (
                     <div key={row.rowId} className="bg-[#0a0e1a] border border-[#1f2937] rounded-xl p-3 space-y-2">
-                      <div className="grid grid-cols-[1fr_80px_auto_auto] gap-2 items-center">
+                      <div className="grid grid-cols-[1fr_80px_auto_auto_auto] gap-2 items-center">
                         <input
                           type="text"
                           value={row.personName}
@@ -839,6 +839,17 @@ export const WeekPlanning = ({ isBestuur, currentUserId, staffProfiles }: WeekPl
                           {row.afgemeld ? 'Afgemeld' : 'Actief'}
                         </button>
                         <button
+                          onClick={() => updateHourRow(row.rowId, 'aangemeldDezeWeek', !row.aangemeldDezeWeek)}
+                          title="Persoon is deze week pas aangemeld — geen uren vereist"
+                          className={`h-9 px-3 rounded-lg border text-xs font-medium transition-colors whitespace-nowrap ${
+                            row.aangemeldDezeWeek
+                              ? 'border-blue-400/40 bg-blue-400/10 text-blue-300'
+                              : 'border-[#374151] bg-[#1f2937] text-[#9ca3af] hover:text-white'
+                          }`}
+                        >
+                          Deze week aangemeld
+                        </button>
+                        <button
                           onClick={() => removeHourRow(row.rowId)}
                           className="h-9 w-9 rounded-lg border border-[#374151] bg-[#1f2937] text-[#6b7280] hover:text-red-400 transition-colors flex items-center justify-center"
                         >
@@ -852,12 +863,16 @@ export const WeekPlanning = ({ isBestuur, currentUserId, staffProfiles }: WeekPl
                           'bg-[#00ff88]/10 text-[#00ff88]'
                         }`}>
                           {status === 'inactivity' && <><AlertTriangle className="h-3 w-3" /> Inactiviteit waarschuwing — onder de {Math.min(5, required).toFixed(1).replace('.', ',')} uur</>}
-                          {status === 'ok' && <><Check className="h-3 w-3" /> In orde</>}
+                          {status === 'ok' && <><Check className="h-3 w-3" /> {row.aangemeldDezeWeek ? 'Nieuw deze week — 0 uur vereist' : 'In orde'}</>}
                           {status === 'promotion' && <><TrendingUp className="h-3 w-3" /> Promotie — boven de 7 uur</>}
                         </div>
                       )}
                       {row.afgemeld && row.personName && (
-                        <p className="text-[10px] text-[#6b7280]">Afgemeld — moet deze week alsnog {required.toFixed(1).replace('.', ',')} uur halen</p>
+                        <p className="text-[10px] text-[#6b7280]">
+                          {findAbsenceForName(row.personName, getTaskWeekStart(selectedTask))
+                            ? `Afgemeld — moet deze week alsnog ${required.toFixed(1).replace('.', ',')} uur halen`
+                            : 'Afgemeld — geen uren vereist deze week'}
+                        </p>
                       )}
                     </div>
                   );
