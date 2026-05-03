@@ -16,6 +16,7 @@ import {
   CheckCircle2,
   Circle,
   Clock,
+  Search,
 } from "lucide-react";
 
 interface StaffProfile {
