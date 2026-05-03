@@ -110,6 +110,7 @@ export const WeekPlanning = ({ isBestuur, currentUserId, staffProfiles }: WeekPl
   const [hourRows, setHourRows] = useState<HourRow[]>([createEmptyHourRow()]);
   const [hoursViewOnly, setHoursViewOnly] = useState(false);
   const [absences, setAbsences] = useState<AbsenceRecord[]>([]);
+  const [historyByName, setHistoryByName] = useState<Record<string, { promotions: number; warnings: number }>>({});
   const { toast } = useToast();
   const [showPlanningPanel, setShowPlanningPanel] = useState(false);
 
