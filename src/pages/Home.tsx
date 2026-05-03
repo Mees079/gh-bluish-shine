@@ -294,7 +294,15 @@ const Home = () => {
           </div>
 
           {/* Stats cards */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6 pt-12 max-w-5xl mx-auto">
+          <div
+            className="grid grid-cols-2 sm:grid-cols-3 gap-3 lg:gap-5 pt-8 max-w-6xl mx-auto"
+            style={{
+              gridTemplateColumns:
+                stats.length > 0 && typeof window !== "undefined" && window.innerWidth >= 1024
+                  ? `repeat(${Math.min(stats.length, 5)}, minmax(0, 1fr))`
+                  : undefined,
+            }}
+          >
             {stats.map((stat, idx) => {
               const IconComponent = iconMap[stat.icon] || Users;
               return (
