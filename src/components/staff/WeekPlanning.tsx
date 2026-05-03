@@ -75,6 +75,7 @@ interface HourRow {
   personName: string;
   hours: string;
   afgemeld: boolean;
+  aangemeldDezeWeek: boolean;
 }
 
 interface WeekPlanningProps {
@@ -88,6 +89,7 @@ const createEmptyHourRow = (): HourRow => ({
   personName: "",
   hours: "",
   afgemeld: false,
+  aangemeldDezeWeek: false,
 });
 
 export const WeekPlanning = ({ isBestuur, currentUserId, staffProfiles }: WeekPlanningProps) => {
