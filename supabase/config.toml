@@ -1,1 +1,16 @@
 project_id = "houdpzneyagzirbtchde"
+
+[functions.meos-roblox-signal]
+verify_jwt = false
+
+[functions.meos-roblox-login-code]
+verify_jwt = false
+
+[functions.meos-redeem-code]
+verify_jwt = false
+
+[functions.meos-init-super]
+verify_jwt = false
+
+[functions.meos-roblox-avatar]
+verify_jwt = false

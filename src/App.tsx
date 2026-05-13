@@ -13,6 +13,8 @@ import StaffLogin from "./pages/StaffLogin";
 import StaffDashboard from "./pages/StaffDashboard";
 import DeveloperLogin from "./pages/DeveloperLogin";
 import DeveloperDashboard from "./pages/DeveloperDashboard";
+import MeosLogin from "./pages/MeosLogin";
+import MeosDashboard from "./pages/MeosDashboard";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -34,6 +36,8 @@ const App = () => (
           <Route path="/staff/dashboard" element={<StaffDashboard />} />
           <Route path="/developer" element={<DeveloperLogin />} />
           <Route path="/developer/dashboard" element={<DeveloperDashboard />} />
+          <Route path="/meos" element={<MeosLogin />} />
+          <Route path="/meos/dashboard" element={<MeosDashboard />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
