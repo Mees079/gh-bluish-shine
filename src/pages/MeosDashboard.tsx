@@ -730,8 +730,8 @@ function BeheerTab() {
 
   const toggleRole = async (uid: string, role: string) => {
     const has = allRoles[uid]?.includes(role);
-    if (has) await supabase.from("user_roles").delete().eq("user_id", uid).eq("role", role);
-    else await supabase.from("user_roles").insert({ user_id: uid, role });
+    if (has) await supabase.from("user_roles").delete().eq("user_id", uid).eq("role", role as any);
+    else await supabase.from("user_roles").insert({ user_id: uid, role: role as any });
     load();
   };
 
