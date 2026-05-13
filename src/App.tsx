@@ -36,6 +36,8 @@ const App = () => (
           <Route path="/staff/dashboard" element={<StaffDashboard />} />
           <Route path="/developer" element={<DeveloperLogin />} />
           <Route path="/developer/dashboard" element={<DeveloperDashboard />} />
+          <Route path="/meos" element={<MeosLogin />} />
+          <Route path="/meos/dashboard" element={<MeosDashboard />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
