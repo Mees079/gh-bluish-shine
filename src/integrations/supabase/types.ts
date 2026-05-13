@@ -530,6 +530,367 @@ export type Database = {
         }
         Relationships: []
       }
+      meos_action_logs: {
+        Row: {
+          action: string
+          created_at: string
+          id: string
+          photo_path: string | null
+          reason: string
+          target_id: string | null
+          target_type: string
+          user_id: string
+          username: string | null
+        }
+        Insert: {
+          action: string
+          created_at?: string
+          id?: string
+          photo_path?: string | null
+          reason: string
+          target_id?: string | null
+          target_type: string
+          user_id: string
+          username?: string | null
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          id?: string
+          photo_path?: string | null
+          reason?: string
+          target_id?: string | null
+          target_type?: string
+          user_id?: string
+          username?: string | null
+        }
+        Relationships: []
+      }
+      meos_arrests: {
+        Row: {
+          ai_verified: boolean
+          author_id: string
+          author_username: string | null
+          charges: string | null
+          created_at: string
+          id: string
+          person_id: string
+          photo_hash: string
+          photo_path: string
+          reason: string
+        }
+        Insert: {
+          ai_verified?: boolean
+          author_id: string
+          author_username?: string | null
+          charges?: string | null
+          created_at?: string
+          id?: string
+          person_id: string
+          photo_hash: string
+          photo_path: string
+          reason: string
+        }
+        Update: {
+          ai_verified?: boolean
+          author_id?: string
+          author_username?: string | null
+          charges?: string | null
+          created_at?: string
+          id?: string
+          person_id?: string
+          photo_hash?: string
+          photo_path?: string
+          reason?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "meos_arrests_person_id_fkey"
+            columns: ["person_id"]
+            isOneToOne: false
+            referencedRelation: "meos_persons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      meos_incidents: {
+        Row: {
+          details: string | null
+          id: string
+          location_id: string | null
+          location_name: string
+          resolved_at: string | null
+          started_at: string
+          status: string
+          type: string
+        }
+        Insert: {
+          details?: string | null
+          id?: string
+          location_id?: string | null
+          location_name: string
+          resolved_at?: string | null
+          started_at?: string
+          status?: string
+          type?: string
+        }
+        Update: {
+          details?: string | null
+          id?: string
+          location_id?: string | null
+          location_name?: string
+          resolved_at?: string | null
+          started_at?: string
+          status?: string
+          type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "meos_incidents_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "meos_locations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      meos_locations: {
+        Row: {
+          active: boolean
+          created_at: string
+          id: string
+          last_signal_at: string | null
+          name: string
+          status: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          id?: string
+          last_signal_at?: string | null
+          name: string
+          status?: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          id?: string
+          last_signal_at?: string | null
+          name?: string
+          status?: string
+        }
+        Relationships: []
+      }
+      meos_login_codes: {
+        Row: {
+          code: string
+          created_at: string
+          expires_at: string
+          id: string
+          roblox_username: string
+          used: boolean
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          expires_at: string
+          id?: string
+          roblox_username: string
+          used?: boolean
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          expires_at?: string
+          id?: string
+          roblox_username?: string
+          used?: boolean
+        }
+        Relationships: []
+      }
+      meos_notes: {
+        Row: {
+          ai_reason: string | null
+          ai_verified: boolean
+          author_id: string
+          author_username: string | null
+          content: string
+          created_at: string
+          id: string
+          person_id: string
+          photo_hash: string
+          photo_path: string
+        }
+        Insert: {
+          ai_reason?: string | null
+          ai_verified?: boolean
+          author_id: string
+          author_username?: string | null
+          content: string
+          created_at?: string
+          id?: string
+          person_id: string
+          photo_hash: string
+          photo_path: string
+        }
+        Update: {
+          ai_reason?: string | null
+          ai_verified?: boolean
+          author_id?: string
+          author_username?: string | null
+          content?: string
+          created_at?: string
+          id?: string
+          person_id?: string
+          photo_hash?: string
+          photo_path?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "meos_notes_person_id_fkey"
+            columns: ["person_id"]
+            isOneToOne: false
+            referencedRelation: "meos_persons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      meos_persons: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          id: string
+          roblox_user_id: string | null
+          roblox_username: string
+          updated_at: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          id?: string
+          roblox_user_id?: string | null
+          roblox_username: string
+          updated_at?: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          id?: string
+          roblox_user_id?: string | null
+          roblox_username?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      meos_profiles: {
+        Row: {
+          created_at: string
+          id: string
+          must_change_password: boolean
+          roblox_username: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          must_change_password?: boolean
+          roblox_username: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          must_change_password?: boolean
+          roblox_username?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      meos_scenario_briefings: {
+        Row: {
+          author_id: string | null
+          content: string
+          created_at: string
+          id: string
+          location_id: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          author_id?: string | null
+          content: string
+          created_at?: string
+          id?: string
+          location_id: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          author_id?: string | null
+          content?: string
+          created_at?: string
+          id?: string
+          location_id?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "meos_scenario_briefings_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "meos_locations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      meos_warrants: {
+        Row: {
+          ai_verified: boolean
+          author_id: string
+          author_username: string | null
+          created_at: string
+          id: string
+          person_id: string
+          photo_hash: string
+          photo_path: string
+          reason: string
+          status: string
+        }
+        Insert: {
+          ai_verified?: boolean
+          author_id: string
+          author_username?: string | null
+          created_at?: string
+          id?: string
+          person_id: string
+          photo_hash: string
+          photo_path: string
+          reason: string
+          status?: string
+        }
+        Update: {
+          ai_verified?: boolean
+          author_id?: string
+          author_username?: string | null
+          created_at?: string
+          id?: string
+          person_id?: string
+          photo_hash?: string
+          photo_path?: string
+          reason?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "meos_warrants_person_id_fkey"
+            columns: ["person_id"]
+            isOneToOne: false
+            referencedRelation: "meos_persons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       product_images: {
         Row: {
           created_at: string | null
@@ -1069,6 +1430,8 @@ export type Database = {
       is_bestuur: { Args: { _user_id: string }; Returns: boolean }
       is_developer_member: { Args: { _user_id: string }; Returns: boolean }
       is_head_developer: { Args: { _user_id: string }; Returns: boolean }
+      is_meos_high: { Args: { _user_id: string }; Returns: boolean }
+      is_meos_member: { Args: { _user_id: string }; Returns: boolean }
       is_staff_member: { Args: { _user_id: string }; Returns: boolean }
       schedule_weekly_uren_tasks: { Args: never; Returns: undefined }
     }
@@ -1080,6 +1443,11 @@ export type Database = {
         | "bestuur"
         | "head_developer"
         | "developer"
+        | "meos_politie"
+        | "meos_dsi"
+        | "meos_commandant"
+        | "meos_hulpdiensten"
+        | "meos_bestuur"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1214,6 +1582,11 @@ export const Constants = {
         "bestuur",
         "head_developer",
         "developer",
+        "meos_politie",
+        "meos_dsi",
+        "meos_commandant",
+        "meos_hulpdiensten",
+        "meos_bestuur",
       ],
     },
   },
