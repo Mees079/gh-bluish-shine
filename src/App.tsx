@@ -13,6 +13,8 @@ import StaffLogin from "./pages/StaffLogin";
 import StaffDashboard from "./pages/StaffDashboard";
 import DeveloperLogin from "./pages/DeveloperLogin";
 import DeveloperDashboard from "./pages/DeveloperDashboard";
+import MeosLogin from "./pages/MeosLogin";
+import MeosDashboard from "./pages/MeosDashboard";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
