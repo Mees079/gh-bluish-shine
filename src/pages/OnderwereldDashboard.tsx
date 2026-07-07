@@ -84,7 +84,7 @@ const OnderwereldDashboard = () => {
       if (!prof) {
         const dn = session.user.email?.split("@")[0] || "Onbekend";
         await supabase.from("ow_profiles").insert({ user_id: session.user.id, display_name: dn });
-        prof = { user_id: session.user.id, display_name: dn, avatar_url: null };
+        prof = { user_id: session.user.id, display_name: dn, avatar_url: null } as any;
       }
       setMe(prof as OwProfile);
       setAvatarUrl(await signed("onderwereld-avatars", prof.avatar_url));
