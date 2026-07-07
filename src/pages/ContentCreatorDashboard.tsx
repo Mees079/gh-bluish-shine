@@ -24,9 +24,10 @@ type Creator = {
   last_checked_at: string | null;
   created_at: string;
 };
-type Reward = { id: string; points_required: number; hours_required: number; title: string; description: string | null; sort_order: number; is_active: boolean };
+type Reward = { id: string; points_required: number; hours_required: number; title: string; description: string | null; sort_order: number; is_active: boolean; boost_multiplier: number | null; boost_duration_minutes: number | null };
 type Claim = { id: string; creator_id: string; reward_id: string; claimed_at: string; status: string; code: string | null; points_spent: number; redeemed_at: string | null };
 type Session = { id: string; creator_id: string; started_at: string; ended_at: string | null; duration_seconds: number | null; stream_title: string | null };
+type Boost = { id: string; creator_id: string | null; label: string; multiplier: number; interval_seconds: number | null; starts_at: string; ends_at: string; source: string; points_spent: number };
 
 const fmtHours = (s: number) => `${Math.floor(s / 3600)}u ${Math.floor((s % 3600) / 60)}m`;
 const fmtHoursDecimal = (s: number) => (s / 3600).toFixed(1);
