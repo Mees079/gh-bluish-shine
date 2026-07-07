@@ -450,8 +450,8 @@ const ContentCreatorDashboard = () => {
         {isHead && (
           <section className="bg-gradient-to-br from-[#180a2d] to-[#150822] border border-purple-500/25 rounded-2xl p-6">
             <h2 className="text-lg font-semibold mb-1 flex items-center gap-2"><Plus className="h-5 w-5 text-purple-400" /> Nieuw creator account</h2>
-            <p className="text-xs text-slate-400 mb-4">De <b>login gebruikersnaam</b> wordt gebruikt om in te loggen. De <b>TikTok gebruikersnaam</b> wordt gemonitord voor livestatus.</p>
-            <form onSubmit={createAccount} className="grid grid-cols-1 md:grid-cols-4 gap-3">
+            <p className="text-xs text-slate-400 mb-4">De <b>login gebruikersnaam</b> wordt gebruikt om in te loggen. De <b>TikTok gebruikersnaam</b> wordt gemonitord voor livestatus. De <b>Roblox gebruikersnaam</b> wordt gebruikt om te controleren of de creator daadwerkelijk in-game zit — anders telt de live-tijd niet.</p>
+            <form onSubmit={createAccount} className="grid grid-cols-1 md:grid-cols-5 gap-3">
               <div>
                 <label className="text-xs text-slate-400 mb-1 block">Login gebruikersnaam</label>
                 <input value={newLogin} onChange={e => setNewLogin(e.target.value)} placeholder="bv. jan_creator" required className="w-full bg-[#1a0f2e] border border-slate-700 rounded-lg px-3 py-2 text-sm" />
@@ -460,9 +460,13 @@ const ContentCreatorDashboard = () => {
                 <label className="text-xs text-slate-400 mb-1 block">TikTok gebruikersnaam</label>
                 <input value={newTikTok} onChange={e => setNewTikTok(e.target.value)} placeholder="@tiktok_naam" required className="w-full bg-[#1a0f2e] border border-slate-700 rounded-lg px-3 py-2 text-sm" />
               </div>
+              <div>
+                <label className="text-xs text-slate-400 mb-1 block">Roblox gebruikersnaam</label>
+                <input value={newRoblox} onChange={e => setNewRoblox(e.target.value)} placeholder="RobloxUser123" required className="w-full bg-[#1a0f2e] border border-slate-700 rounded-lg px-3 py-2 text-sm" />
+              </div>
               <label className="flex items-center gap-2 text-sm mt-6">
                 <input type="checkbox" checked={newHead} onChange={e => setNewHead(e.target.checked)} className="accent-purple-500" />
-                Head Content Creator
+                Head CC
               </label>
               <button type="submit" disabled={creating} className="bg-gradient-to-r from-purple-600 to-fuchsia-500 hover:brightness-110 rounded-lg text-sm mt-6 disabled:opacity-50 shadow-[0_0_20px_rgba(168,85,247,0.35)]">
                 {creating ? "Aanmaken..." : "Account aanmaken"}
