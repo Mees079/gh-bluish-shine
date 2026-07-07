@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import {
   Video, LogOut, Plus, Trophy, RefreshCw, Trash2, Radio, Clock, Gift, Ticket,
   Users, Flame, TrendingUp, Crown, ExternalLink, Copy, Sparkles, Calendar, Award,
+  Coins, CheckCircle2, KeyRound,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -16,14 +17,15 @@ type Creator = {
   display_name: string | null;
   is_active: boolean;
   total_seconds: number;
+  points: number;
   is_currently_live: boolean;
   is_in_game: boolean;
   last_ingame_ping_at: string | null;
   last_checked_at: string | null;
   created_at: string;
 };
-type Reward = { id: string; hours_required: number; title: string; description: string | null; sort_order: number; is_active: boolean };
-type Claim = { id: string; creator_id: string; reward_id: string; claimed_at: string; status: string };
+type Reward = { id: string; points_required: number; hours_required: number; title: string; description: string | null; sort_order: number; is_active: boolean };
+type Claim = { id: string; creator_id: string; reward_id: string; claimed_at: string; status: string; code: string | null; points_spent: number; redeemed_at: string | null };
 type Session = { id: string; creator_id: string; started_at: string; ended_at: string | null; duration_seconds: number | null; stream_title: string | null };
 
 const fmtHours = (s: number) => `${Math.floor(s / 3600)}u ${Math.floor((s % 3600) / 60)}m`;
@@ -51,8 +53,8 @@ const ContentCreatorDashboard = () => {
 
   const load = async () => {
     const [{ data: cs }, { data: rs }, { data: cls }, { data: ss }] = await Promise.all([
-      supabase.from("cc_creators").select("*").order("total_seconds", { ascending: false }),
-      supabase.from("cc_rewards").select("*").order("hours_required"),
+      supabase.from("cc_creators").select("*").order("points", { ascending: false }),
+      supabase.from("cc_rewards").select("*").order("points_required"),
       supabase.from("cc_reward_claims").select("*").order("claimed_at", { ascending: false }),
       supabase.from("cc_live_sessions").select("*").order("started_at", { ascending: false }).limit(50),
     ]);
@@ -130,15 +132,15 @@ const ContentCreatorDashboard = () => {
     await load();
   };
 
-  // Reward management
-  const [rh, setRh] = useState(5);
+  // Reward management (points based)
+  const [rp, setRp] = useState(4);
   const [rt, setRt] = useState("");
   const [rd, setRd] = useState("");
   const addReward = async (e: React.FormEvent) => {
     e.preventDefault();
-    const { error } = await supabase.from("cc_rewards").insert({ hours_required: rh, title: rt, description: rd, sort_order: rh });
+    const { error } = await supabase.from("cc_rewards").insert({ points_required: rp, hours_required: 0, title: rt, description: rd, sort_order: rp });
     if (error) return toast.error(error.message);
-    setRh(5); setRt(""); setRd("");
+    setRp(4); setRt(""); setRd("");
     await load();
     toast.success("Beloning toegevoegd");
   };
@@ -148,21 +150,38 @@ const ContentCreatorDashboard = () => {
     await load();
   };
 
+  const [lastCode, setLastCode] = useState<{ code: string; title: string } | null>(null);
   const claimReward = async (reward: Reward) => {
     if (!myCreator) return toast.error("Geen creator profiel gekoppeld");
-    const { error } = await supabase.from("cc_reward_claims").insert({ creator_id: myCreator.id, reward_id: reward.id });
-    if (error) return toast.error(error.message);
-    toast.success("Beloning geclaimd! Maak een ticket in Discord.");
+    if ((myCreator.points || 0) < reward.points_required) return toast.error("Niet genoeg punten");
+    if (!confirm(`Beloning "${reward.title}" kopen voor ${reward.points_required} punten?`)) return;
+    const { data, error } = await supabase.functions.invoke("cc-claim-reward", { body: { reward_id: reward.id } });
+    if (error || (data as any)?.error) return toast.error((data as any)?.error || "Aankoop mislukt");
+    setLastCode({ code: (data as any).code, title: reward.title });
+    toast.success("Aankoop gelukt! Kopieer je code.");
     await load();
   };
 
-  const isClaimed = (rewardId: string, creatorId?: string) =>
-    claims.some(c => c.reward_id === rewardId && c.creator_id === (creatorId || myCreator?.id));
+  // Head CC: redeem a code that a creator brought via Discord ticket
+  const [redeemCode, setRedeemCode] = useState("");
+  const [redeemInfo, setRedeemInfo] = useState<any>(null);
+  const [redeeming, setRedeeming] = useState(false);
+  const doRedeem = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setRedeeming(true);
+    setRedeemInfo(null);
+    const { data, error } = await supabase.functions.invoke("cc-redeem-code", { body: { code: redeemCode.trim().toUpperCase() } });
+    setRedeeming(false);
+    if (error || (data as any)?.error) return toast.error((data as any)?.error || "Ongeldig");
+    setRedeemInfo((data as any).claim);
+    setRedeemCode("");
+    toast.success("Code ingewisseld");
+    await load();
+  };
 
   const nextReward = useMemo(() => {
     if (!myCreator) return null;
-    const h = myCreator.total_seconds / 3600;
-    return rewards.filter(r => r.hours_required > h).sort((a, b) => a.hours_required - b.hours_required)[0] || null;
+    return rewards.filter(r => r.points_required > (myCreator.points || 0)).sort((a, b) => a.points_required - b.points_required)[0] || null;
   }, [rewards, myCreator]);
 
   if (loading) return (
@@ -229,9 +248,10 @@ const ContentCreatorDashboard = () => {
                 Open mijn TikTok LIVE <ExternalLink className="h-3 w-3" />
               </a>
             </div>
-            <div className="relative grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div className="relative grid grid-cols-1 md:grid-cols-5 gap-4">
               <MiniStat label="TikTok" value={`@${myCreator.twitch_username}`} accent />
               <MiniStat label="Status" value={myCreator.is_currently_live ? "🔴 LIVE" : "Offline"} accent={myCreator.is_currently_live} />
+              <MiniStat label="Punten" value={`⭐ ${myCreator.points || 0}`} accent />
               <MiniStat label="Totaal live" value={fmtHours(myCreator.total_seconds)} />
               <MiniStat label="Laatst gecheckt" value={timeAgo(myCreator.last_checked_at) + " geleden"} />
             </div>
@@ -240,11 +260,23 @@ const ContentCreatorDashboard = () => {
               <div className="relative mt-6 bg-[#0f0620]/60 border border-purple-500/20 rounded-xl p-4">
                 <div className="flex items-center justify-between mb-2 text-sm">
                   <span className="flex items-center gap-2 text-slate-300"><Award className="h-4 w-4 text-yellow-400" /> Volgende beloning: <span className="text-white font-semibold">{nextReward.title}</span></span>
-                  <span className="text-xs text-slate-400">{fmtHoursDecimal(myCreator.total_seconds)} / {nextReward.hours_required}u</span>
+                  <span className="text-xs text-slate-400">{myCreator.points || 0} / {nextReward.points_required} punten</span>
                 </div>
                 <div className="h-2.5 bg-slate-800 rounded-full overflow-hidden">
-                  <div className="h-full bg-gradient-to-r from-purple-500 via-fuchsia-500 to-pink-400 transition-all" style={{ width: `${Math.min(100, (myCreator.total_seconds / 3600 / nextReward.hours_required) * 100)}%` }} />
+                  <div className="h-full bg-gradient-to-r from-purple-500 via-fuchsia-500 to-pink-400 transition-all" style={{ width: `${Math.min(100, ((myCreator.points || 0) / nextReward.points_required) * 100)}%` }} />
                 </div>
+                <p className="text-xs text-slate-500 mt-2">Je verdient <b>1 punt per 15 min</b> dat je TikTok LIVE bent én in-game zit.</p>
+              </div>
+            )}
+
+            {lastCode && (
+              <div className="relative mt-4 bg-emerald-500/10 border border-emerald-500/30 rounded-xl p-4">
+                <div className="flex items-center gap-2 text-emerald-300 text-sm font-semibold mb-1"><CheckCircle2 className="h-4 w-4" /> Aankoop gelukt: {lastCode.title}</div>
+                <div className="flex items-center gap-3 flex-wrap">
+                  <code className="font-mono font-bold text-2xl text-emerald-200 bg-black/30 px-3 py-1.5 rounded-lg tracking-widest">{lastCode.code}</code>
+                  <button onClick={() => { navigator.clipboard.writeText(lastCode.code); toast.success("Gekopieerd"); }} className="flex items-center gap-1 text-xs bg-emerald-500/20 border border-emerald-500/40 hover:bg-emerald-500/30 px-3 py-1.5 rounded-lg"><Copy className="h-3 w-3" /> Kopieer code</button>
+                </div>
+                <p className="text-xs text-slate-400 mt-2">Maak een ticket aan in Discord en stuur deze code — een Head Content Creator geeft je het product.</p>
               </div>
             )}
           </section>
@@ -252,18 +284,18 @@ const ContentCreatorDashboard = () => {
 
         {/* Grid: rewards + leaderboard */}
         <section className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Beloningen */}
+          {/* Beloningen (shop) */}
           <div className="lg:col-span-2 bg-[#150822]/80 border border-purple-500/20 rounded-2xl p-6">
-            <h2 className="text-lg font-semibold mb-4 flex items-center gap-2"><Trophy className="h-5 w-5 text-yellow-400" /> Beloningen</h2>
+            <h2 className="text-lg font-semibold mb-1 flex items-center gap-2"><Trophy className="h-5 w-5 text-yellow-400" /> Puntenshop</h2>
+            <p className="text-xs text-slate-400 mb-4">Koop een beloning met je verdiende punten. Je krijgt een unieke code die je in Discord inlevert.</p>
             {rewards.length === 0 ? (
               <p className="text-slate-400 text-sm">Nog geen beloningen ingesteld.</p>
             ) : (
               <div className="space-y-3">
                 {rewards.map(r => {
-                  const myHours = (myCreator?.total_seconds || 0) / 3600;
-                  const pct = Math.min(100, (myHours / r.hours_required) * 100);
-                  const reached = myHours >= r.hours_required;
-                  const claimed = isClaimed(r.id);
+                  const myPts = myCreator?.points || 0;
+                  const pct = Math.min(100, (myPts / r.points_required) * 100);
+                  const reached = myPts >= r.points_required;
                   return (
                     <div key={r.id} className="bg-gradient-to-br from-[#1a0f2e] to-[#150822] border border-purple-500/10 rounded-xl p-4 hover:border-purple-500/30 transition">
                       <div className="flex items-start justify-between gap-4 mb-2">
@@ -271,20 +303,18 @@ const ContentCreatorDashboard = () => {
                           <div className="font-semibold flex items-center gap-2 flex-wrap">
                             <Gift className="h-4 w-4 text-purple-400 shrink-0" />
                             <span>{r.title}</span>
-                            <span className="text-xs bg-purple-500/15 text-purple-300 border border-purple-500/30 px-2 py-0.5 rounded-full">{r.hours_required}u</span>
+                            <span className="text-xs bg-yellow-500/15 text-yellow-300 border border-yellow-500/30 px-2 py-0.5 rounded-full flex items-center gap-1"><Coins className="h-3 w-3" /> {r.points_required} pt</span>
                           </div>
                           {r.description && <p className="text-sm text-slate-400 mt-1">{r.description}</p>}
                         </div>
                         <div className="flex gap-2 items-center shrink-0">
                           {myCreator && (
-                            claimed ? (
-                              <span className="text-xs bg-green-500/15 text-green-300 px-3 py-1.5 rounded-lg border border-green-500/30">✓ Geclaimd</span>
-                            ) : reached ? (
+                            reached ? (
                               <button onClick={() => claimReward(r)} className="text-xs bg-gradient-to-r from-purple-600 to-fuchsia-500 hover:brightness-110 px-3 py-1.5 rounded-lg flex items-center gap-1 shadow-[0_0_20px_rgba(168,85,247,0.4)]">
-                                <Ticket className="h-3 w-3" /> Claim
+                                <Ticket className="h-3 w-3" /> Koop ({r.points_required})
                               </button>
                             ) : (
-                              <span className="text-xs text-slate-500">Nog {(r.hours_required - myHours).toFixed(1)}u</span>
+                              <span className="text-xs text-slate-500">Nog {r.points_required - myPts} pt</span>
                             )
                           )}
                           {isHead && (
@@ -297,9 +327,6 @@ const ContentCreatorDashboard = () => {
                           <div className="h-full bg-gradient-to-r from-purple-500 to-fuchsia-400" style={{ width: `${pct}%` }} />
                         </div>
                       )}
-                      {claimed && (
-                        <p className="text-xs text-yellow-300/90 mt-2 flex items-center gap-1"><Ticket className="h-3 w-3" /> Maak een ticket aan in de Discord om je beloning op te halen.</p>
-                      )}
                     </div>
                   );
                 })}
@@ -308,13 +335,14 @@ const ContentCreatorDashboard = () => {
 
             {isHead && (
               <form onSubmit={addReward} className="mt-6 border-t border-purple-500/20 pt-6 grid grid-cols-1 md:grid-cols-4 gap-3">
-                <input type="number" min={1} value={rh} onChange={e => setRh(+e.target.value)} placeholder="Uren" required className="bg-[#1a0f2e] border border-slate-700 rounded-lg px-3 py-2 text-sm" />
+                <input type="number" min={1} value={rp} onChange={e => setRp(+e.target.value)} placeholder="Punten" required className="bg-[#1a0f2e] border border-slate-700 rounded-lg px-3 py-2 text-sm" />
                 <input value={rt} onChange={e => setRt(e.target.value)} placeholder="Titel (bv. €10 Robux)" required className="bg-[#1a0f2e] border border-slate-700 rounded-lg px-3 py-2 text-sm" />
                 <input value={rd} onChange={e => setRd(e.target.value)} placeholder="Beschrijving" className="bg-[#1a0f2e] border border-slate-700 rounded-lg px-3 py-2 text-sm" />
                 <button type="submit" className="bg-purple-600 hover:bg-purple-500 rounded-lg text-sm flex items-center justify-center gap-1"><Plus className="h-4 w-4" /> Toevoegen</button>
               </form>
             )}
           </div>
+
 
           {/* Leaderboard */}
           <div className="bg-[#150822]/80 border border-purple-500/20 rounded-2xl p-6">
@@ -333,7 +361,7 @@ const ContentCreatorDashboard = () => {
                       <span className="font-medium truncate">@{c.twitch_username}</span>
                       {c.is_currently_live && <span className="text-[10px] bg-red-500/20 text-red-300 px-1.5 py-0.5 rounded animate-pulse">LIVE</span>}
                     </div>
-                    <div className="text-xs text-slate-500 font-mono">{fmtHours(c.total_seconds)}</div>
+                    <div className="text-xs text-slate-500 font-mono flex gap-2"><span className="text-yellow-400">⭐ {c.points || 0}</span><span>·</span><span>{fmtHours(c.total_seconds)}</span></div>
                   </div>
                   {i === 0 && <Crown className="h-4 w-4 text-yellow-400 shrink-0" />}
                 </div>
@@ -359,7 +387,8 @@ const ContentCreatorDashboard = () => {
                   <th className="text-left py-2 font-medium">Status</th>
                   <th className="text-left py-2 font-medium">In-game</th>
                   <th className="text-left py-2 font-medium">Uren</th>
-                  <th className="text-left py-2 font-medium">Beloningen</th>
+                  <th className="text-left py-2 font-medium">Punten</th>
+                  <th className="text-left py-2 font-medium">Aankopen</th>
                   <th className="text-left py-2 font-medium">Laatst</th>
                   {isHead && <th></th>}
                 </tr>
@@ -383,6 +412,7 @@ const ContentCreatorDashboard = () => {
                         {c.is_in_game ? <span className="inline-flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" /> in-game</span> : "-"}
                       </td>
                       <td className="font-mono">{fmtHours(c.total_seconds)}</td>
+                      <td className="font-mono text-yellow-300">⭐ {c.points || 0}</td>
                       <td className="text-slate-400"><span className="text-xs bg-purple-500/10 border border-purple-500/20 rounded-full px-2 py-0.5">{claimedCount}</span></td>
                       <td className="text-slate-500 text-xs">{c.last_checked_at ? timeAgo(c.last_checked_at) + " geleden" : "-"}</td>
                       {isHead && (
@@ -422,29 +452,66 @@ const ContentCreatorDashboard = () => {
           </div>
 
           <div className="bg-[#150822]/80 border border-purple-500/20 rounded-2xl p-6">
-            <h2 className="text-lg font-semibold mb-4 flex items-center gap-2"><Ticket className="h-5 w-5 text-yellow-400" /> Recente claims</h2>
+            <h2 className="text-lg font-semibold mb-4 flex items-center gap-2"><Ticket className="h-5 w-5 text-yellow-400" /> Recente aankopen</h2>
             <div className="space-y-2 max-h-80 overflow-y-auto">
-              {claims.slice(0, 15).map(cl => {
+              {claims.slice(0, 20).map(cl => {
                 const creator = creators.find(c => c.id === cl.creator_id);
                 const reward = rewards.find(r => r.id === cl.reward_id);
+                const mine = creator?.user_id === me?.id;
+                const showCode = isHead || mine;
                 return (
-                  <div key={cl.id} className="flex items-center justify-between bg-[#1a0f2e]/60 rounded-lg px-3 py-2 text-sm">
-                    <div className="min-w-0">
-                      <div className="truncate">
-                        <span className="font-mono text-purple-300">@{creator?.twitch_username || "?"}</span>
-                        <span className="text-slate-500"> claimde </span>
-                        <span className="text-white font-medium">{reward?.title || "?"}</span>
+                  <div key={cl.id} className="bg-[#1a0f2e]/60 rounded-lg px-3 py-2 text-sm">
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="min-w-0">
+                        <div className="truncate">
+                          <span className="font-mono text-purple-300">@{creator?.twitch_username || "?"}</span>
+                          <span className="text-slate-500"> kocht </span>
+                          <span className="text-white font-medium">{reward?.title || "?"}</span>
+                          <span className="text-yellow-400 text-xs"> · {cl.points_spent}pt</span>
+                        </div>
+                        <div className="text-xs text-slate-500">{new Date(cl.claimed_at).toLocaleString("nl-NL")}</div>
                       </div>
-                      <div className="text-xs text-slate-500">{new Date(cl.claimed_at).toLocaleString("nl-NL")}</div>
+                      <span className={`text-[10px] px-2 py-0.5 rounded-full uppercase border ${cl.redeemed_at ? "bg-emerald-500/15 text-emerald-300 border-emerald-500/30" : "bg-yellow-500/15 text-yellow-300 border-yellow-500/30"}`}>
+                        {cl.redeemed_at ? "ingewisseld" : "open"}
+                      </span>
                     </div>
-                    <span className="text-[10px] bg-yellow-500/15 text-yellow-300 border border-yellow-500/30 px-2 py-0.5 rounded-full uppercase">{cl.status || "open"}</span>
+                    {showCode && cl.code && (
+                      <div className="mt-1.5 flex items-center gap-2">
+                        <code className="font-mono text-xs text-emerald-200 bg-black/40 px-2 py-0.5 rounded tracking-wider">{cl.code}</code>
+                        <button onClick={() => { navigator.clipboard.writeText(cl.code!); toast.success("Gekopieerd"); }} className="text-slate-500 hover:text-white"><Copy className="h-3 w-3" /></button>
+                      </div>
+                    )}
                   </div>
                 );
               })}
-              {claims.length === 0 && <p className="text-slate-500 text-sm">Nog geen claims.</p>}
+              {claims.length === 0 && <p className="text-slate-500 text-sm">Nog geen aankopen.</p>}
             </div>
           </div>
         </section>
+
+        {/* Head CC: code inwisselen */}
+        {isHead && (
+          <section className="bg-gradient-to-br from-[#180a2d] to-[#150822] border border-emerald-500/25 rounded-2xl p-6">
+            <h2 className="text-lg font-semibold mb-1 flex items-center gap-2"><KeyRound className="h-5 w-5 text-emerald-400" /> Code inwisselen (Head CC)</h2>
+            <p className="text-xs text-slate-400 mb-4">Vul de code in die een creator via Discord ticket doorgaf. Na inwisselen zie je welk product je moet uitreiken.</p>
+            <form onSubmit={doRedeem} className="flex gap-2">
+              <input value={redeemCode} onChange={e => setRedeemCode(e.target.value.toUpperCase())} placeholder="CC-XXXX-XXXX" required className="flex-1 bg-[#1a0f2e] border border-slate-700 rounded-lg px-3 py-2 text-sm font-mono tracking-widest" />
+              <button type="submit" disabled={redeeming} className="bg-emerald-600 hover:bg-emerald-500 rounded-lg text-sm px-4 flex items-center gap-1 disabled:opacity-50">
+                <CheckCircle2 className="h-4 w-4" /> Inwisselen
+              </button>
+            </form>
+            {redeemInfo && (
+              <div className="mt-4 p-4 bg-emerald-500/10 border border-emerald-500/30 rounded-lg text-sm space-y-1">
+                <div className="font-semibold text-emerald-300 flex items-center gap-2"><CheckCircle2 className="h-4 w-4" /> Geef dit uit:</div>
+                <div>Product: <b className="text-white">{redeemInfo.cc_rewards?.title}</b></div>
+                {redeemInfo.cc_rewards?.description && <div className="text-slate-400 text-xs">{redeemInfo.cc_rewards.description}</div>}
+                <div>Creator: <span className="font-mono text-purple-300">@{redeemInfo.cc_creators?.twitch_username}</span></div>
+                <div>Roblox: <span className="font-mono text-purple-300">{redeemInfo.cc_creators?.roblox_username || "-"}</span></div>
+                <div className="text-xs text-slate-400">Kosten: {redeemInfo.points_spent} pt</div>
+              </div>
+            )}
+          </section>
+        )}
 
         {/* Account aanmaken (head only) */}
         {isHead && (
