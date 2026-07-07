@@ -44,6 +44,158 @@ export type Database = {
         }
         Relationships: []
       }
+      cc_creators: {
+        Row: {
+          created_at: string
+          display_name: string | null
+          id: string
+          is_active: boolean
+          is_currently_live: boolean
+          last_checked_at: string | null
+          total_seconds: number
+          twitch_user_id: string | null
+          twitch_username: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          is_active?: boolean
+          is_currently_live?: boolean
+          last_checked_at?: string | null
+          total_seconds?: number
+          twitch_user_id?: string | null
+          twitch_username: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          is_active?: boolean
+          is_currently_live?: boolean
+          last_checked_at?: string | null
+          total_seconds?: number
+          twitch_user_id?: string | null
+          twitch_username?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      cc_live_sessions: {
+        Row: {
+          created_at: string
+          creator_id: string
+          duration_seconds: number
+          ended_at: string | null
+          id: string
+          started_at: string
+          stream_title: string | null
+        }
+        Insert: {
+          created_at?: string
+          creator_id: string
+          duration_seconds?: number
+          ended_at?: string | null
+          id?: string
+          started_at?: string
+          stream_title?: string | null
+        }
+        Update: {
+          created_at?: string
+          creator_id?: string
+          duration_seconds?: number
+          ended_at?: string | null
+          id?: string
+          started_at?: string
+          stream_title?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cc_live_sessions_creator_id_fkey"
+            columns: ["creator_id"]
+            isOneToOne: false
+            referencedRelation: "cc_creators"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      cc_reward_claims: {
+        Row: {
+          claimed_at: string
+          creator_id: string
+          id: string
+          reward_id: string
+          status: string
+        }
+        Insert: {
+          claimed_at?: string
+          creator_id: string
+          id?: string
+          reward_id: string
+          status?: string
+        }
+        Update: {
+          claimed_at?: string
+          creator_id?: string
+          id?: string
+          reward_id?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cc_reward_claims_creator_id_fkey"
+            columns: ["creator_id"]
+            isOneToOne: false
+            referencedRelation: "cc_creators"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cc_reward_claims_reward_id_fkey"
+            columns: ["reward_id"]
+            isOneToOne: false
+            referencedRelation: "cc_rewards"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      cc_rewards: {
+        Row: {
+          created_at: string
+          description: string | null
+          hours_required: number
+          id: string
+          is_active: boolean
+          sort_order: number
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          hours_required: number
+          id?: string
+          is_active?: boolean
+          sort_order?: number
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          hours_required?: number
+          id?: string
+          is_active?: boolean
+          sort_order?: number
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       code_claims: {
         Row: {
           claimed_at: string
@@ -1428,7 +1580,9 @@ export type Database = {
       }
       is_admin: { Args: { _user_id: string }; Returns: boolean }
       is_bestuur: { Args: { _user_id: string }; Returns: boolean }
+      is_content_creator: { Args: { _user_id: string }; Returns: boolean }
       is_developer_member: { Args: { _user_id: string }; Returns: boolean }
+      is_head_content_creator: { Args: { _user_id: string }; Returns: boolean }
       is_head_developer: { Args: { _user_id: string }; Returns: boolean }
       is_meos_high: { Args: { _user_id: string }; Returns: boolean }
       is_meos_member: { Args: { _user_id: string }; Returns: boolean }
