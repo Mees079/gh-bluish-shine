@@ -659,12 +659,13 @@ const ContentCreatorDashboard = () => {
   );
 };
 
-const StatCard = ({ icon, label, value, tint, pulse }: { icon: React.ReactNode; label: string; value: string; tint: "purple" | "red" | "fuchsia" | "cyan"; pulse?: boolean }) => {
+const StatCard = ({ icon, label, value, tint, pulse }: { icon: React.ReactNode; label: string; value: string; tint: "purple" | "red" | "fuchsia" | "cyan" | "yellow"; pulse?: boolean }) => {
   const tints: Record<string, string> = {
     purple: "from-purple-500/15 to-transparent border-purple-500/30 text-purple-300",
     red: "from-red-500/15 to-transparent border-red-500/30 text-red-300",
     fuchsia: "from-fuchsia-500/15 to-transparent border-fuchsia-500/30 text-fuchsia-300",
     cyan: "from-cyan-500/15 to-transparent border-cyan-500/30 text-cyan-300",
+    yellow: "from-yellow-500/15 to-transparent border-yellow-500/30 text-yellow-300",
   };
   return (
     <div className={`relative bg-gradient-to-br ${tints[tint]} border rounded-2xl p-4 backdrop-blur-sm`}>
