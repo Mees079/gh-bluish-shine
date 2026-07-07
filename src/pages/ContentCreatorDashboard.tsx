@@ -291,12 +291,47 @@ const ContentCreatorDashboard = () => {
 
       <main className="relative max-w-7xl mx-auto px-6 py-8 space-y-8">
         {/* Overzicht stats */}
-        <section className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <section className="grid grid-cols-2 md:grid-cols-5 gap-4">
           <StatCard icon={<Users className="h-4 w-4" />} label="Creators" value={totals.creators.toString()} tint="purple" />
           <StatCard icon={<Radio className="h-4 w-4" />} label="Nu live" value={totals.liveNow.toString()} tint="red" pulse={totals.liveNow > 0} />
           <StatCard icon={<Clock className="h-4 w-4" />} label="Totaal uren" value={totals.totalHours.toFixed(1)} tint="fuchsia" />
           <StatCard icon={<Calendar className="h-4 w-4" />} label="Sessies" value={totals.totalSessions.toString()} tint="cyan" />
+          <StatCard icon={<Zap className="h-4 w-4" />} label="Actieve boosts" value={activeBoosts.length.toString()} tint="yellow" pulse={activeBoosts.length > 0} />
         </section>
+
+        {/* Actieve boosts banner */}
+        {activeBoosts.length > 0 && (
+          <section className="relative overflow-hidden bg-gradient-to-r from-yellow-500/10 via-orange-500/10 to-fuchsia-500/10 border border-yellow-500/30 rounded-2xl p-5">
+            <div className="absolute inset-0 opacity-30 pointer-events-none" style={{ backgroundImage: "radial-gradient(circle at 20% 50%, rgba(250,204,21,0.2), transparent 40%)" }} />
+            <div className="relative flex items-start justify-between gap-4 flex-wrap">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-yellow-500/20 border border-yellow-500/50 flex items-center justify-center animate-pulse"><Zap className="h-5 w-5 text-yellow-300" /></div>
+                <div>
+                  <h3 className="font-bold text-yellow-100 flex items-center gap-2">Boost actief! <Rocket className="h-4 w-4" /></h3>
+                  {myCreator && (
+                    <p className="text-sm text-yellow-200/80">Jij verdient nu <b>x{myEffective.mult}</b> punten per <b>{myEffective.interval} min</b>.</p>
+                  )}
+                </div>
+              </div>
+              <div className="flex gap-2 flex-wrap">
+                {activeBoosts.map(b => {
+                  const scoped = b.creator_id ? creators.find(c => c.id === b.creator_id)?.twitch_username : null;
+                  const min = Math.max(0, Math.floor((new Date(b.ends_at).getTime() - Date.now()) / 60000));
+                  return (
+                    <div key={b.id} className="text-xs bg-black/30 border border-yellow-500/30 rounded-lg px-2.5 py-1.5 flex items-center gap-2">
+                      <span className="font-bold text-yellow-200">x{b.multiplier}</span>
+                      {b.interval_seconds && <span className="text-slate-300">/{Math.round(b.interval_seconds/60)}m</span>}
+                      <span className="text-slate-400">{scoped ? `@${scoped}` : "iedereen"}</span>
+                      <Timer className="h-3 w-3 text-yellow-300" /> <span className="text-slate-300">{min}m</span>
+                      {isHead && <button onClick={() => stopBoost(b.id)} className="text-red-400/80 hover:text-red-300 ml-1"><Trash2 className="h-3 w-3" /></button>}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </section>
+        )}
+
 
         {/* Mijn stats */}
         {myCreator && (
