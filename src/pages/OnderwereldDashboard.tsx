@@ -337,7 +337,7 @@ function OverviewPanel({ me, role, onNav, onGang }: any) {
               <div key={m.id} className={`p-3 rounded-lg text-sm border ${
                 m.kind === "urgent" ? "bg-red-950/40 border-red-500/40 text-red-100"
                 : m.kind === "system" ? "bg-zinc-900/60 border-zinc-800 text-zinc-300"
-                : "bg-yellow-950/20 border-yellow-800/40 text-white"
+                : "bg-zinc-900/60 border-zinc-800 text-white"
               }`}>
                 <div className="text-xs text-zinc-500 mb-1">{m.author_name || "Systeem"} · {nlDate(m.created_at)}</div>
                 {m.body}
@@ -392,7 +392,7 @@ function GangsPanel({ isHoofd, onOpen }: any) {
                     ? <img src={g.logoSigned} className="w-14 h-14 rounded-lg object-cover border border-zinc-800" alt="" />
                     : <div className="w-14 h-14 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center text-2xl font-bold text-zinc-300">{g.name[0]?.toUpperCase()}</div>}
                   <div className="flex-1 min-w-0">
-                    <div className="text-lg font-bold text-white truncate group-hover:text-yellow-300">{g.name}</div>
+                    <div className="text-lg font-bold text-white truncate group-hover:text-white">{g.name}</div>
                     <LevelBadge level={g.level} />
                   </div>
                 </div>
@@ -683,7 +683,7 @@ function PointsNewPanel({ me, uid }: any) {
               {scenarios.map((s) => (
                 <button key={s.key} type="button" onClick={() => setScenario(s.key)}
                   className={`flex justify-between items-center p-3 rounded-lg border text-left text-sm ${
-                    scenario === s.key ? "bg-yellow-950/50 border-zinc-300 text-white" : "bg-zinc-900/40 border-zinc-800 text-zinc-300 hover:border-zinc-600"
+                    scenario === s.key ? "bg-zinc-900/60 border-zinc-300 text-white" : "bg-zinc-900/40 border-zinc-800 text-zinc-300 hover:border-zinc-600"
                   }`}>
                   <span>{s.label}</span>
                   <span className="font-bold text-zinc-100">{s.base_points} pt</span>
@@ -697,12 +697,12 @@ function PointsNewPanel({ me, uid }: any) {
           </div>
 
           {selectedScenario && (
-            <Card className={`p-4 border ${activeBoost ? "border-zinc-100/60 bg-yellow-950/30" : "border-zinc-800"}`}>
+            <Card className={`p-4 border ${activeBoost ? "border-zinc-100/60 bg-zinc-900/60" : "border-zinc-800"}`}>
               <div className="flex items-center justify-between">
                 <span className="text-zinc-400 text-sm">Punten die worden toegekend</span>
                 <div className="text-right">
                   <div className="text-2xl font-bold text-white">{base * mult} pt</div>
-                  {activeBoost && <div className="text-xs text-yellow-300">{base} × {mult} boost actief</div>}
+                  {activeBoost && <div className="text-xs text-white">{base} × {mult} boost actief</div>}
                 </div>
               </div>
             </Card>
@@ -833,7 +833,7 @@ function BoostsPanel({ me, uid, isCoord }: any) {
         <Card className="p-5 mb-6 border-zinc-100/50 bg-gradient-to-r from-zinc-900/60 to-zinc-900/40">
           <div className="flex items-center gap-3 mb-3"><Sparkles className="h-5 w-5 text-white" /><span className="text-white font-semibold">Actief nu</span></div>
           {active.map(b => (
-            <div key={b.id} className="flex items-center justify-between py-2 border-t border-yellow-800/30 first:border-t-0">
+            <div key={b.id} className="flex items-center justify-between py-2 border-t border-zinc-800 first:border-t-0">
               <div>
                 <div className="text-white text-xl font-bold">x{b.multiplier}</div>
                 <div className="text-xs text-zinc-100">Loopt tot {nlDate(b.ends_at)} · door {b.created_by_name}</div>
@@ -1043,7 +1043,7 @@ function InboxPanel({ me, uid, isHoofd }: any) {
               <div className={`max-w-2xl rounded-xl px-4 py-2.5 text-sm border relative ${
                 m.kind === "urgent" ? "bg-red-950/40 border-red-500/60 text-red-100"
                 : m.kind === "system" ? "bg-zinc-900/70 border-zinc-800 text-zinc-300"
-                : m.author_id === uid ? "bg-gradient-to-r from-yellow-800/50 to-amber-800/40 border-zinc-800/50 text-yellow-50"
+                : m.author_id === uid ? "bg-gradient-to-r from-zinc-800 to-zinc-800 border-zinc-800/50 text-white"
                 : "bg-zinc-900 border-zinc-800 text-zinc-100"
               }`}>
                 {m.kind === "chat" && <div className="text-xs text-zinc-100 font-semibold mb-0.5">{m.author_name}</div>}
@@ -1226,8 +1226,8 @@ function AccountsPanel({ meUid }: any) {
                 <td className="px-4 py-3 text-white">{a.display_name}</td>
                 <td className="px-4 py-3">
                   <span className={`text-xs px-2 py-1 rounded ${
-                    a.role === "onderwereld_hoofd" ? "bg-yellow-900/40 text-yellow-300 border border-zinc-700"
-                    : a.role === "onderwereld_coordinator" ? "bg-amber-900/30 text-amber-300 border border-amber-700/40"
+                    a.role === "onderwereld_hoofd" ? "bg-zinc-800 text-white border border-zinc-700"
+                    : a.role === "onderwereld_coordinator" ? "bg-zinc-800 text-zinc-200 border border-zinc-700"
                     : "bg-zinc-800 text-zinc-300 border border-zinc-700"
                   }`}>{roleLabel(a.role)}</span>
                 </td>
