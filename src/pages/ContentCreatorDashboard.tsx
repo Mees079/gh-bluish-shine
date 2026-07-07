@@ -361,7 +361,7 @@ const ContentCreatorDashboard = () => {
                       <span className="font-medium truncate">@{c.twitch_username}</span>
                       {c.is_currently_live && <span className="text-[10px] bg-red-500/20 text-red-300 px-1.5 py-0.5 rounded animate-pulse">LIVE</span>}
                     </div>
-                    <div className="text-xs text-slate-500 font-mono">{fmtHours(c.total_seconds)}</div>
+                    <div className="text-xs text-slate-500 font-mono flex gap-2"><span className="text-yellow-400">⭐ {c.points || 0}</span><span>·</span><span>{fmtHours(c.total_seconds)}</span></div>
                   </div>
                   {i === 0 && <Crown className="h-4 w-4 text-yellow-400 shrink-0" />}
                 </div>
