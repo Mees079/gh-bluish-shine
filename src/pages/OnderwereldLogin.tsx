@@ -37,7 +37,7 @@ const OnderwereldLogin = () => {
   };
 
   return (
-    <div className="min-h-screen bg-black flex items-center justify-center p-4 relative overflow-hidden">
+    <div className="min-h-screen bg-slate-900 flex items-center justify-center p-4 relative overflow-hidden">
       {/* Subtle diagonal grid background */}
       <div
         className="absolute inset-0 opacity-[0.06]"
@@ -53,13 +53,13 @@ const OnderwereldLogin = () => {
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_rgba(255,255,255,0.06)_0%,_transparent_60%)]" />
 
       <div className="relative w-full max-w-md">
-        <div className="bg-zinc-950/90 backdrop-blur-xl border border-zinc-800 rounded-2xl p-8 shadow-[0_0_80px_rgba(255,255,255,0.05)]">
+        <div className="bg-slate-800/90 backdrop-blur-xl border border-slate-600 rounded-2xl p-8 shadow-[0_0_80px_rgba(255,255,255,0.05)]">
           <div className="text-center mb-8">
-            <div className="mx-auto w-16 h-16 bg-zinc-900 rounded-2xl flex items-center justify-center mb-4 border border-zinc-700">
+            <div className="mx-auto w-16 h-16 bg-slate-800 rounded-2xl flex items-center justify-center mb-4 border border-slate-500">
               <Skull className="h-8 w-8 text-white" />
             </div>
             <h1 className="text-2xl font-bold text-white tracking-tight">Onderwereld Portal</h1>
-            <p className="text-zinc-500 text-xs mt-2 uppercase tracking-widest">HDRP · Gang Coordinatie</p>
+            <p className="text-slate-400 text-xs mt-2 uppercase tracking-widest">HDRP · Gang Coordinatie</p>
           </div>
 
           {error && (
@@ -68,42 +68,42 @@ const OnderwereldLogin = () => {
 
           <form onSubmit={handleLogin} className="space-y-5">
             <div>
-              <label className="text-zinc-300 text-sm font-medium mb-2 block">Gebruikersnaam</label>
+              <label className="text-slate-200 text-sm font-medium mb-2 block">Gebruikersnaam</label>
               <div className="relative">
-                <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-600" />
+                <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
                 <input
                   type="text"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
                   placeholder="hdrp"
                   required
-                  className="w-full bg-black/60 border border-zinc-800 rounded-lg pl-10 pr-4 py-3 text-white placeholder-zinc-700 focus:outline-none focus:border-zinc-500 focus:ring-1 focus:ring-zinc-500"
+                  className="w-full bg-slate-900/60 border border-slate-600 rounded-lg pl-10 pr-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-blue-400 focus:ring-1 focus:ring-blue-400"
                 />
               </div>
             </div>
             <div>
-              <label className="text-zinc-300 text-sm font-medium mb-2 block">Wachtwoord</label>
+              <label className="text-slate-200 text-sm font-medium mb-2 block">Wachtwoord</label>
               <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-600" />
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
                 <input
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••"
                   required
-                  className="w-full bg-black/60 border border-zinc-800 rounded-lg pl-10 pr-4 py-3 text-white placeholder-zinc-700 focus:outline-none focus:border-zinc-500 focus:ring-1 focus:ring-zinc-500"
+                  className="w-full bg-slate-900/60 border border-slate-600 rounded-lg pl-10 pr-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-blue-400 focus:ring-1 focus:ring-blue-400"
                 />
               </div>
             </div>
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-white hover:bg-zinc-200 text-black font-bold py-3 rounded-lg transition-all disabled:opacity-50 uppercase tracking-wider text-sm"
+              className="w-full bg-blue-500 hover:bg-blue-400 text-white font-bold py-3 rounded-lg transition-all disabled:opacity-50 uppercase tracking-wider text-sm"
             >
               {loading ? "Inloggen..." : "Toegang"}
             </button>
           </form>
-          <p className="text-center text-xs text-zinc-700 mt-6 uppercase tracking-widest">Onderwereld Coordinatie</p>
+          <p className="text-center text-xs text-slate-500 mt-6 uppercase tracking-widest">Onderwereld Coordinatie</p>
         </div>
       </div>
     </div>
