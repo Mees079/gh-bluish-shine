@@ -105,17 +105,28 @@ const OnderwereldDashboard = () => {
 
   const openGangDetail = (id: string) => { setSelectedGang(id); setNav("gang-detail"); };
 
-  const NavItem = ({ k, icon: I, label, indent = false }: any) => (
-    <button
-      onClick={() => setNav(k)}
-      className={`w-full text-left flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-all ${
-        nav === k ? "bg-gradient-to-r from-white/10 to-transparent border-l-2 border-zinc-100 text-white" : "text-slate-300 hover:bg-slate-800 hover:text-white"
-      } ${indent ? "pl-8 text-xs" : ""}`}
-    >
-      <I className={`h-4 w-4 ${nav === k ? "text-white" : "text-slate-400"}`} />
-      <span>{label}</span>
-    </button>
-  );
+  const NavItem = ({ k, icon: I, label, indent = false, color = "blue" }: any) => {
+    const colorMap: any = {
+      blue: { on: "text-blue-300", bar: "border-blue-400", glow: "from-blue-500/20" },
+      violet: { on: "text-violet-300", bar: "border-violet-400", glow: "from-violet-500/20" },
+      emerald: { on: "text-emerald-300", bar: "border-emerald-400", glow: "from-emerald-500/20" },
+      amber: { on: "text-amber-300", bar: "border-amber-400", glow: "from-amber-500/20" },
+      pink: { on: "text-pink-300", bar: "border-pink-400", glow: "from-pink-500/20" },
+      red: { on: "text-red-300", bar: "border-red-400", glow: "from-red-500/20" },
+    };
+    const c = colorMap[color] || colorMap.blue;
+    return (
+      <button
+        onClick={() => setNav(k)}
+        className={`w-full text-left flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-all ${
+          nav === k ? `bg-gradient-to-r ${c.glow} to-transparent border-l-2 ${c.bar} text-white` : "text-slate-300 hover:bg-slate-700/60 hover:text-white"
+        } ${indent ? "pl-8 text-xs" : ""}`}
+      >
+        <I className={`h-4 w-4 ${nav === k ? c.on : "text-slate-400"}`} />
+        <span>{label}</span>
+      </button>
+    );
+  };
 
   const closeNav = () => setSidebarOpen(false);
   const NavItemClose = (props: any) => (
@@ -123,22 +134,25 @@ const OnderwereldDashboard = () => {
   );
 
   return (
-    <div className="min-h-screen bg-slate-900 text-white relative">
-      {/* Ambient background */}
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-900 to-indigo-950 text-white relative overflow-x-hidden">
+      {/* Colored ambient blobs */}
+      <div className="fixed -top-40 -left-40 w-[500px] h-[500px] rounded-full bg-blue-600/20 blur-[120px] pointer-events-none" />
+      <div className="fixed top-1/3 -right-40 w-[500px] h-[500px] rounded-full bg-violet-600/20 blur-[120px] pointer-events-none" />
+      <div className="fixed -bottom-40 left-1/3 w-[500px] h-[500px] rounded-full bg-pink-600/15 blur-[120px] pointer-events-none" />
+      <div className="fixed bottom-1/4 -left-20 w-[400px] h-[400px] rounded-full bg-emerald-600/10 blur-[120px] pointer-events-none" />
+      {/* Grid overlay */}
       <div
-        className="fixed inset-0 opacity-[0.05] pointer-events-none"
+        className="fixed inset-0 opacity-[0.04] pointer-events-none"
         style={{
           backgroundImage:
             "linear-gradient(45deg, #ffffff 1px, transparent 1px), linear-gradient(-45deg, #ffffff 1px, transparent 1px)",
           backgroundSize: "48px 48px",
         }}
       />
-      <div className="fixed inset-0 bg-[radial-gradient(ellipse_at_top,_rgba(255,255,255,0.05)_0%,_transparent_60%)] pointer-events-none" />
-      <div className="fixed inset-0 bg-[radial-gradient(ellipse_at_bottom,_rgba(255,255,255,0.03)_0%,_transparent_60%)] pointer-events-none" />
       {/* Floating open button */}
       <button
         onClick={() => setSidebarOpen(true)}
-        className={`fixed top-4 right-4 z-40 p-2.5 rounded-lg bg-slate-800 border border-slate-600 hover:bg-slate-700 text-white transition-all ${sidebarOpen ? "opacity-0 pointer-events-none" : "opacity-100"}`}
+        className={`fixed top-4 right-4 z-40 p-2.5 rounded-lg bg-gradient-to-br from-blue-600 to-violet-600 hover:from-blue-500 hover:to-violet-500 shadow-lg shadow-blue-900/50 text-white transition-all ${sidebarOpen ? "opacity-0 pointer-events-none" : "opacity-100"}`}
         aria-label="Open menu"
       >
         <Menu className="h-5 w-5" />
@@ -150,15 +164,15 @@ const OnderwereldDashboard = () => {
       )}
 
       {/* Sidebar (right, collapsible) */}
-      <aside className={`fixed top-0 right-0 h-full w-72 bg-slate-800 border-l border-slate-600 flex flex-col z-50 transition-transform duration-300 ${sidebarOpen ? "translate-x-0" : "translate-x-full"}`}>
-        <div className="p-5 border-b border-slate-700 flex items-center justify-between">
+      <aside className={`fixed top-0 right-0 h-full w-72 bg-slate-800/95 backdrop-blur-xl border-l border-slate-600 flex flex-col z-50 transition-transform duration-300 ${sidebarOpen ? "translate-x-0" : "translate-x-full"}`}>
+        <div className="p-5 border-b border-slate-700 flex items-center justify-between bg-gradient-to-r from-blue-950/40 to-violet-950/40">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg bg-slate-700 border border-slate-500 flex items-center justify-center">
+            <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-500 to-violet-600 flex items-center justify-center shadow-lg shadow-blue-900/50">
               <Skull className="h-5 w-5 text-white" />
             </div>
             <div>
               <div className="text-white font-bold tracking-tight">Onderwereld</div>
-              <div className="text-xs text-slate-400 uppercase tracking-wider">HDRP</div>
+              <div className="text-xs bg-gradient-to-r from-blue-300 to-violet-300 bg-clip-text text-transparent uppercase tracking-wider font-semibold">HDRP</div>
             </div>
           </div>
           <button onClick={closeNav} className="p-1.5 rounded hover:bg-slate-700 text-slate-300 hover:text-white">
@@ -166,41 +180,42 @@ const OnderwereldDashboard = () => {
           </button>
         </div>
 
-        <nav className="flex-1 overflow-y-auto p-3 space-y-1">
-          <NavItemClose k="overview" icon={LayoutDashboard} label="Overzicht" />
 
-          <button onClick={() => setGangsOpen(!gangsOpen)} className="w-full flex items-center justify-between px-3 py-2 text-xs uppercase tracking-wider text-slate-400 hover:text-slate-200">
+        <nav className="flex-1 overflow-y-auto p-3 space-y-1">
+          <NavItemClose k="overview" icon={LayoutDashboard} label="Overzicht" color="blue" />
+
+          <button onClick={() => setGangsOpen(!gangsOpen)} className="w-full flex items-center justify-between px-3 py-2 text-xs uppercase tracking-wider text-violet-300/80 hover:text-violet-200 mt-2">
             <span className="flex items-center gap-2"><Users className="h-3.5 w-3.5" /> Gangs</span>
             {gangsOpen ? <ChevronDown className="h-3.5 w-3.5" /> : <ChevronRight className="h-3.5 w-3.5" />}
           </button>
           {gangsOpen && <>
-            <NavItemClose k="gangs" icon={Users} label="Alle gangs" indent />
-            {isHoofd && <NavItemClose k="gang-new" icon={Plus} label="Nieuwe gang" indent />}
+            <NavItemClose k="gangs" icon={Users} label="Alle gangs" indent color="violet" />
+            {isHoofd && <NavItemClose k="gang-new" icon={Plus} label="Nieuwe gang" indent color="violet" />}
           </>}
 
-          <button onClick={() => setPointsOpen(!pointsOpen)} className="w-full flex items-center justify-between px-3 py-2 text-xs uppercase tracking-wider text-slate-400 hover:text-slate-200 mt-2">
+          <button onClick={() => setPointsOpen(!pointsOpen)} className="w-full flex items-center justify-between px-3 py-2 text-xs uppercase tracking-wider text-emerald-300/80 hover:text-emerald-200 mt-2">
             <span className="flex items-center gap-2"><ScrollText className="h-3.5 w-3.5" /> Punten</span>
             {pointsOpen ? <ChevronDown className="h-3.5 w-3.5" /> : <ChevronRight className="h-3.5 w-3.5" />}
           </button>
           {pointsOpen && <>
-            <NavItemClose k="points-new" icon={Plus} label="Punten invoeren" indent />
-            <NavItemClose k="points-recent" icon={ScrollText} label="Recent toegevoegd" indent />
+            <NavItemClose k="points-new" icon={Plus} label="Punten invoeren" indent color="emerald" />
+            <NavItemClose k="points-recent" icon={ScrollText} label="Recent toegevoegd" indent color="emerald" />
           </>}
 
           <div className="pt-2" />
-          <NavItemClose k="boosts" icon={Zap} label="Boosts" />
-          <NavItemClose k="warnings" icon={AlertTriangle} label="Waarschuwingen" />
-          <NavItemClose k="inbox" icon={Inbox} label="Inbox & chat" />
+          <NavItemClose k="boosts" icon={Zap} label="Boosts" color="amber" />
+          <NavItemClose k="warnings" icon={AlertTriangle} label="Waarschuwingen" color="red" />
+          <NavItemClose k="inbox" icon={Inbox} label="Inbox & chat" color="pink" />
 
           <div className="pt-3 mt-3 border-t border-slate-700" />
-          <NavItemClose k="settings" icon={UserCircle} label="Mijn account" />
-          {isHoofd && <NavItemClose k="accounts" icon={ShieldAlert} label="Accounts beheren" />}
+          <NavItemClose k="settings" icon={UserCircle} label="Mijn account" color="blue" />
+          {isHoofd && <NavItemClose k="accounts" icon={ShieldAlert} label="Accounts beheren" color="red" />}
         </nav>
 
-        <div className="p-4 border-t border-slate-700 flex items-center gap-3">
+        <div className="p-4 border-t border-slate-700 flex items-center gap-3 bg-gradient-to-r from-slate-900/60 to-violet-950/30">
           {avatarUrl
-            ? <img src={avatarUrl} className="w-9 h-9 rounded-full object-cover border border-slate-500" alt="" />
-            : <div className="w-9 h-9 rounded-full bg-slate-700 flex items-center justify-center text-white font-bold">{me.display_name[0]?.toUpperCase()}</div>}
+            ? <img src={avatarUrl} className="w-9 h-9 rounded-full object-cover border-2 border-blue-400/60" alt="" />
+            : <div className="w-9 h-9 rounded-full bg-gradient-to-br from-blue-500 to-violet-600 flex items-center justify-center text-white font-bold">{me.display_name[0]?.toUpperCase()}</div>}
           <div className="flex-1 min-w-0">
             <div className="text-sm text-white truncate">{me.display_name}</div>
             <div className="text-xs text-slate-300 truncate">{roleLabel}</div>
@@ -285,7 +300,7 @@ function ProgressBar({ current, target, level }: { current: number; target: numb
         <span className="text-slate-400">{info.next ? `${info.needed} nodig voor LVL ${info.next}` : "MAX LEVEL"}</span>
       </div>
       <div className="h-2 bg-slate-800 rounded-full overflow-hidden border border-slate-600">
-        <div className="h-full bg-gradient-to-r from-zinc-300 via-white to-red-500 transition-all" style={{ width: `${info.progress}%` }} />
+        <div className="h-full bg-gradient-to-r from-blue-400 via-violet-500 to-pink-500 transition-all shadow-[0_0_10px_rgba(139,92,246,0.6)]" style={{ width: `${info.progress}%` }} />
       </div>
     </div>
   );
@@ -325,10 +340,10 @@ function OverviewPanel({ me, role, onNav, onGang }: any) {
   return (
     <div className="-m-6 lg:-m-10 -mr-16 lg:-mr-20">
       {/* Compact hero */}
-      <section className="px-6 lg:px-10 pr-16 lg:pr-20 pt-10 pb-8 relative border-b border-slate-700/60">
-        <p className="text-slate-400 text-xs uppercase tracking-[0.4em] mb-4">{roleLabel}</p>
+      <section className="px-6 lg:px-10 pr-16 lg:pr-20 pt-10 pb-8 relative border-b border-slate-700/60 bg-gradient-to-br from-blue-950/40 via-violet-950/30 to-transparent">
+        <p className="text-transparent bg-clip-text bg-gradient-to-r from-blue-300 via-violet-300 to-pink-300 text-xs uppercase tracking-[0.4em] mb-4 font-bold">{roleLabel}</p>
         <h1 className="text-[clamp(2.5rem,7vw,6rem)] font-black text-white tracking-tighter leading-[0.9]">
-          Welkom <span className="text-slate-400">{me.display_name}.</span>
+          Welkom <span className="bg-gradient-to-r from-blue-400 via-violet-400 to-pink-400 bg-clip-text text-transparent">{me.display_name}.</span>
         </h1>
         <p className="text-slate-300 mt-4 text-base md:text-lg max-w-3xl">
           Overzicht van gang-activiteit binnen HDRP. Beheer punten, boosts en waarschuwingen vanuit één centrale plek.
@@ -338,12 +353,14 @@ function OverviewPanel({ me, role, onNav, onGang }: any) {
       <div className="px-6 lg:px-10 pr-16 lg:pr-20 py-8 space-y-8">
 
       {stats.activeBoost && (
-        <Card className="p-4 border-blue-500/50 bg-gradient-to-r from-blue-950/50 to-slate-800/40">
+        <Card className="p-4 border-amber-500/50 bg-gradient-to-r from-amber-950/60 via-orange-950/40 to-red-950/40 shadow-lg shadow-amber-900/20">
           <div className="flex items-center gap-3">
-            <Zap className="h-6 w-6 text-blue-300" />
+            <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center shadow-lg shadow-amber-900/50">
+              <Zap className="h-5 w-5 text-white" />
+            </div>
             <div className="flex-1">
               <div className="text-white font-bold">Actieve boost: x{stats.activeBoost.multiplier}</div>
-              <div className="text-xs text-slate-300">Loopt tot {nlDate(stats.activeBoost.ends_at)}</div>
+              <div className="text-xs text-amber-200/80">Loopt tot {nlDate(stats.activeBoost.ends_at)}</div>
             </div>
           </div>
         </Card>
@@ -351,13 +368,15 @@ function OverviewPanel({ me, role, onNav, onGang }: any) {
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {[
-          { label: "Gangs", value: stats.gangs, icon: Users, tint: "text-blue-300" },
-          { label: "Punten deze week", value: stats.weekPoints, icon: ScrollText, tint: "text-white" },
-          { label: "Actieve warns", value: stats.activeWarns, icon: AlertTriangle, tint: "text-orange-400" },
-          { label: "Spoedmeldingen", value: stats.urgent, icon: ShieldAlert, tint: "text-red-500" },
+          { label: "Gangs", value: stats.gangs, icon: Users, grad: "from-blue-500 to-cyan-500", ring: "shadow-blue-900/40 border-blue-500/30" },
+          { label: "Punten deze week", value: stats.weekPoints, icon: ScrollText, grad: "from-emerald-500 to-teal-500", ring: "shadow-emerald-900/40 border-emerald-500/30" },
+          { label: "Actieve warns", value: stats.activeWarns, icon: AlertTriangle, grad: "from-orange-500 to-amber-500", ring: "shadow-orange-900/40 border-orange-500/30" },
+          { label: "Spoedmeldingen", value: stats.urgent, icon: ShieldAlert, grad: "from-red-500 to-pink-500", ring: "shadow-red-900/40 border-red-500/30" },
         ].map((s, i) => (
-          <Card key={i} className="p-5">
-            <s.icon className={`h-5 w-5 ${s.tint} mb-3`} />
+          <Card key={i} className={`p-5 shadow-lg ${s.ring}`}>
+            <div className={`w-10 h-10 rounded-lg bg-gradient-to-br ${s.grad} flex items-center justify-center mb-3 shadow-md`}>
+              <s.icon className="h-5 w-5 text-white" />
+            </div>
             <div className="text-3xl font-bold text-white">{s.value}</div>
             <div className="text-xs text-slate-400 uppercase tracking-wider mt-1">{s.label}</div>
           </Card>
@@ -369,15 +388,15 @@ function OverviewPanel({ me, role, onNav, onGang }: any) {
         <h3 className="text-slate-400 text-xs uppercase tracking-widest mb-3">Snelle acties</h3>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
           {[
-            { k: "points-new", icon: Plus, label: "Punten invoeren" },
-            { k: "gangs", icon: Users, label: "Alle gangs" },
-            { k: "warnings", icon: AlertTriangle, label: "Waarschuwingen" },
-            { k: "inbox", icon: Inbox, label: "Inbox & chat" },
+            { k: "points-new", icon: Plus, label: "Punten invoeren", grad: "from-emerald-500 to-teal-600", hover: "hover:border-emerald-400" },
+            { k: "gangs", icon: Users, label: "Alle gangs", grad: "from-violet-500 to-purple-600", hover: "hover:border-violet-400" },
+            { k: "warnings", icon: AlertTriangle, label: "Waarschuwingen", grad: "from-orange-500 to-red-500", hover: "hover:border-orange-400" },
+            { k: "inbox", icon: Inbox, label: "Inbox & chat", grad: "from-pink-500 to-rose-500", hover: "hover:border-pink-400" },
           ].map((a) => (
             <button key={a.k} onClick={() => onNav(a.k)} className="group">
-              <Card className="p-4 hover:border-blue-400 transition flex items-center gap-3">
-                <div className="w-10 h-10 rounded-lg bg-slate-700 border border-slate-600 flex items-center justify-center group-hover:bg-blue-500/20 group-hover:border-blue-400/60 transition">
-                  <a.icon className="h-5 w-5 text-slate-200 group-hover:text-blue-200" />
+              <Card className={`p-4 ${a.hover} transition flex items-center gap-3`}>
+                <div className={`w-11 h-11 rounded-lg bg-gradient-to-br ${a.grad} flex items-center justify-center shadow-md group-hover:scale-110 transition`}>
+                  <a.icon className="h-5 w-5 text-white" />
                 </div>
                 <span className="text-sm text-white font-medium">{a.label}</span>
               </Card>
@@ -386,9 +405,10 @@ function OverviewPanel({ me, role, onNav, onGang }: any) {
         </div>
       </div>
 
+
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card className="p-5">
-          <h3 className="text-white font-semibold mb-4 flex items-center gap-2"><Crown className="h-4 w-4 text-blue-300" /> Top gangs</h3>
+          <h3 className="text-white font-semibold mb-4 flex items-center gap-2"><Crown className="h-4 w-4 text-amber-400" /> Top gangs</h3>
           {topGangs.length === 0 && <p className="text-slate-400 text-sm">Nog geen gangs.</p>}
           <div className="space-y-3">
             {topGangs.map((g) => (
@@ -403,7 +423,7 @@ function OverviewPanel({ me, role, onNav, onGang }: any) {
           </div>
         </Card>
         <Card className="p-5">
-          <h3 className="text-white font-semibold mb-4 flex items-center gap-2"><Inbox className="h-4 w-4 text-blue-300" /> Recente meldingen</h3>
+          <h3 className="text-white font-semibold mb-4 flex items-center gap-2"><Inbox className="h-4 w-4 text-pink-400" /> Recente meldingen</h3>
           {recentInbox.length === 0 && <p className="text-slate-400 text-sm">Nog geen berichten.</p>}
           <div className="space-y-3">
             {recentInbox.map((m) => (
