@@ -132,15 +132,15 @@ const ContentCreatorDashboard = () => {
     await load();
   };
 
-  // Reward management
-  const [rh, setRh] = useState(5);
+  // Reward management (points based)
+  const [rp, setRp] = useState(4);
   const [rt, setRt] = useState("");
   const [rd, setRd] = useState("");
   const addReward = async (e: React.FormEvent) => {
     e.preventDefault();
-    const { error } = await supabase.from("cc_rewards").insert({ hours_required: rh, title: rt, description: rd, sort_order: rh });
+    const { error } = await supabase.from("cc_rewards").insert({ points_required: rp, hours_required: 0, title: rt, description: rd, sort_order: rp });
     if (error) return toast.error(error.message);
-    setRh(5); setRt(""); setRd("");
+    setRp(4); setRt(""); setRd("");
     await load();
     toast.success("Beloning toegevoegd");
   };
@@ -150,21 +150,38 @@ const ContentCreatorDashboard = () => {
     await load();
   };
 
+  const [lastCode, setLastCode] = useState<{ code: string; title: string } | null>(null);
   const claimReward = async (reward: Reward) => {
     if (!myCreator) return toast.error("Geen creator profiel gekoppeld");
-    const { error } = await supabase.from("cc_reward_claims").insert({ creator_id: myCreator.id, reward_id: reward.id });
-    if (error) return toast.error(error.message);
-    toast.success("Beloning geclaimd! Maak een ticket in Discord.");
+    if ((myCreator.points || 0) < reward.points_required) return toast.error("Niet genoeg punten");
+    if (!confirm(`Beloning "${reward.title}" kopen voor ${reward.points_required} punten?`)) return;
+    const { data, error } = await supabase.functions.invoke("cc-claim-reward", { body: { reward_id: reward.id } });
+    if (error || (data as any)?.error) return toast.error((data as any)?.error || "Aankoop mislukt");
+    setLastCode({ code: (data as any).code, title: reward.title });
+    toast.success("Aankoop gelukt! Kopieer je code.");
     await load();
   };
 
-  const isClaimed = (rewardId: string, creatorId?: string) =>
-    claims.some(c => c.reward_id === rewardId && c.creator_id === (creatorId || myCreator?.id));
+  // Head CC: redeem a code that a creator brought via Discord ticket
+  const [redeemCode, setRedeemCode] = useState("");
+  const [redeemInfo, setRedeemInfo] = useState<any>(null);
+  const [redeeming, setRedeeming] = useState(false);
+  const doRedeem = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setRedeeming(true);
+    setRedeemInfo(null);
+    const { data, error } = await supabase.functions.invoke("cc-redeem-code", { body: { code: redeemCode.trim().toUpperCase() } });
+    setRedeeming(false);
+    if (error || (data as any)?.error) return toast.error((data as any)?.error || "Ongeldig");
+    setRedeemInfo((data as any).claim);
+    setRedeemCode("");
+    toast.success("Code ingewisseld");
+    await load();
+  };
 
   const nextReward = useMemo(() => {
     if (!myCreator) return null;
-    const h = myCreator.total_seconds / 3600;
-    return rewards.filter(r => r.hours_required > h).sort((a, b) => a.hours_required - b.hours_required)[0] || null;
+    return rewards.filter(r => r.points_required > (myCreator.points || 0)).sort((a, b) => a.points_required - b.points_required)[0] || null;
   }, [rewards, myCreator]);
 
   if (loading) return (
