@@ -323,41 +323,35 @@ function OverviewPanel({ me, role, onNav, onGang }: any) {
   const roleLabel = role === "onderwereld_hoofd" ? "Hoofd Onderwereld Coordinator" : role === "onderwereld_coordinator" ? "Onderwereld Coordinator" : "Proef Onderwereld Coordinator";
 
   return (
-    <div className="-m-8 -mr-20">
-      {/* Full-height hero */}
-      <section className="min-h-screen flex flex-col justify-center px-8 pr-20 relative">
-        <p className="text-slate-400 text-sm uppercase tracking-[0.4em] mb-6">{roleLabel}</p>
-        <h1 className="text-[clamp(4rem,14vw,12rem)] font-black text-white tracking-tighter leading-[0.85]">
-          Welkom
+    <div className="-m-6 lg:-m-10 -mr-16 lg:-mr-20">
+      {/* Compact hero */}
+      <section className="px-6 lg:px-10 pr-16 lg:pr-20 pt-10 pb-8 relative border-b border-slate-700/60">
+        <p className="text-slate-400 text-xs uppercase tracking-[0.4em] mb-4">{roleLabel}</p>
+        <h1 className="text-[clamp(2.5rem,7vw,6rem)] font-black text-white tracking-tighter leading-[0.9]">
+          Welkom <span className="text-slate-400">{me.display_name}.</span>
         </h1>
-        <h2 className="text-[clamp(3rem,10vw,9rem)] font-black text-slate-400 tracking-tighter leading-[0.85] mt-2">
-          {me.display_name}.
-        </h2>
-        <p className="text-slate-300 mt-10 text-lg md:text-xl max-w-2xl">
-          Overzicht van gang-activiteit binnen HDRP. Scroll naar beneden voor de statistieken, top gangs en recente meldingen.
+        <p className="text-slate-300 mt-4 text-base md:text-lg max-w-3xl">
+          Overzicht van gang-activiteit binnen HDRP. Beheer punten, boosts en waarschuwingen vanuit één centrale plek.
         </p>
-        <div className="absolute bottom-10 left-8 text-slate-400 text-xs uppercase tracking-widest animate-pulse">
-          ↓ Scroll voor overzicht
-        </div>
       </section>
 
-      <div className="px-8 pr-20 pb-16 space-y-8">
+      <div className="px-6 lg:px-10 pr-16 lg:pr-20 py-8 space-y-8">
 
       {stats.activeBoost && (
-        <Card className="p-4 mb-6 border-slate-500 bg-gradient-to-r from-zinc-900/60 to-zinc-900/40">
+        <Card className="p-4 border-blue-500/50 bg-gradient-to-r from-blue-950/50 to-slate-800/40">
           <div className="flex items-center gap-3">
-            <Zap className="h-6 w-6 text-white" />
+            <Zap className="h-6 w-6 text-blue-300" />
             <div className="flex-1">
               <div className="text-white font-bold">Actieve boost: x{stats.activeBoost.multiplier}</div>
-              <div className="text-xs text-white/80">Loopt tot {nlDate(stats.activeBoost.ends_at)}</div>
+              <div className="text-xs text-slate-300">Loopt tot {nlDate(stats.activeBoost.ends_at)}</div>
             </div>
           </div>
         </Card>
       )}
 
-      <div className="grid grid-cols-4 gap-4 mb-8">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {[
-          { label: "Gangs", value: stats.gangs, icon: Users, tint: "text-white" },
+          { label: "Gangs", value: stats.gangs, icon: Users, tint: "text-blue-300" },
           { label: "Punten deze week", value: stats.weekPoints, icon: ScrollText, tint: "text-white" },
           { label: "Actieve warns", value: stats.activeWarns, icon: AlertTriangle, tint: "text-orange-400" },
           { label: "Spoedmeldingen", value: stats.urgent, icon: ShieldAlert, tint: "text-red-500" },
@@ -370,9 +364,31 @@ function OverviewPanel({ me, role, onNav, onGang }: any) {
         ))}
       </div>
 
-      <div className="grid grid-cols-2 gap-6">
+      {/* Quick actions */}
+      <div>
+        <h3 className="text-slate-400 text-xs uppercase tracking-widest mb-3">Snelle acties</h3>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          {[
+            { k: "points-new", icon: Plus, label: "Punten invoeren" },
+            { k: "gangs", icon: Users, label: "Alle gangs" },
+            { k: "warnings", icon: AlertTriangle, label: "Waarschuwingen" },
+            { k: "inbox", icon: Inbox, label: "Inbox & chat" },
+          ].map((a) => (
+            <button key={a.k} onClick={() => onNav(a.k)} className="group">
+              <Card className="p-4 hover:border-blue-400 transition flex items-center gap-3">
+                <div className="w-10 h-10 rounded-lg bg-slate-700 border border-slate-600 flex items-center justify-center group-hover:bg-blue-500/20 group-hover:border-blue-400/60 transition">
+                  <a.icon className="h-5 w-5 text-slate-200 group-hover:text-blue-200" />
+                </div>
+                <span className="text-sm text-white font-medium">{a.label}</span>
+              </Card>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card className="p-5">
-          <h3 className="text-white font-semibold mb-4 flex items-center gap-2"><Crown className="h-4 w-4 text-white" /> Top gangs</h3>
+          <h3 className="text-white font-semibold mb-4 flex items-center gap-2"><Crown className="h-4 w-4 text-blue-300" /> Top gangs</h3>
           {topGangs.length === 0 && <p className="text-slate-400 text-sm">Nog geen gangs.</p>}
           <div className="space-y-3">
             {topGangs.map((g) => (
@@ -387,7 +403,7 @@ function OverviewPanel({ me, role, onNav, onGang }: any) {
           </div>
         </Card>
         <Card className="p-5">
-          <h3 className="text-white font-semibold mb-4 flex items-center gap-2"><Inbox className="h-4 w-4 text-white" /> Recente meldingen</h3>
+          <h3 className="text-white font-semibold mb-4 flex items-center gap-2"><Inbox className="h-4 w-4 text-blue-300" /> Recente meldingen</h3>
           {recentInbox.length === 0 && <p className="text-slate-400 text-sm">Nog geen berichten.</p>}
           <div className="space-y-3">
             {recentInbox.map((m) => (
