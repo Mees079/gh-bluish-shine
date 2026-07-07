@@ -52,6 +52,7 @@ export type Database = {
           is_active: boolean
           is_currently_live: boolean
           last_checked_at: string | null
+          login_username: string | null
           total_seconds: number
           twitch_user_id: string | null
           twitch_username: string
@@ -65,6 +66,7 @@ export type Database = {
           is_active?: boolean
           is_currently_live?: boolean
           last_checked_at?: string | null
+          login_username?: string | null
           total_seconds?: number
           twitch_user_id?: string | null
           twitch_username: string
@@ -78,6 +80,7 @@ export type Database = {
           is_active?: boolean
           is_currently_live?: boolean
           last_checked_at?: string | null
+          login_username?: string | null
           total_seconds?: number
           twitch_user_id?: string | null
           twitch_username?: string
