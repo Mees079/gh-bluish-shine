@@ -105,17 +105,28 @@ const OnderwereldDashboard = () => {
 
   const openGangDetail = (id: string) => { setSelectedGang(id); setNav("gang-detail"); };
 
-  const NavItem = ({ k, icon: I, label, indent = false }: any) => (
-    <button
-      onClick={() => setNav(k)}
-      className={`w-full text-left flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-all ${
-        nav === k ? "bg-gradient-to-r from-white/10 to-transparent border-l-2 border-zinc-100 text-white" : "text-slate-300 hover:bg-slate-800 hover:text-white"
-      } ${indent ? "pl-8 text-xs" : ""}`}
-    >
-      <I className={`h-4 w-4 ${nav === k ? "text-white" : "text-slate-400"}`} />
-      <span>{label}</span>
-    </button>
-  );
+  const NavItem = ({ k, icon: I, label, indent = false, color = "blue" }: any) => {
+    const colorMap: any = {
+      blue: { on: "text-blue-300", bar: "border-blue-400", glow: "from-blue-500/20" },
+      violet: { on: "text-violet-300", bar: "border-violet-400", glow: "from-violet-500/20" },
+      emerald: { on: "text-emerald-300", bar: "border-emerald-400", glow: "from-emerald-500/20" },
+      amber: { on: "text-amber-300", bar: "border-amber-400", glow: "from-amber-500/20" },
+      pink: { on: "text-pink-300", bar: "border-pink-400", glow: "from-pink-500/20" },
+      red: { on: "text-red-300", bar: "border-red-400", glow: "from-red-500/20" },
+    };
+    const c = colorMap[color] || colorMap.blue;
+    return (
+      <button
+        onClick={() => setNav(k)}
+        className={`w-full text-left flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-all ${
+          nav === k ? `bg-gradient-to-r ${c.glow} to-transparent border-l-2 ${c.bar} text-white` : "text-slate-300 hover:bg-slate-700/60 hover:text-white"
+        } ${indent ? "pl-8 text-xs" : ""}`}
+      >
+        <I className={`h-4 w-4 ${nav === k ? c.on : "text-slate-400"}`} />
+        <span>{label}</span>
+      </button>
+    );
+  };
 
   const closeNav = () => setSidebarOpen(false);
   const NavItemClose = (props: any) => (
@@ -123,22 +134,25 @@ const OnderwereldDashboard = () => {
   );
 
   return (
-    <div className="min-h-screen bg-slate-900 text-white relative">
-      {/* Ambient background */}
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-900 to-indigo-950 text-white relative overflow-x-hidden">
+      {/* Colored ambient blobs */}
+      <div className="fixed -top-40 -left-40 w-[500px] h-[500px] rounded-full bg-blue-600/20 blur-[120px] pointer-events-none" />
+      <div className="fixed top-1/3 -right-40 w-[500px] h-[500px] rounded-full bg-violet-600/20 blur-[120px] pointer-events-none" />
+      <div className="fixed -bottom-40 left-1/3 w-[500px] h-[500px] rounded-full bg-pink-600/15 blur-[120px] pointer-events-none" />
+      <div className="fixed bottom-1/4 -left-20 w-[400px] h-[400px] rounded-full bg-emerald-600/10 blur-[120px] pointer-events-none" />
+      {/* Grid overlay */}
       <div
-        className="fixed inset-0 opacity-[0.05] pointer-events-none"
+        className="fixed inset-0 opacity-[0.04] pointer-events-none"
         style={{
           backgroundImage:
             "linear-gradient(45deg, #ffffff 1px, transparent 1px), linear-gradient(-45deg, #ffffff 1px, transparent 1px)",
           backgroundSize: "48px 48px",
         }}
       />
-      <div className="fixed inset-0 bg-[radial-gradient(ellipse_at_top,_rgba(255,255,255,0.05)_0%,_transparent_60%)] pointer-events-none" />
-      <div className="fixed inset-0 bg-[radial-gradient(ellipse_at_bottom,_rgba(255,255,255,0.03)_0%,_transparent_60%)] pointer-events-none" />
       {/* Floating open button */}
       <button
         onClick={() => setSidebarOpen(true)}
-        className={`fixed top-4 right-4 z-40 p-2.5 rounded-lg bg-slate-800 border border-slate-600 hover:bg-slate-700 text-white transition-all ${sidebarOpen ? "opacity-0 pointer-events-none" : "opacity-100"}`}
+        className={`fixed top-4 right-4 z-40 p-2.5 rounded-lg bg-gradient-to-br from-blue-600 to-violet-600 hover:from-blue-500 hover:to-violet-500 shadow-lg shadow-blue-900/50 text-white transition-all ${sidebarOpen ? "opacity-0 pointer-events-none" : "opacity-100"}`}
         aria-label="Open menu"
       >
         <Menu className="h-5 w-5" />
@@ -150,21 +164,22 @@ const OnderwereldDashboard = () => {
       )}
 
       {/* Sidebar (right, collapsible) */}
-      <aside className={`fixed top-0 right-0 h-full w-72 bg-slate-800 border-l border-slate-600 flex flex-col z-50 transition-transform duration-300 ${sidebarOpen ? "translate-x-0" : "translate-x-full"}`}>
-        <div className="p-5 border-b border-slate-700 flex items-center justify-between">
+      <aside className={`fixed top-0 right-0 h-full w-72 bg-slate-800/95 backdrop-blur-xl border-l border-slate-600 flex flex-col z-50 transition-transform duration-300 ${sidebarOpen ? "translate-x-0" : "translate-x-full"}`}>
+        <div className="p-5 border-b border-slate-700 flex items-center justify-between bg-gradient-to-r from-blue-950/40 to-violet-950/40">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg bg-slate-700 border border-slate-500 flex items-center justify-center">
+            <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-500 to-violet-600 flex items-center justify-center shadow-lg shadow-blue-900/50">
               <Skull className="h-5 w-5 text-white" />
             </div>
             <div>
               <div className="text-white font-bold tracking-tight">Onderwereld</div>
-              <div className="text-xs text-slate-400 uppercase tracking-wider">HDRP</div>
+              <div className="text-xs bg-gradient-to-r from-blue-300 to-violet-300 bg-clip-text text-transparent uppercase tracking-wider font-semibold">HDRP</div>
             </div>
           </div>
           <button onClick={closeNav} className="p-1.5 rounded hover:bg-slate-700 text-slate-300 hover:text-white">
             <X className="h-4 w-4" />
           </button>
         </div>
+
 
         <nav className="flex-1 overflow-y-auto p-3 space-y-1">
           <NavItemClose k="overview" icon={LayoutDashboard} label="Overzicht" />
