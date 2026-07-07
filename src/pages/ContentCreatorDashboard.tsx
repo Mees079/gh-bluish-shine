@@ -355,7 +355,9 @@ const ContentCreatorDashboard = () => {
                 <tr className="border-b border-purple-500/20">
                   <th className="text-left py-2 font-medium">TikTok</th>
                   <th className="text-left py-2 font-medium">Login</th>
+                  <th className="text-left py-2 font-medium">Roblox</th>
                   <th className="text-left py-2 font-medium">Status</th>
+                  <th className="text-left py-2 font-medium">In-game</th>
                   <th className="text-left py-2 font-medium">Uren</th>
                   <th className="text-left py-2 font-medium">Beloningen</th>
                   <th className="text-left py-2 font-medium">Laatst</th>
@@ -373,8 +375,12 @@ const ContentCreatorDashboard = () => {
                         </a>
                       </td>
                       <td className="text-slate-400 font-mono text-xs">{c.login_username || "-"}</td>
+                      <td className="text-slate-400 font-mono text-xs">{c.roblox_username || "-"}</td>
                       <td className={c.is_currently_live ? "text-red-400 font-semibold" : "text-slate-500"}>
                         {c.is_currently_live ? <span className="inline-flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-red-400 animate-pulse" /> LIVE</span> : "Offline"}
+                      </td>
+                      <td className={c.is_in_game ? "text-emerald-400 font-semibold" : "text-slate-500"}>
+                        {c.is_in_game ? <span className="inline-flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" /> in-game</span> : "-"}
                       </td>
                       <td className="font-mono">{fmtHours(c.total_seconds)}</td>
                       <td className="text-slate-400"><span className="text-xs bg-purple-500/10 border border-purple-500/20 rounded-full px-2 py-0.5">{claimedCount}</span></td>
