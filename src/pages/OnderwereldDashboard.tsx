@@ -297,10 +297,10 @@ function OverviewPanel({ me, role, onNav, onGang }: any) {
 
   return (
     <div>
-      <div className="mb-8">
-        <p className="text-zinc-100 text-sm uppercase tracking-widest mb-1">{roleLabel}</p>
-        <h1 className="text-4xl font-bold text-white">Welkom {me.display_name}</h1>
-        <p className="text-zinc-400 mt-2">Overzicht van gang-activiteit binnen HDRP. Hieronder zie je wat er speelt.</p>
+      <div className="mb-12 pt-4">
+        <p className="text-zinc-500 text-sm uppercase tracking-[0.3em] mb-3">{roleLabel}</p>
+        <h1 className="text-6xl md:text-7xl font-black text-white tracking-tight leading-none">Welkom <span className="text-zinc-400">{me.display_name}</span></h1>
+        <p className="text-zinc-400 mt-6 text-lg max-w-2xl">Hieronder zie je een overzicht van de gang-activiteit binnen HDRP. Scroll naar beneden voor de punten van deze week, top gangs en recente meldingen.</p>
       </div>
 
       {stats.activeBoost && (
