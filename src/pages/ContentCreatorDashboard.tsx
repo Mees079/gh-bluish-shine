@@ -12,10 +12,13 @@ type Creator = {
   user_id: string | null;
   twitch_username: string;
   login_username: string | null;
+  roblox_username: string | null;
   display_name: string | null;
   is_active: boolean;
   total_seconds: number;
   is_currently_live: boolean;
+  is_in_game: boolean;
+  last_ingame_ping_at: string | null;
   last_checked_at: string | null;
   created_at: string;
 };
