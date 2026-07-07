@@ -401,7 +401,7 @@ const ContentCreatorDashboard = () => {
                 <h2 className="text-lg font-semibold flex items-center gap-2"><Zap className="h-5 w-5 text-yellow-400" /> Boost shop</h2>
                 {myCreator && <span className="text-xs bg-yellow-500/10 border border-yellow-500/30 text-yellow-300 px-2 py-1 rounded-full font-mono">⭐ {myCreator.points || 0} pt</span>}
               </div>
-              <p className="text-xs text-slate-400 mb-4">Koop een tijdelijke persoonlijke boost — je verdient dan sneller punten.</p>
+              <p className="text-xs text-slate-400 mb-4">Koop een boost — hij komt in je inventaris en je activeert 'm zelf wanneer je wilt gaan grinden.</p>
               {boostShopItems.length === 0 ? (
                 <p className="text-slate-500 text-sm italic">Nog geen boosts in de shop.</p>
               ) : (
