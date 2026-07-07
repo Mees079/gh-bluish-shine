@@ -48,21 +48,24 @@ const ContentCreatorDashboard = () => {
   const [rewards, setRewards] = useState<Reward[]>([]);
   const [claims, setClaims] = useState<Claim[]>([]);
   const [sessions, setSessions] = useState<Session[]>([]);
+  const [boosts, setBoosts] = useState<Boost[]>([]);
   const [loading, setLoading] = useState(true);
   const [tempPw, setTempPw] = useState<{ pw: string; login: string } | null>(null);
   const [checking, setChecking] = useState(false);
 
   const load = async () => {
-    const [{ data: cs }, { data: rs }, { data: cls }, { data: ss }] = await Promise.all([
+    const [{ data: cs }, { data: rs }, { data: cls }, { data: ss }, { data: bs }] = await Promise.all([
       supabase.from("cc_creators").select("*").order("points", { ascending: false }),
       supabase.from("cc_rewards").select("*").order("points_required"),
       supabase.from("cc_reward_claims").select("*").order("claimed_at", { ascending: false }),
       supabase.from("cc_live_sessions").select("*").order("started_at", { ascending: false }).limit(50),
+      supabase.from("cc_boosts").select("*").order("ends_at", { ascending: false }),
     ]);
     setCreators((cs as Creator[]) || []);
     setRewards((rs as Reward[]) || []);
     setClaims((cls as Claim[]) || []);
     setSessions((ss as Session[]) || []);
+    setBoosts((bs as Boost[]) || []);
     setLoading(false);
   };
 
