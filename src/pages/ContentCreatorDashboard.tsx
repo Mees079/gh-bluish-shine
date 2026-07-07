@@ -53,9 +53,9 @@ const ContentCreatorDashboard = () => {
 
   const load = async () => {
     const [{ data: cs }, { data: rs }, { data: cls }, { data: ss }] = await Promise.all([
-      supabase.from("cc_creators").select("*").order("total_seconds", { ascending: false }),
-      supabase.from("cc_rewards").select("*").order("hours_required"),
-      supabase.from("cc_reward_claims").select("*").order("claimed_at", { ascending: false }),
+      supa.from("cc_creators").select("*").order("points", { ascending: false }),
+      supa.from("cc_rewards").select("*").order("points_required"),
+      supa.from("cc_reward_claims").select("*").order("claimed_at", { ascending: false }),
       supabase.from("cc_live_sessions").select("*").order("started_at", { ascending: false }).limit(50),
     ]);
     setCreators((cs as Creator[]) || []);
