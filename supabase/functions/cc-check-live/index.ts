@@ -56,8 +56,12 @@ Deno.serve(async (req) => {
 
     const results: any[] = [];
     for (const c of creators || []) {
-      const { live, title } = await isLive(c.twitch_username);
+      const { live: tiktokLive, title } = await isLive(c.twitch_username);
       const now = new Date();
+      // Only count as "live for tracking" if also in-game (fresh ping within 10 min)
+      const ingameFresh = c.is_in_game && c.last_ingame_ping_at &&
+        (now.getTime() - new Date(c.last_ingame_ping_at).getTime()) < 10 * 60 * 1000;
+      const live = tiktokLive && !!ingameFresh;
       let totalSeconds = c.total_seconds || 0;
 
       if (live && !c.is_currently_live) {
@@ -91,7 +95,7 @@ Deno.serve(async (req) => {
       } else {
         await supa.from("cc_creators").update({ last_checked_at: now.toISOString() }).eq("id", c.id);
       }
-      results.push({ user: c.twitch_username, live, total_seconds: totalSeconds });
+      results.push({ user: c.twitch_username, tiktok_live: tiktokLive, in_game: !!ingameFresh, counted: live, total_seconds: totalSeconds });
     }
     return new Response(JSON.stringify({ ok: true, results }), { headers: { ...cors, "Content-Type": "application/json" } });
   } catch (e: any) {

@@ -17,3 +17,7 @@ verify_jwt = false
 
 [functions.cc-init-hdrp]
 verify_jwt = false
+
+[functions.cc-roblox-presence]
+verify_jwt = false
+
