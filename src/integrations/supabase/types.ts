@@ -1448,6 +1448,8 @@ export type Database = {
         | "meos_commandant"
         | "meos_hulpdiensten"
         | "meos_bestuur"
+        | "head_content_creator"
+        | "content_creator"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1587,6 +1589,8 @@ export const Constants = {
         "meos_commandant",
         "meos_hulpdiensten",
         "meos_bestuur",
+        "head_content_creator",
+        "content_creator",
       ],
     },
   },
