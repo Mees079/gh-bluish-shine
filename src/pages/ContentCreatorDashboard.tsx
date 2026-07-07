@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import {
   Video, LogOut, Plus, Trophy, RefreshCw, Trash2, Radio, Clock, Gift, Ticket,
   Users, Flame, TrendingUp, Crown, ExternalLink, Copy, Sparkles, Calendar, Award,
+  Coins, CheckCircle2, KeyRound,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -16,14 +17,15 @@ type Creator = {
   display_name: string | null;
   is_active: boolean;
   total_seconds: number;
+  points: number;
   is_currently_live: boolean;
   is_in_game: boolean;
   last_ingame_ping_at: string | null;
   last_checked_at: string | null;
   created_at: string;
 };
-type Reward = { id: string; hours_required: number; title: string; description: string | null; sort_order: number; is_active: boolean };
-type Claim = { id: string; creator_id: string; reward_id: string; claimed_at: string; status: string };
+type Reward = { id: string; points_required: number; hours_required: number; title: string; description: string | null; sort_order: number; is_active: boolean };
+type Claim = { id: string; creator_id: string; reward_id: string; claimed_at: string; status: string; code: string | null; points_spent: number; redeemed_at: string | null };
 type Session = { id: string; creator_id: string; started_at: string; ended_at: string | null; duration_seconds: number | null; stream_title: string | null };
 
 const fmtHours = (s: number) => `${Math.floor(s / 3600)}u ${Math.floor((s % 3600) / 60)}m`;
