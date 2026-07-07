@@ -382,64 +382,128 @@ const ContentCreatorDashboard = () => {
 
         {/* Grid: rewards + leaderboard */}
         <section className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Beloningen (shop) */}
-          <div className="lg:col-span-2 bg-[#150822]/80 border border-purple-500/20 rounded-2xl p-6">
-            <h2 className="text-lg font-semibold mb-1 flex items-center gap-2"><Trophy className="h-5 w-5 text-yellow-400" /> Puntenshop</h2>
-            <p className="text-xs text-slate-400 mb-4">Koop een beloning met je verdiende punten. Je krijgt een unieke code die je in Discord inlevert.</p>
-            {rewards.length === 0 ? (
-              <p className="text-slate-400 text-sm">Nog geen beloningen ingesteld.</p>
-            ) : (
-              <div className="space-y-3">
-                {rewards.map(r => {
-                  const myPts = myCreator?.points || 0;
-                  const pct = Math.min(100, (myPts / r.points_required) * 100);
-                  const reached = myPts >= r.points_required;
-                  return (
-                    <div key={r.id} className="bg-gradient-to-br from-[#1a0f2e] to-[#150822] border border-purple-500/10 rounded-xl p-4 hover:border-purple-500/30 transition">
-                      <div className="flex items-start justify-between gap-4 mb-2">
-                        <div className="min-w-0">
-                          <div className="font-semibold flex items-center gap-2 flex-wrap">
-                            <Gift className="h-4 w-4 text-purple-400 shrink-0" />
-                            <span>{r.title}</span>
-                            <span className="text-xs bg-yellow-500/15 text-yellow-300 border border-yellow-500/30 px-2 py-0.5 rounded-full flex items-center gap-1"><Coins className="h-3 w-3" /> {r.points_required} pt</span>
+          <div className="lg:col-span-2 space-y-6">
+            {/* Boost items */}
+            <div className="bg-gradient-to-br from-[#1a0f2e]/90 to-[#150822]/90 border border-yellow-500/25 rounded-2xl p-6">
+              <div className="flex items-center justify-between mb-1">
+                <h2 className="text-lg font-semibold flex items-center gap-2"><Zap className="h-5 w-5 text-yellow-400" /> Boost shop</h2>
+                {myCreator && <span className="text-xs bg-yellow-500/10 border border-yellow-500/30 text-yellow-300 px-2 py-1 rounded-full font-mono">⭐ {myCreator.points || 0} pt</span>}
+              </div>
+              <p className="text-xs text-slate-400 mb-4">Koop een tijdelijke persoonlijke boost — je verdient dan sneller punten.</p>
+              {boostShopItems.length === 0 ? (
+                <p className="text-slate-500 text-sm italic">Nog geen boosts in de shop.</p>
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {boostShopItems.map(r => {
+                    const myPts = myCreator?.points || 0;
+                    const reached = myPts >= r.points_required;
+                    return (
+                      <div key={r.id} className="relative overflow-hidden bg-gradient-to-br from-yellow-500/10 via-orange-500/5 to-fuchsia-500/10 border border-yellow-500/20 rounded-xl p-4 hover:border-yellow-400/50 transition group">
+                        <div className="absolute -top-4 -right-4 w-20 h-20 bg-yellow-500/10 rounded-full blur-xl group-hover:bg-yellow-400/20 transition" />
+                        <div className="relative flex items-start justify-between gap-2 mb-1">
+                          <div className="min-w-0">
+                            <div className="text-2xl font-black text-yellow-300 flex items-center gap-1"><Rocket className="h-5 w-5" /> x{r.boost_multiplier}</div>
+                            <div className="text-sm font-semibold text-white truncate">{r.title}</div>
+                            <div className="text-xs text-slate-400">{r.boost_duration_minutes} min lang</div>
+                            {r.description && <p className="text-xs text-slate-500 mt-1 line-clamp-2">{r.description}</p>}
                           </div>
-                          {r.description && <p className="text-sm text-slate-400 mt-1">{r.description}</p>}
+                          {isHead && <button onClick={() => removeReward(r.id)} className="text-red-400/70 hover:text-red-300 shrink-0"><Trash2 className="h-4 w-4" /></button>}
                         </div>
-                        <div className="flex gap-2 items-center shrink-0">
+                        <div className="relative mt-3 flex items-center justify-between">
+                          <span className="text-xs bg-black/40 text-yellow-200 border border-yellow-500/30 px-2 py-1 rounded-full flex items-center gap-1"><Coins className="h-3 w-3" /> {r.points_required} pt</span>
                           {myCreator && (
                             reached ? (
-                              <button onClick={() => claimReward(r)} className="text-xs bg-gradient-to-r from-purple-600 to-fuchsia-500 hover:brightness-110 px-3 py-1.5 rounded-lg flex items-center gap-1 shadow-[0_0_20px_rgba(168,85,247,0.4)]">
-                                <Ticket className="h-3 w-3" /> Koop ({r.points_required})
+                              <button onClick={() => claimReward(r)} className="text-xs bg-gradient-to-r from-yellow-500 to-orange-500 hover:brightness-110 text-black font-bold px-3 py-1.5 rounded-lg flex items-center gap-1 shadow-[0_0_20px_rgba(250,204,21,0.35)]">
+                                Activeer <Zap className="h-3 w-3" />
                               </button>
                             ) : (
                               <span className="text-xs text-slate-500">Nog {r.points_required - myPts} pt</span>
                             )
                           )}
-                          {isHead && (
-                            <button onClick={() => removeReward(r.id)} className="text-red-400/70 hover:text-red-300"><Trash2 className="h-4 w-4" /></button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+
+            {/* Product items */}
+            <div className="bg-[#150822]/80 border border-purple-500/20 rounded-2xl p-6">
+              <div className="flex items-center justify-between mb-1">
+                <h2 className="text-lg font-semibold flex items-center gap-2"><ShoppingBag className="h-5 w-5 text-purple-400" /> Producten</h2>
+                {myCreator && <span className="text-xs bg-purple-500/10 border border-purple-500/30 text-purple-300 px-2 py-1 rounded-full font-mono">⭐ {myCreator.points || 0} pt</span>}
+              </div>
+              <p className="text-xs text-slate-400 mb-4">Wissel je punten in voor Robux, merch of andere beloningen. Je krijgt een code voor in Discord.</p>
+              {productShopItems.length === 0 ? (
+                <p className="text-slate-500 text-sm italic">Nog geen producten.</p>
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {productShopItems.map(r => {
+                    const myPts = myCreator?.points || 0;
+                    const pct = Math.min(100, (myPts / r.points_required) * 100);
+                    const reached = myPts >= r.points_required;
+                    return (
+                      <div key={r.id} className="bg-gradient-to-br from-[#1a0f2e] to-[#150822] border border-purple-500/10 rounded-xl p-4 hover:border-purple-500/40 transition group">
+                        <div className="flex items-start justify-between gap-2 mb-2">
+                          <div className="min-w-0">
+                            <div className="font-semibold flex items-center gap-2 flex-wrap">
+                              <Gift className="h-4 w-4 text-purple-400 shrink-0" />
+                              <span className="truncate">{r.title}</span>
+                            </div>
+                            {r.description && <p className="text-xs text-slate-400 mt-1 line-clamp-2">{r.description}</p>}
+                          </div>
+                          {isHead && <button onClick={() => removeReward(r.id)} className="text-red-400/70 hover:text-red-300 shrink-0"><Trash2 className="h-4 w-4" /></button>}
+                        </div>
+                        <div className="h-1.5 bg-slate-800/80 rounded-full overflow-hidden mt-2 mb-3">
+                          <div className="h-full bg-gradient-to-r from-purple-500 to-fuchsia-400" style={{ width: `${pct}%` }} />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs bg-yellow-500/15 text-yellow-300 border border-yellow-500/30 px-2 py-1 rounded-full flex items-center gap-1"><Coins className="h-3 w-3" /> {r.points_required} pt</span>
+                          {myCreator && (
+                            reached ? (
+                              <button onClick={() => claimReward(r)} className="text-xs bg-gradient-to-r from-purple-600 to-fuchsia-500 hover:brightness-110 px-3 py-1.5 rounded-lg flex items-center gap-1 shadow-[0_0_20px_rgba(168,85,247,0.4)]">
+                                <Ticket className="h-3 w-3" /> Koop
+                              </button>
+                            ) : (
+                              <span className="text-xs text-slate-500">Nog {r.points_required - myPts} pt</span>
+                            )
                           )}
                         </div>
                       </div>
-                      {myCreator && (
-                        <div className="h-1.5 bg-slate-800/80 rounded-full overflow-hidden mt-2">
-                          <div className="h-full bg-gradient-to-r from-purple-500 to-fuchsia-400" style={{ width: `${pct}%` }} />
-                        </div>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-            )}
+                    );
+                  })}
+                </div>
+              )}
 
-            {isHead && (
-              <form onSubmit={addReward} className="mt-6 border-t border-purple-500/20 pt-6 grid grid-cols-1 md:grid-cols-4 gap-3">
-                <input type="number" min={1} value={rp} onChange={e => setRp(+e.target.value)} placeholder="Punten" required className="bg-[#1a0f2e] border border-slate-700 rounded-lg px-3 py-2 text-sm" />
-                <input value={rt} onChange={e => setRt(e.target.value)} placeholder="Titel (bv. €10 Robux)" required className="bg-[#1a0f2e] border border-slate-700 rounded-lg px-3 py-2 text-sm" />
-                <input value={rd} onChange={e => setRd(e.target.value)} placeholder="Beschrijving" className="bg-[#1a0f2e] border border-slate-700 rounded-lg px-3 py-2 text-sm" />
-                <button type="submit" className="bg-purple-600 hover:bg-purple-500 rounded-lg text-sm flex items-center justify-center gap-1"><Plus className="h-4 w-4" /> Toevoegen</button>
-              </form>
-            )}
+              {isHead && (
+                <form onSubmit={addReward} className="mt-6 border-t border-purple-500/20 pt-5 space-y-3">
+                  <div className="text-xs text-slate-400 uppercase tracking-wider flex items-center gap-2"><Plus className="h-3 w-3" /> Nieuw shop-item</div>
+                  <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+                    <input type="number" min={1} value={rp} onChange={e => setRp(+e.target.value)} placeholder="Punten" required className="bg-[#1a0f2e] border border-slate-700 rounded-lg px-3 py-2 text-sm" />
+                    <input value={rt} onChange={e => setRt(e.target.value)} placeholder="Titel (bv. €10 Robux)" required className="bg-[#1a0f2e] border border-slate-700 rounded-lg px-3 py-2 text-sm md:col-span-2" />
+                    <label className="flex items-center gap-2 text-sm bg-[#1a0f2e]/50 border border-slate-700 rounded-lg px-3 py-2 cursor-pointer">
+                      <input type="checkbox" checked={rIsBoost} onChange={e => setRIsBoost(e.target.checked)} className="accent-yellow-400" />
+                      <Zap className="h-3.5 w-3.5 text-yellow-400" /> Boost item
+                    </label>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+                    <input value={rd} onChange={e => setRd(e.target.value)} placeholder="Beschrijving" className="bg-[#1a0f2e] border border-slate-700 rounded-lg px-3 py-2 text-sm md:col-span-2" />
+                    {rIsBoost && (
+                      <>
+                        <input type="number" min={2} step="0.5" value={rBoostMult} onChange={e => setRBoostMult(+e.target.value)} placeholder="Boost x?" required className="bg-[#1a0f2e] border border-yellow-500/30 rounded-lg px-3 py-2 text-sm" />
+                        <input type="number" min={5} value={rBoostDur} onChange={e => setRBoostDur(+e.target.value)} placeholder="Duur in min" required className="bg-[#1a0f2e] border border-yellow-500/30 rounded-lg px-3 py-2 text-sm" />
+                      </>
+                    )}
+                    <button type="submit" className={`rounded-lg text-sm flex items-center justify-center gap-1 ${rIsBoost ? "bg-gradient-to-r from-yellow-500 to-orange-500 text-black font-bold" : "bg-purple-600 hover:bg-purple-500"} ${rIsBoost ? "" : "md:col-start-4"}`}>
+                      <Plus className="h-4 w-4" /> Toevoegen
+                    </button>
+                  </div>
+                </form>
+              )}
+            </div>
           </div>
+
 
 
           {/* Leaderboard */}
