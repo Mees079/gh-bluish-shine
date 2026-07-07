@@ -1193,6 +1193,253 @@ export type Database = {
           },
         ]
       }
+      ow_boosts: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          created_by_name: string | null
+          ends_at: string
+          id: string
+          multiplier: number
+          starts_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          created_by_name?: string | null
+          ends_at: string
+          id?: string
+          multiplier: number
+          starts_at: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          created_by_name?: string | null
+          ends_at?: string
+          id?: string
+          multiplier?: number
+          starts_at?: string
+        }
+        Relationships: []
+      }
+      ow_gangs: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          level: number
+          logo_url: string | null
+          name: string
+          total_points: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          level?: number
+          logo_url?: string | null
+          name: string
+          total_points?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          level?: number
+          logo_url?: string | null
+          name?: string
+          total_points?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      ow_inbox_messages: {
+        Row: {
+          author_id: string | null
+          author_name: string | null
+          body: string
+          created_at: string
+          gang_id: string | null
+          id: string
+          kind: string
+        }
+        Insert: {
+          author_id?: string | null
+          author_name?: string | null
+          body: string
+          created_at?: string
+          gang_id?: string | null
+          id?: string
+          kind: string
+        }
+        Update: {
+          author_id?: string | null
+          author_name?: string | null
+          body?: string
+          created_at?: string
+          gang_id?: string | null
+          id?: string
+          kind?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ow_inbox_messages_gang_id_fkey"
+            columns: ["gang_id"]
+            isOneToOne: false
+            referencedRelation: "ow_gangs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ow_point_entries: {
+        Row: {
+          base_points: number
+          boost_multiplier: number
+          clip_url: string
+          created_at: string
+          effective_points: number
+          entered_by: string | null
+          entered_by_name: string | null
+          gang_id: string
+          id: string
+          scenario_key: string
+          scenario_time: string
+        }
+        Insert: {
+          base_points: number
+          boost_multiplier?: number
+          clip_url: string
+          created_at?: string
+          effective_points: number
+          entered_by?: string | null
+          entered_by_name?: string | null
+          gang_id: string
+          id?: string
+          scenario_key: string
+          scenario_time: string
+        }
+        Update: {
+          base_points?: number
+          boost_multiplier?: number
+          clip_url?: string
+          created_at?: string
+          effective_points?: number
+          entered_by?: string | null
+          entered_by_name?: string | null
+          gang_id?: string
+          id?: string
+          scenario_key?: string
+          scenario_time?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ow_point_entries_gang_id_fkey"
+            columns: ["gang_id"]
+            isOneToOne: false
+            referencedRelation: "ow_gangs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ow_point_entries_scenario_key_fkey"
+            columns: ["scenario_key"]
+            isOneToOne: false
+            referencedRelation: "ow_scenarios"
+            referencedColumns: ["key"]
+          },
+        ]
+      }
+      ow_profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          display_name: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          display_name: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          display_name?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      ow_scenarios: {
+        Row: {
+          base_points: number
+          display_order: number
+          key: string
+          label: string
+        }
+        Insert: {
+          base_points: number
+          display_order?: number
+          key: string
+          label: string
+        }
+        Update: {
+          base_points?: number
+          display_order?: number
+          key?: string
+          label?: string
+        }
+        Relationships: []
+      }
+      ow_warnings: {
+        Row: {
+          created_at: string
+          gang_id: string
+          id: string
+          issued_by: string | null
+          issued_by_name: string | null
+          reason: string | null
+          resolved_at: string | null
+          type: string
+          week_start: string | null
+        }
+        Insert: {
+          created_at?: string
+          gang_id: string
+          id?: string
+          issued_by?: string | null
+          issued_by_name?: string | null
+          reason?: string | null
+          resolved_at?: string | null
+          type: string
+          week_start?: string | null
+        }
+        Update: {
+          created_at?: string
+          gang_id?: string
+          id?: string
+          issued_by?: string | null
+          issued_by_name?: string | null
+          reason?: string | null
+          resolved_at?: string | null
+          type?: string
+          week_start?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ow_warnings_gang_id_fkey"
+            columns: ["gang_id"]
+            isOneToOne: false
+            referencedRelation: "ow_gangs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       product_images: {
         Row: {
           created_at: string | null
@@ -1736,7 +1983,16 @@ export type Database = {
       is_head_developer: { Args: { _user_id: string }; Returns: boolean }
       is_meos_high: { Args: { _user_id: string }; Returns: boolean }
       is_meos_member: { Args: { _user_id: string }; Returns: boolean }
+      is_onderwereld: { Args: { _user_id: string }; Returns: boolean }
+      is_onderwereld_coordinator: {
+        Args: { _user_id: string }
+        Returns: boolean
+      }
+      is_onderwereld_hoofd: { Args: { _user_id: string }; Returns: boolean }
       is_staff_member: { Args: { _user_id: string }; Returns: boolean }
+      ow_level_for_points: { Args: { _pts: number }; Returns: number }
+      ow_recalc_gang: { Args: { _gang_id: string }; Returns: undefined }
+      ow_weekly_inactivity_check: { Args: never; Returns: undefined }
       schedule_weekly_uren_tasks: { Args: never; Returns: undefined }
     }
     Enums: {
@@ -1754,6 +2010,9 @@ export type Database = {
         | "meos_bestuur"
         | "head_content_creator"
         | "content_creator"
+        | "onderwereld_proef"
+        | "onderwereld_coordinator"
+        | "onderwereld_hoofd"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1895,6 +2154,9 @@ export const Constants = {
         "meos_bestuur",
         "head_content_creator",
         "content_creator",
+        "onderwereld_proef",
+        "onderwereld_coordinator",
+        "onderwereld_hoofd",
       ],
     },
   },
