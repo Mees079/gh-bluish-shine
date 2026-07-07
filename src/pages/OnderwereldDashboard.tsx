@@ -95,7 +95,7 @@ const OnderwereldDashboard = () => {
   const handleLogout = async () => { await supabase.auth.signOut(); navigate("/onderwereld"); };
 
   if (loading || !uid || !role || !me) {
-    return <div className="min-h-screen bg-black flex items-center justify-center text-yellow-500">Laden...</div>;
+    return <div className="min-h-screen bg-black flex items-center justify-center text-zinc-100">Laden...</div>;
   }
 
   const roleLabel = role === "onderwereld_hoofd" ? "Hoofd Coordinator" : role === "onderwereld_coordinator" ? "Coordinator" : "Proef Coordinator";
@@ -108,10 +108,10 @@ const OnderwereldDashboard = () => {
     <button
       onClick={() => setNav(k)}
       className={`w-full text-left flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-all ${
-        nav === k ? "bg-gradient-to-r from-yellow-600/20 to-transparent border-l-2 border-yellow-500 text-yellow-100" : "text-zinc-400 hover:bg-zinc-900 hover:text-white"
+        nav === k ? "bg-gradient-to-r from-white/10 to-transparent border-l-2 border-zinc-100 text-white" : "text-zinc-400 hover:bg-zinc-900 hover:text-white"
       } ${indent ? "pl-8 text-xs" : ""}`}
     >
-      <I className={`h-4 w-4 ${nav === k ? "text-yellow-500" : "text-zinc-500"}`} />
+      <I className={`h-4 w-4 ${nav === k ? "text-zinc-100" : "text-zinc-500"}`} />
       <span>{label}</span>
     </button>
   );
@@ -125,10 +125,10 @@ const OnderwereldDashboard = () => {
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,_rgba(212,175,55,0.06)_0%,_transparent_50%),radial-gradient(ellipse_at_bottom_right,_rgba(139,0,0,0.08)_0%,_transparent_50%)] pointer-events-none" />
 
       {/* Sidebar */}
-      <aside className="relative w-72 bg-zinc-950/95 backdrop-blur-xl border-r border-yellow-900/30 flex flex-col z-10">
+      <aside className="relative w-72 bg-zinc-950/95 backdrop-blur-xl border-r border-zinc-800 flex flex-col z-10">
         <div className="p-5 border-b border-zinc-900">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-yellow-600 to-red-900 flex items-center justify-center">
+            <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-zinc-300 to-red-900 flex items-center justify-center">
               <Skull className="h-5 w-5 text-black" />
             </div>
             <div>
@@ -171,11 +171,11 @@ const OnderwereldDashboard = () => {
 
         <div className="p-4 border-t border-zinc-900 flex items-center gap-3">
           {avatarUrl
-            ? <img src={avatarUrl} className="w-9 h-9 rounded-full object-cover border border-yellow-600/40" alt="" />
-            : <div className="w-9 h-9 rounded-full bg-zinc-800 flex items-center justify-center text-yellow-500 font-bold">{me.display_name[0]?.toUpperCase()}</div>}
+            ? <img src={avatarUrl} className="w-9 h-9 rounded-full object-cover border border-zinc-700" alt="" />
+            : <div className="w-9 h-9 rounded-full bg-zinc-800 flex items-center justify-center text-zinc-100 font-bold">{me.display_name[0]?.toUpperCase()}</div>}
           <div className="flex-1 min-w-0">
             <div className="text-sm text-white truncate">{me.display_name}</div>
-            <div className="text-xs text-yellow-600/80 truncate">{roleLabel}</div>
+            <div className="text-xs text-zinc-400 truncate">{roleLabel}</div>
           </div>
           <button onClick={handleLogout} className="p-2 rounded hover:bg-red-900/30 text-zinc-500 hover:text-red-400" title="Uitloggen">
             <LogOut className="h-4 w-4" />
@@ -221,15 +221,15 @@ function SectionTitle({ children, sub }: any) {
   );
 }
 function Label({ children }: any) { return <label className="block text-xs font-medium uppercase tracking-wider text-zinc-500 mb-2">{children}</label>; }
-const inputCls = "w-full bg-black/60 border border-zinc-800 rounded-lg px-3 py-2.5 text-white text-sm focus:outline-none focus:border-yellow-600/60 focus:ring-1 focus:ring-yellow-600/40 placeholder-zinc-700";
-const btnPrimary = "bg-gradient-to-r from-yellow-700 to-amber-600 hover:from-yellow-600 hover:to-amber-500 text-black font-bold px-5 py-2.5 rounded-lg text-sm uppercase tracking-wider transition-all disabled:opacity-40";
-const btnGhost = "border border-zinc-800 hover:border-yellow-600/50 text-zinc-300 hover:text-white px-4 py-2 rounded-lg text-sm transition-all";
+const inputCls = "w-full bg-black/60 border border-zinc-800 rounded-lg px-3 py-2.5 text-white text-sm focus:outline-none focus:border-zinc-500 focus:ring-1 focus:ring-zinc-700 placeholder-zinc-700";
+const btnPrimary = "bg-gradient-to-r from-zinc-800 to-zinc-200 hover:from-zinc-300 hover:to-white text-black font-bold px-5 py-2.5 rounded-lg text-sm uppercase tracking-wider transition-all disabled:opacity-40";
+const btnGhost = "border border-zinc-800 hover:border-zinc-600 text-zinc-300 hover:text-white px-4 py-2 rounded-lg text-sm transition-all";
 const btnDanger = "border border-red-900/60 hover:bg-red-900/30 text-red-400 px-3 py-1.5 rounded-lg text-xs transition-all inline-flex items-center gap-1.5";
 
 function LevelBadge({ level }: { level: number }) {
   const stars = "★".repeat(level);
-  const colors = ["text-zinc-500", "text-yellow-700", "text-yellow-600", "text-yellow-500", "text-amber-400", "text-orange-400", "text-red-500"];
-  return <span className={`text-sm font-bold ${colors[level] || "text-yellow-500"}`}>LVL {level} <span className="text-xs">{stars}</span></span>;
+  const colors = ["text-zinc-500", "text-zinc-800", "text-zinc-300", "text-zinc-100", "text-zinc-100", "text-orange-400", "text-red-500"];
+  return <span className={`text-sm font-bold ${colors[level] || "text-zinc-100"}`}>LVL {level} <span className="text-xs">{stars}</span></span>;
 }
 
 function ProgressBar({ current, target, level }: { current: number; target: number; level: number }) {
@@ -241,7 +241,7 @@ function ProgressBar({ current, target, level }: { current: number; target: numb
         <span className="text-zinc-500">{info.next ? `${info.needed} nodig voor LVL ${info.next}` : "MAX LEVEL"}</span>
       </div>
       <div className="h-2 bg-zinc-900 rounded-full overflow-hidden border border-zinc-800">
-        <div className="h-full bg-gradient-to-r from-yellow-600 via-amber-500 to-red-500 transition-all" style={{ width: `${info.progress}%` }} />
+        <div className="h-full bg-gradient-to-r from-zinc-300 via-white to-red-500 transition-all" style={{ width: `${info.progress}%` }} />
       </div>
     </div>
   );
@@ -281,18 +281,18 @@ function OverviewPanel({ me, role, onNav, onGang }: any) {
   return (
     <div>
       <div className="mb-8">
-        <p className="text-yellow-500 text-sm uppercase tracking-widest mb-1">{roleLabel}</p>
+        <p className="text-zinc-100 text-sm uppercase tracking-widest mb-1">{roleLabel}</p>
         <h1 className="text-4xl font-bold text-white">Welkom {me.display_name}</h1>
         <p className="text-zinc-400 mt-2">Overzicht van gang-activiteit binnen HDRP. Hieronder zie je wat er speelt.</p>
       </div>
 
       {stats.activeBoost && (
-        <Card className="p-4 mb-6 border-yellow-600/40 bg-gradient-to-r from-yellow-950/40 to-amber-950/30">
+        <Card className="p-4 mb-6 border-zinc-700 bg-gradient-to-r from-zinc-900/60 to-zinc-900/40">
           <div className="flex items-center gap-3">
-            <Zap className="h-6 w-6 text-yellow-400" />
+            <Zap className="h-6 w-6 text-white" />
             <div className="flex-1">
-              <div className="text-yellow-200 font-bold">Actieve boost: x{stats.activeBoost.multiplier}</div>
-              <div className="text-xs text-yellow-500/80">Loopt tot {nlDate(stats.activeBoost.ends_at)}</div>
+              <div className="text-white font-bold">Actieve boost: x{stats.activeBoost.multiplier}</div>
+              <div className="text-xs text-zinc-100/80">Loopt tot {nlDate(stats.activeBoost.ends_at)}</div>
             </div>
           </div>
         </Card>
@@ -300,8 +300,8 @@ function OverviewPanel({ me, role, onNav, onGang }: any) {
 
       <div className="grid grid-cols-4 gap-4 mb-8">
         {[
-          { label: "Gangs", value: stats.gangs, icon: Users, tint: "text-yellow-500" },
-          { label: "Punten deze week", value: stats.weekPoints, icon: ScrollText, tint: "text-amber-400" },
+          { label: "Gangs", value: stats.gangs, icon: Users, tint: "text-zinc-100" },
+          { label: "Punten deze week", value: stats.weekPoints, icon: ScrollText, tint: "text-zinc-100" },
           { label: "Actieve warns", value: stats.activeWarns, icon: AlertTriangle, tint: "text-orange-400" },
           { label: "Spoedmeldingen", value: stats.urgent, icon: ShieldAlert, tint: "text-red-500" },
         ].map((s, i) => (
@@ -315,7 +315,7 @@ function OverviewPanel({ me, role, onNav, onGang }: any) {
 
       <div className="grid grid-cols-2 gap-6">
         <Card className="p-5">
-          <h3 className="text-white font-semibold mb-4 flex items-center gap-2"><Crown className="h-4 w-4 text-yellow-500" /> Top gangs</h3>
+          <h3 className="text-white font-semibold mb-4 flex items-center gap-2"><Crown className="h-4 w-4 text-zinc-100" /> Top gangs</h3>
           {topGangs.length === 0 && <p className="text-zinc-500 text-sm">Nog geen gangs.</p>}
           <div className="space-y-3">
             {topGangs.map((g) => (
@@ -330,14 +330,14 @@ function OverviewPanel({ me, role, onNav, onGang }: any) {
           </div>
         </Card>
         <Card className="p-5">
-          <h3 className="text-white font-semibold mb-4 flex items-center gap-2"><Inbox className="h-4 w-4 text-yellow-500" /> Recente meldingen</h3>
+          <h3 className="text-white font-semibold mb-4 flex items-center gap-2"><Inbox className="h-4 w-4 text-zinc-100" /> Recente meldingen</h3>
           {recentInbox.length === 0 && <p className="text-zinc-500 text-sm">Nog geen berichten.</p>}
           <div className="space-y-3">
             {recentInbox.map((m) => (
               <div key={m.id} className={`p-3 rounded-lg text-sm border ${
                 m.kind === "urgent" ? "bg-red-950/40 border-red-500/40 text-red-100"
                 : m.kind === "system" ? "bg-zinc-900/60 border-zinc-800 text-zinc-300"
-                : "bg-yellow-950/20 border-yellow-800/40 text-yellow-100"
+                : "bg-yellow-950/20 border-yellow-800/40 text-white"
               }`}>
                 <div className="text-xs text-zinc-500 mb-1">{m.author_name || "Systeem"} · {nlDate(m.created_at)}</div>
                 {m.body}
@@ -386,11 +386,11 @@ function GangsPanel({ isHoofd, onOpen }: any) {
         <div className="grid grid-cols-2 gap-4">
           {gangs.map((g) => (
             <button key={g.id} onClick={() => onOpen(g.id)} className="text-left">
-              <Card className="p-5 hover:border-yellow-600/50 transition group">
+              <Card className="p-5 hover:border-zinc-600 transition group">
                 <div className="flex items-center gap-4 mb-4">
                   {g.logoSigned
                     ? <img src={g.logoSigned} className="w-14 h-14 rounded-lg object-cover border border-zinc-800" alt="" />
-                    : <div className="w-14 h-14 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center text-2xl font-bold text-yellow-600">{g.name[0]?.toUpperCase()}</div>}
+                    : <div className="w-14 h-14 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center text-2xl font-bold text-zinc-300">{g.name[0]?.toUpperCase()}</div>}
                   <div className="flex-1 min-w-0">
                     <div className="text-lg font-bold text-white truncate group-hover:text-yellow-300">{g.name}</div>
                     <LevelBadge level={g.level} />
@@ -450,7 +450,7 @@ function GangNewPanel({ me, uid, onDone }: any) {
             <div className="grid grid-cols-6 gap-2">
               {[1, 2, 3, 4, 5, 6].map((n) => (
                 <button key={n} type="button" onClick={() => setLevel(n)}
-                  className={`py-2 rounded-lg border text-sm font-bold ${level === n ? "bg-yellow-600 text-black border-yellow-500" : "bg-zinc-900 border-zinc-800 text-zinc-400 hover:border-yellow-600/50"}`}>
+                  className={`py-2 rounded-lg border text-sm font-bold ${level === n ? "bg-zinc-300 text-black border-zinc-100" : "bg-zinc-900 border-zinc-800 text-zinc-400 hover:border-zinc-600"}`}>
                   LVL {n}
                 </button>
               ))}
@@ -460,7 +460,7 @@ function GangNewPanel({ me, uid, onDone }: any) {
           <div>
             <Label>Logo (optioneel)</Label>
             <input type="file" accept="image/*" onChange={(e) => setLogoFile(e.target.files?.[0] || null)}
-              className="block w-full text-sm text-zinc-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-yellow-700 file:text-black file:font-bold hover:file:bg-yellow-600 file:cursor-pointer" />
+              className="block w-full text-sm text-zinc-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-zinc-800 file:text-black file:font-bold hover:file:bg-zinc-300 file:cursor-pointer" />
           </div>
           <button disabled={busy || !name} className={btnPrimary}>{busy ? "Aanmaken..." : "Gang aanmaken"}</button>
         </form>
@@ -529,7 +529,7 @@ function GangDetailPanel({ gangId, isHoofd, isCoord }: any) {
         <div className="flex items-start gap-5">
           {gang.logoSigned
             ? <img src={gang.logoSigned} className="w-24 h-24 rounded-xl object-cover border border-zinc-800" alt="" />
-            : <div className="w-24 h-24 rounded-xl bg-zinc-900 border border-zinc-800 flex items-center justify-center text-4xl font-bold text-yellow-600">{gang.name[0]?.toUpperCase()}</div>}
+            : <div className="w-24 h-24 rounded-xl bg-zinc-900 border border-zinc-800 flex items-center justify-center text-4xl font-bold text-zinc-300">{gang.name[0]?.toUpperCase()}</div>}
           <div className="flex-1 min-w-0">
             {editing ? (
               <div className="space-y-3">
@@ -571,12 +571,12 @@ function GangDetailPanel({ gangId, isHoofd, isCoord }: any) {
                     <div className="text-white font-medium">{scenarios[e.scenario_key]?.label || e.scenario_key}</div>
                     <div className="text-xs text-zinc-500">
                       {nlDate(e.scenario_time)} · door {e.entered_by_name || "?"}
-                      <a href={e.clip_url} target="_blank" rel="noreferrer" className="ml-2 text-yellow-500 hover:underline">Clip →</a>
+                      <a href={e.clip_url} target="_blank" rel="noreferrer" className="ml-2 text-zinc-100 hover:underline">Clip →</a>
                     </div>
                   </div>
                   <div className="text-right">
-                    <div className="text-yellow-400 font-bold">+{e.effective_points} pt</div>
-                    {e.boost_multiplier > 1 && <div className="text-xs text-amber-500">x{e.boost_multiplier} boost</div>}
+                    <div className="text-white font-bold">+{e.effective_points} pt</div>
+                    {e.boost_multiplier > 1 && <div className="text-xs text-white">x{e.boost_multiplier} boost</div>}
                   </div>
                   {isCoord && <button onClick={() => deleteEntry(e.id)} className={btnDanger}><Trash2 className="h-3.5 w-3.5" /></button>}
                 </div>
@@ -683,10 +683,10 @@ function PointsNewPanel({ me, uid }: any) {
               {scenarios.map((s) => (
                 <button key={s.key} type="button" onClick={() => setScenario(s.key)}
                   className={`flex justify-between items-center p-3 rounded-lg border text-left text-sm ${
-                    scenario === s.key ? "bg-yellow-950/50 border-yellow-600 text-white" : "bg-zinc-900/40 border-zinc-800 text-zinc-300 hover:border-yellow-600/50"
+                    scenario === s.key ? "bg-yellow-950/50 border-zinc-300 text-white" : "bg-zinc-900/40 border-zinc-800 text-zinc-300 hover:border-zinc-600"
                   }`}>
                   <span>{s.label}</span>
-                  <span className="font-bold text-yellow-500">{s.base_points} pt</span>
+                  <span className="font-bold text-zinc-100">{s.base_points} pt</span>
                 </button>
               ))}
             </div>
@@ -697,11 +697,11 @@ function PointsNewPanel({ me, uid }: any) {
           </div>
 
           {selectedScenario && (
-            <Card className={`p-4 border ${activeBoost ? "border-yellow-500/60 bg-yellow-950/30" : "border-zinc-800"}`}>
+            <Card className={`p-4 border ${activeBoost ? "border-zinc-100/60 bg-yellow-950/30" : "border-zinc-800"}`}>
               <div className="flex items-center justify-between">
                 <span className="text-zinc-400 text-sm">Punten die worden toegekend</span>
                 <div className="text-right">
-                  <div className="text-2xl font-bold text-yellow-400">{base * mult} pt</div>
+                  <div className="text-2xl font-bold text-white">{base * mult} pt</div>
                   {activeBoost && <div className="text-xs text-yellow-300">{base} × {mult} boost actief</div>}
                 </div>
               </div>
@@ -760,11 +760,11 @@ function PointsRecentPanel({ isCoord }: any) {
                   <td className="px-4 py-3 text-white">{r.gang}</td>
                   <td className="px-4 py-3 text-zinc-300">{scenarios[r.scenario_key]?.label || r.scenario_key}</td>
                   <td className="px-4 py-3 text-zinc-400">{nlDate(r.scenario_time)}</td>
-                  <td className="px-4 py-3"><a href={r.clip_url} target="_blank" rel="noreferrer" className="text-yellow-500 hover:underline">Bekijk →</a></td>
+                  <td className="px-4 py-3"><a href={r.clip_url} target="_blank" rel="noreferrer" className="text-zinc-100 hover:underline">Bekijk →</a></td>
                   <td className="px-4 py-3 text-zinc-400">{r.entered_by_name || "?"}</td>
                   <td className="px-4 py-3 text-right">
-                    <span className="text-yellow-400 font-bold">+{r.effective_points}</span>
-                    {r.boost_multiplier > 1 && <span className="text-xs text-amber-500 ml-1">×{r.boost_multiplier}</span>}
+                    <span className="text-white font-bold">+{r.effective_points}</span>
+                    {r.boost_multiplier > 1 && <span className="text-xs text-white ml-1">×{r.boost_multiplier}</span>}
                   </td>
                   {isCoord && (
                     <td className="px-2"><button onClick={() => del(r.id)} className="text-red-500 hover:text-red-400 p-2"><Trash2 className="h-3.5 w-3.5" /></button></td>
@@ -830,13 +830,13 @@ function BoostsPanel({ me, uid, isCoord }: any) {
       <SectionTitle sub="Puntenboost x2 t/m x5. Alle punten die tijdens de boost-periode worden ingevoerd (op basis van scenario-tijdstip) worden automatisch vermenigvuldigd.">Puntenboosts</SectionTitle>
 
       {active.length > 0 && (
-        <Card className="p-5 mb-6 border-yellow-500/50 bg-gradient-to-r from-yellow-950/40 to-amber-950/30">
-          <div className="flex items-center gap-3 mb-3"><Sparkles className="h-5 w-5 text-yellow-400" /><span className="text-yellow-100 font-semibold">Actief nu</span></div>
+        <Card className="p-5 mb-6 border-zinc-100/50 bg-gradient-to-r from-zinc-900/60 to-zinc-900/40">
+          <div className="flex items-center gap-3 mb-3"><Sparkles className="h-5 w-5 text-white" /><span className="text-white font-semibold">Actief nu</span></div>
           {active.map(b => (
             <div key={b.id} className="flex items-center justify-between py-2 border-t border-yellow-800/30 first:border-t-0">
               <div>
-                <div className="text-yellow-200 text-xl font-bold">x{b.multiplier}</div>
-                <div className="text-xs text-yellow-500">Loopt tot {nlDate(b.ends_at)} · door {b.created_by_name}</div>
+                <div className="text-white text-xl font-bold">x{b.multiplier}</div>
+                <div className="text-xs text-zinc-100">Loopt tot {nlDate(b.ends_at)} · door {b.created_by_name}</div>
               </div>
               {isCoord && <button onClick={() => del(b.id)} className={btnDanger}><Trash2 className="h-3 w-3" /></button>}
             </div>
@@ -853,7 +853,7 @@ function BoostsPanel({ me, uid, isCoord }: any) {
             <div className="grid grid-cols-4 gap-2">
               {[2, 3, 4, 5].map(n => (
                 <button key={n} type="button" onClick={() => setMult(n)}
-                  className={`py-3 rounded-lg border font-bold text-lg ${mult === n ? "bg-yellow-600 text-black border-yellow-500" : "bg-zinc-900 border-zinc-800 text-zinc-400 hover:border-yellow-600/50"}`}>x{n}</button>
+                  className={`py-3 rounded-lg border font-bold text-lg ${mult === n ? "bg-zinc-300 text-black border-zinc-100" : "bg-zinc-900 border-zinc-800 text-zinc-400 hover:border-zinc-600"}`}>x{n}</button>
               ))}
             </div>
           </div>
@@ -878,7 +878,7 @@ function BoostsPanel({ me, uid, isCoord }: any) {
           <h3 className="text-white font-semibold mb-3">Gepland</h3>
           {upcoming.map(b => (
             <div key={b.id} className="flex items-center justify-between py-2 border-t border-zinc-800 first:border-t-0 text-sm">
-              <div><span className="text-yellow-400 font-bold">x{b.multiplier}</span> <span className="text-zinc-500">· {nlDate(b.starts_at)} → {nlDate(b.ends_at)}</span></div>
+              <div><span className="text-white font-bold">x{b.multiplier}</span> <span className="text-zinc-500">· {nlDate(b.starts_at)} → {nlDate(b.ends_at)}</span></div>
               {isCoord && <button onClick={() => del(b.id)} className={btnDanger}><Trash2 className="h-3 w-3" /></button>}
             </div>
           ))}
@@ -1043,10 +1043,10 @@ function InboxPanel({ me, uid, isHoofd }: any) {
               <div className={`max-w-2xl rounded-xl px-4 py-2.5 text-sm border relative ${
                 m.kind === "urgent" ? "bg-red-950/40 border-red-500/60 text-red-100"
                 : m.kind === "system" ? "bg-zinc-900/70 border-zinc-800 text-zinc-300"
-                : m.author_id === uid ? "bg-gradient-to-r from-yellow-800/50 to-amber-800/40 border-yellow-700/50 text-yellow-50"
+                : m.author_id === uid ? "bg-gradient-to-r from-yellow-800/50 to-amber-800/40 border-zinc-800/50 text-yellow-50"
                 : "bg-zinc-900 border-zinc-800 text-zinc-100"
               }`}>
-                {m.kind === "chat" && <div className="text-xs text-yellow-500 font-semibold mb-0.5">{m.author_name}</div>}
+                {m.kind === "chat" && <div className="text-xs text-zinc-100 font-semibold mb-0.5">{m.author_name}</div>}
                 <div className="whitespace-pre-wrap">{m.body}</div>
                 <div className="text-[10px] opacity-60 mt-1">{nlDate(m.created_at)}</div>
                 {isHoofd && (
@@ -1114,7 +1114,7 @@ function SettingsPanel({ me, setMe, setAvatarUrl }: any) {
           <div>
             <Label>Profielfoto</Label>
             <input type="file" accept="image/*" onChange={e => setFile(e.target.files?.[0] || null)}
-              className="block w-full text-sm text-zinc-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-yellow-700 file:text-black file:font-bold hover:file:bg-yellow-600 file:cursor-pointer" />
+              className="block w-full text-sm text-zinc-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-zinc-800 file:text-black file:font-bold hover:file:bg-zinc-300 file:cursor-pointer" />
           </div>
           <button onClick={save} disabled={busy} className={btnPrimary}>{busy ? "Opslaan..." : "Opslaan"}</button>
         </div>
@@ -1204,7 +1204,7 @@ function AccountsPanel({ meUid }: any) {
               <div className="grid grid-cols-3 gap-2">
                 {(["onderwereld_proef", "onderwereld_coordinator", "onderwereld_hoofd"] as Role[]).map(r => (
                   <button key={r} type="button" onClick={() => setRole(r)}
-                    className={`py-2.5 rounded-lg border text-sm ${role === r ? "bg-yellow-600 text-black border-yellow-500 font-bold" : "bg-zinc-900 border-zinc-800 text-zinc-400 hover:border-yellow-600/50"}`}>
+                    className={`py-2.5 rounded-lg border text-sm ${role === r ? "bg-zinc-300 text-black border-zinc-100 font-bold" : "bg-zinc-900 border-zinc-800 text-zinc-400 hover:border-zinc-600"}`}>
                     {roleLabel(r)}
                   </button>
                 ))}
@@ -1226,7 +1226,7 @@ function AccountsPanel({ meUid }: any) {
                 <td className="px-4 py-3 text-white">{a.display_name}</td>
                 <td className="px-4 py-3">
                   <span className={`text-xs px-2 py-1 rounded ${
-                    a.role === "onderwereld_hoofd" ? "bg-yellow-900/40 text-yellow-300 border border-yellow-600/40"
+                    a.role === "onderwereld_hoofd" ? "bg-yellow-900/40 text-yellow-300 border border-zinc-700"
                     : a.role === "onderwereld_coordinator" ? "bg-amber-900/30 text-amber-300 border border-amber-700/40"
                     : "bg-zinc-800 text-zinc-300 border border-zinc-700"
                   }`}>{roleLabel(a.role)}</span>
