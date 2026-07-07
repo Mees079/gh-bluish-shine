@@ -426,7 +426,7 @@ const ContentCreatorDashboard = () => {
                           {myCreator && (
                             reached ? (
                               <button onClick={() => claimReward(r)} className="text-xs bg-gradient-to-r from-yellow-500 to-orange-500 hover:brightness-110 text-black font-bold px-3 py-1.5 rounded-lg flex items-center gap-1 shadow-[0_0_20px_rgba(250,204,21,0.35)]">
-                                Activeer <Zap className="h-3 w-3" />
+                                Koop <ShoppingBag className="h-3 w-3" />
                               </button>
                             ) : (
                               <span className="text-xs text-slate-500">Nog {r.points_required - myPts} pt</span>
