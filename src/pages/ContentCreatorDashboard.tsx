@@ -28,6 +28,7 @@ type Reward = { id: string; points_required: number; hours_required: number; tit
 type Claim = { id: string; creator_id: string; reward_id: string; claimed_at: string; status: string; code: string | null; points_spent: number; redeemed_at: string | null };
 type Session = { id: string; creator_id: string; started_at: string; ended_at: string | null; duration_seconds: number | null; stream_title: string | null };
 type Boost = { id: string; creator_id: string | null; label: string; multiplier: number; interval_seconds: number | null; starts_at: string; ends_at: string; source: string; points_spent: number };
+type BoostInventory = { id: string; creator_id: string; reward_id: string | null; label: string; multiplier: number; duration_minutes: number; points_spent: number; purchased_at: string; activated_at: string | null; boost_id: string | null };
 
 const fmtHours = (s: number) => `${Math.floor(s / 3600)}u ${Math.floor((s % 3600) / 60)}m`;
 const fmtHoursDecimal = (s: number) => (s / 3600).toFixed(1);
@@ -49,23 +50,26 @@ const ContentCreatorDashboard = () => {
   const [claims, setClaims] = useState<Claim[]>([]);
   const [sessions, setSessions] = useState<Session[]>([]);
   const [boosts, setBoosts] = useState<Boost[]>([]);
+  const [inventory, setInventory] = useState<BoostInventory[]>([]);
   const [loading, setLoading] = useState(true);
   const [tempPw, setTempPw] = useState<{ pw: string; login: string } | null>(null);
   const [checking, setChecking] = useState(false);
 
   const load = async () => {
-    const [{ data: cs }, { data: rs }, { data: cls }, { data: ss }, { data: bs }] = await Promise.all([
+    const [{ data: cs }, { data: rs }, { data: cls }, { data: ss }, { data: bs }, { data: inv }] = await Promise.all([
       supabase.from("cc_creators").select("*").order("points", { ascending: false }),
       supabase.from("cc_rewards").select("*").order("points_required"),
       supabase.from("cc_reward_claims").select("*").order("claimed_at", { ascending: false }),
       supabase.from("cc_live_sessions").select("*").order("started_at", { ascending: false }).limit(50),
       supabase.from("cc_boosts").select("*").order("ends_at", { ascending: false }),
+      supabase.from("cc_boost_inventory").select("*").order("purchased_at", { ascending: false }),
     ]);
     setCreators((cs as Creator[]) || []);
     setRewards((rs as Reward[]) || []);
     setClaims((cls as Claim[]) || []);
     setSessions((ss as Session[]) || []);
     setBoosts((bs as Boost[]) || []);
+    setInventory((inv as BoostInventory[]) || []);
     setLoading(false);
   };
 
@@ -167,14 +171,22 @@ const ContentCreatorDashboard = () => {
     if (!myCreator) return toast.error("Geen creator profiel gekoppeld");
     if ((myCreator.points || 0) < reward.points_required) return toast.error("Niet genoeg punten");
     const boost = reward.boost_multiplier && reward.boost_duration_minutes;
-    if (!confirm(`"${reward.title}" kopen voor ${reward.points_required} punten?${boost ? `\n\nJe krijgt een x${reward.boost_multiplier} boost voor ${reward.boost_duration_minutes} min.` : ""}`)) return;
+    if (!confirm(`"${reward.title}" kopen voor ${reward.points_required} punten?${boost ? `\n\nJe krijgt een x${reward.boost_multiplier} boost van ${reward.boost_duration_minutes} min in je inventaris — activeer zelf wanneer je wilt.` : ""}`)) return;
     const { data, error } = await supabase.functions.invoke("cc-claim-reward", { body: { reward_id: reward.id } });
     if (error || (data as any)?.error) return toast.error((data as any)?.error || "Aankoop mislukt");
-    if (boost) toast.success(`Boost x${reward.boost_multiplier} actief!`);
+    if (boost) toast.success("Boost toegevoegd aan je inventaris!");
     else {
       setLastCode({ code: (data as any).code, title: reward.title });
       toast.success("Aankoop gelukt! Kopieer je code.");
     }
+    await load();
+  };
+
+  const activateInventory = async (inv: BoostInventory) => {
+    if (!confirm(`Boost "${inv.label}" (x${inv.multiplier}, ${inv.duration_minutes} min) nu activeren?`)) return;
+    const { data, error } = await supabase.functions.invoke("cc-activate-boost", { body: { inventory_id: inv.id } });
+    if (error || (data as any)?.error) return toast.error((data as any)?.error || "Activeren mislukt");
+    toast.success(`Boost x${inv.multiplier} actief!`);
     await load();
   };
 
@@ -389,7 +401,7 @@ const ContentCreatorDashboard = () => {
                 <h2 className="text-lg font-semibold flex items-center gap-2"><Zap className="h-5 w-5 text-yellow-400" /> Boost shop</h2>
                 {myCreator && <span className="text-xs bg-yellow-500/10 border border-yellow-500/30 text-yellow-300 px-2 py-1 rounded-full font-mono">⭐ {myCreator.points || 0} pt</span>}
               </div>
-              <p className="text-xs text-slate-400 mb-4">Koop een tijdelijke persoonlijke boost — je verdient dan sneller punten.</p>
+              <p className="text-xs text-slate-400 mb-4">Koop een boost — hij komt in je inventaris en je activeert 'm zelf wanneer je wilt gaan grinden.</p>
               {boostShopItems.length === 0 ? (
                 <p className="text-slate-500 text-sm italic">Nog geen boosts in de shop.</p>
               ) : (
@@ -414,7 +426,7 @@ const ContentCreatorDashboard = () => {
                           {myCreator && (
                             reached ? (
                               <button onClick={() => claimReward(r)} className="text-xs bg-gradient-to-r from-yellow-500 to-orange-500 hover:brightness-110 text-black font-bold px-3 py-1.5 rounded-lg flex items-center gap-1 shadow-[0_0_20px_rgba(250,204,21,0.35)]">
-                                Activeer <Zap className="h-3 w-3" />
+                                Koop <ShoppingBag className="h-3 w-3" />
                               </button>
                             ) : (
                               <span className="text-xs text-slate-500">Nog {r.points_required - myPts} pt</span>
@@ -427,6 +439,61 @@ const ContentCreatorDashboard = () => {
                 </div>
               )}
             </div>
+
+            {/* Mijn boost inventaris */}
+            {myCreator && (
+              <div className="bg-gradient-to-br from-[#1a0f2e]/90 to-[#150822]/90 border border-fuchsia-500/25 rounded-2xl p-6">
+                <div className="flex items-center justify-between mb-1">
+                  <h2 className="text-lg font-semibold flex items-center gap-2"><Rocket className="h-5 w-5 text-fuchsia-400" /> Mijn boosts</h2>
+                  <span className="text-xs bg-fuchsia-500/10 border border-fuchsia-500/30 text-fuchsia-300 px-2 py-1 rounded-full">
+                    {inventory.filter(i => i.creator_id === myCreator.id && !i.activated_at).length} klaar om te activeren
+                  </span>
+                </div>
+                <p className="text-xs text-slate-400 mb-4">Gekochte boosts wachten hier tot jij ze activeert. Timer start pas bij activatie.</p>
+                {(() => {
+                  const mine = inventory.filter(i => i.creator_id === myCreator.id);
+                  const ready = mine.filter(i => !i.activated_at);
+                  const used = mine.filter(i => i.activated_at).slice(0, 6);
+                  if (mine.length === 0) return <p className="text-slate-500 text-sm italic">Nog geen boosts gekocht. Ga naar de shop hierboven!</p>;
+                  return (
+                    <div className="space-y-4">
+                      {ready.length > 0 && (
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                          {ready.map(i => (
+                            <div key={i.id} className="bg-black/30 border border-fuchsia-500/30 rounded-xl p-4 flex flex-col gap-2 hover:border-fuchsia-400/60 transition">
+                              <div className="flex items-start justify-between gap-2">
+                                <div className="min-w-0">
+                                  <div className="text-xl font-black text-fuchsia-300 flex items-center gap-1"><Rocket className="h-4 w-4" /> x{i.multiplier}</div>
+                                  <div className="text-sm font-semibold text-white truncate">{i.label}</div>
+                                  <div className="text-xs text-slate-400">{i.duration_minutes} min duur</div>
+                                </div>
+                                <span className="text-[10px] text-slate-500 shrink-0">Gekocht {timeAgo(i.purchased_at)} geleden</span>
+                              </div>
+                              <button onClick={() => activateInventory(i)} className="mt-1 text-xs bg-gradient-to-r from-fuchsia-500 to-purple-500 hover:brightness-110 text-white font-bold px-3 py-2 rounded-lg flex items-center justify-center gap-1 shadow-[0_0_20px_rgba(217,70,239,0.35)]">
+                                <Zap className="h-3 w-3" /> Activeer nu
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                      {used.length > 0 && (
+                        <div>
+                          <div className="text-xs text-slate-400 uppercase tracking-wider mb-2">Recent geactiveerd</div>
+                          <div className="space-y-1">
+                            {used.map(i => (
+                              <div key={i.id} className="flex items-center justify-between text-xs bg-black/20 border border-slate-800 rounded-lg px-3 py-2">
+                                <span className="text-slate-300">x{i.multiplier} · {i.label}</span>
+                                <span className="text-slate-500">{timeAgo(i.activated_at)} geleden</span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })()}
+              </div>
+            )}
 
             {/* Product items */}
             <div className="bg-[#150822]/80 border border-purple-500/20 rounded-2xl p-6">

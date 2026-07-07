@@ -50,26 +50,25 @@ Deno.serve(async (req) => {
     const isBoostReward = reward.boost_multiplier && reward.boost_duration_minutes;
 
     if (isBoostReward) {
-      const endsAt = new Date(Date.now() + reward.boost_duration_minutes * 60 * 1000);
-      const { data: boost, error: bErr } = await svc.from("cc_boosts").insert({
+      const { data: inv, error: iErr } = await svc.from("cc_boost_inventory").insert({
         creator_id: creator.id,
+        reward_id: reward.id,
         label: reward.title,
         multiplier: reward.boost_multiplier,
-        ends_at: endsAt.toISOString(),
-        source: "purchase",
+        duration_minutes: reward.boost_duration_minutes,
         points_spent: cost,
       }).select().maybeSingle();
-      if (bErr) {
+      if (iErr) {
         await svc.from("cc_creators").update({ points: creator.points }).eq("id", creator.id);
-        return new Response(JSON.stringify({ error: "Boost activeren mislukt" }), { status: 500, headers: cors });
+        return new Response(JSON.stringify({ error: "Boost aan inventaris toevoegen mislukt" }), { status: 500, headers: cors });
       }
       const { data: claim } = await svc.from("cc_reward_claims").insert({
         creator_id: creator.id,
         reward_id: reward.id,
         points_spent: cost,
-        status: "boost_active",
+        status: "boost_inventory",
       }).select().maybeSingle();
-      return new Response(JSON.stringify({ ok: true, boost, claim }), {
+      return new Response(JSON.stringify({ ok: true, inventory: inv, claim }), {
         headers: { ...cors, "Content-Type": "application/json" },
       });
     }

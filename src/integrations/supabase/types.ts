@@ -44,6 +44,67 @@ export type Database = {
         }
         Relationships: []
       }
+      cc_boost_inventory: {
+        Row: {
+          activated_at: string | null
+          boost_id: string | null
+          creator_id: string
+          duration_minutes: number
+          id: string
+          label: string
+          multiplier: number
+          points_spent: number
+          purchased_at: string
+          reward_id: string | null
+        }
+        Insert: {
+          activated_at?: string | null
+          boost_id?: string | null
+          creator_id: string
+          duration_minutes?: number
+          id?: string
+          label?: string
+          multiplier?: number
+          points_spent?: number
+          purchased_at?: string
+          reward_id?: string | null
+        }
+        Update: {
+          activated_at?: string | null
+          boost_id?: string | null
+          creator_id?: string
+          duration_minutes?: number
+          id?: string
+          label?: string
+          multiplier?: number
+          points_spent?: number
+          purchased_at?: string
+          reward_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cc_boost_inventory_boost_id_fkey"
+            columns: ["boost_id"]
+            isOneToOne: false
+            referencedRelation: "cc_boosts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cc_boost_inventory_creator_id_fkey"
+            columns: ["creator_id"]
+            isOneToOne: false
+            referencedRelation: "cc_creators"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cc_boost_inventory_reward_id_fkey"
+            columns: ["reward_id"]
+            isOneToOne: false
+            referencedRelation: "cc_rewards"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       cc_boosts: {
         Row: {
           created_at: string
