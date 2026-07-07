@@ -387,7 +387,8 @@ const ContentCreatorDashboard = () => {
                   <th className="text-left py-2 font-medium">Status</th>
                   <th className="text-left py-2 font-medium">In-game</th>
                   <th className="text-left py-2 font-medium">Uren</th>
-                  <th className="text-left py-2 font-medium">Beloningen</th>
+                  <th className="text-left py-2 font-medium">Punten</th>
+                  <th className="text-left py-2 font-medium">Aankopen</th>
                   <th className="text-left py-2 font-medium">Laatst</th>
                   {isHead && <th></th>}
                 </tr>
