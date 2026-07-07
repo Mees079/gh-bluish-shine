@@ -1,43 +1,62 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { Video, LogOut, Plus, Trophy, RefreshCw, Trash2, Radio, Clock, Gift, Ticket } from "lucide-react";
+import {
+  Video, LogOut, Plus, Trophy, RefreshCw, Trash2, Radio, Clock, Gift, Ticket,
+  Users, Flame, TrendingUp, Crown, ExternalLink, Copy, Sparkles, Calendar, Award,
+} from "lucide-react";
 import { toast } from "sonner";
 
 type Creator = {
   id: string;
   user_id: string | null;
   twitch_username: string;
+  login_username: string | null;
   display_name: string | null;
   is_active: boolean;
   total_seconds: number;
   is_currently_live: boolean;
   last_checked_at: string | null;
+  created_at: string;
 };
 type Reward = { id: string; hours_required: number; title: string; description: string | null; sort_order: number; is_active: boolean };
-type Claim = { id: string; creator_id: string; reward_id: string; claimed_at: string };
+type Claim = { id: string; creator_id: string; reward_id: string; claimed_at: string; status: string };
+type Session = { id: string; creator_id: string; started_at: string; ended_at: string | null; duration_seconds: number | null; stream_title: string | null };
 
 const fmtHours = (s: number) => `${Math.floor(s / 3600)}u ${Math.floor((s % 3600) / 60)}m`;
+const fmtHoursDecimal = (s: number) => (s / 3600).toFixed(1);
+const timeAgo = (d: string | null) => {
+  if (!d) return "-";
+  const diff = (Date.now() - new Date(d).getTime()) / 1000;
+  if (diff < 60) return `${Math.floor(diff)}s`;
+  if (diff < 3600) return `${Math.floor(diff / 60)}m`;
+  if (diff < 86400) return `${Math.floor(diff / 3600)}u`;
+  return `${Math.floor(diff / 86400)}d`;
+};
 
 const ContentCreatorDashboard = () => {
   const nav = useNavigate();
-  const [me, setMe] = useState<{ id: string } | null>(null);
+  const [me, setMe] = useState<{ id: string; email: string } | null>(null);
   const [isHead, setIsHead] = useState(false);
   const [creators, setCreators] = useState<Creator[]>([]);
   const [rewards, setRewards] = useState<Reward[]>([]);
   const [claims, setClaims] = useState<Claim[]>([]);
+  const [sessions, setSessions] = useState<Session[]>([]);
   const [loading, setLoading] = useState(true);
-  const [tempPw, setTempPw] = useState<string | null>(null);
+  const [tempPw, setTempPw] = useState<{ pw: string; login: string } | null>(null);
+  const [checking, setChecking] = useState(false);
 
   const load = async () => {
-    const [{ data: cs }, { data: rs }, { data: cls }] = await Promise.all([
+    const [{ data: cs }, { data: rs }, { data: cls }, { data: ss }] = await Promise.all([
       supabase.from("cc_creators").select("*").order("total_seconds", { ascending: false }),
       supabase.from("cc_rewards").select("*").order("hours_required"),
-      supabase.from("cc_reward_claims").select("*"),
+      supabase.from("cc_reward_claims").select("*").order("claimed_at", { ascending: false }),
+      supabase.from("cc_live_sessions").select("*").order("started_at", { ascending: false }).limit(50),
     ]);
     setCreators((cs as Creator[]) || []);
     setRewards((rs as Reward[]) || []);
     setClaims((cls as Claim[]) || []);
+    setSessions((ss as Session[]) || []);
     setLoading(false);
   };
 
@@ -49,35 +68,53 @@ const ContentCreatorDashboard = () => {
       if (!isCc) { await supabase.auth.signOut(); return nav("/contentcreator"); }
       const { data: h } = await supabase.rpc("is_head_content_creator", { _user_id: user.id });
       setIsHead(!!h);
-      setMe({ id: user.id });
+      setMe({ id: user.id, email: user.email || "" });
       await load();
     })();
   }, []);
 
   const myCreator = creators.find(c => c.user_id === me?.id);
+  const mySessions = useMemo(() => sessions.filter(s => s.creator_id === myCreator?.id), [sessions, myCreator]);
+
+  const totals = useMemo(() => {
+    const totalHours = creators.reduce((a, c) => a + c.total_seconds, 0) / 3600;
+    const liveNow = creators.filter(c => c.is_currently_live).length;
+    const totalSessions = sessions.length;
+    return { totalHours, liveNow, totalSessions, creators: creators.length };
+  }, [creators, sessions]);
 
   const logout = async () => { await supabase.auth.signOut(); nav("/contentcreator"); };
 
   const checkLive = async () => {
+    setChecking(true);
     toast.loading("Live status checken...", { id: "cl" });
     const { error } = await supabase.functions.invoke("cc-check-live", { body: {} });
     if (error) toast.error("Check mislukt", { id: "cl" });
     else { toast.success("Bijgewerkt", { id: "cl" }); await load(); }
+    setChecking(false);
   };
 
   // Create account form
-  const [newUser, setNewUser] = useState("");
+  const [newLogin, setNewLogin] = useState("");
+  const [newTikTok, setNewTikTok] = useState("");
   const [newHead, setNewHead] = useState(false);
+  const [creating, setCreating] = useState(false);
   const createAccount = async (e: React.FormEvent) => {
     e.preventDefault();
     setTempPw(null);
+    setCreating(true);
     const { data, error } = await supabase.functions.invoke("cc-create-account", {
-      body: { twitch_username: newUser, display_name: newUser, is_head: newHead },
+      body: {
+        login_username: newLogin.trim(),
+        tiktok_username: newTikTok.trim().replace(/^@/, ""),
+        display_name: newTikTok.trim(),
+        is_head: newHead,
+      },
     });
+    setCreating(false);
     if (error || (data as any)?.error) return toast.error((data as any)?.error || "Aanmaken mislukt");
-    setTempPw((data as any).temp_password);
-    setNewUser("");
-    setNewHead(false);
+    setTempPw({ pw: (data as any).temp_password, login: (data as any).login_username });
+    setNewLogin(""); setNewTikTok(""); setNewHead(false);
     await load();
     toast.success("Account aangemaakt");
   };
@@ -117,172 +154,322 @@ const ContentCreatorDashboard = () => {
   const isClaimed = (rewardId: string, creatorId?: string) =>
     claims.some(c => c.reward_id === rewardId && c.creator_id === (creatorId || myCreator?.id));
 
-  if (loading) return <div className="min-h-screen bg-[#0a0512] flex items-center justify-center text-purple-300">Laden...</div>;
+  const nextReward = useMemo(() => {
+    if (!myCreator) return null;
+    const h = myCreator.total_seconds / 3600;
+    return rewards.filter(r => r.hours_required > h).sort((a, b) => a.hours_required - b.hours_required)[0] || null;
+  }, [rewards, myCreator]);
+
+  if (loading) return (
+    <div className="min-h-screen bg-[#0a0512] flex items-center justify-center text-purple-300">
+      <div className="animate-pulse flex items-center gap-3"><Video className="h-5 w-5" /> Laden...</div>
+    </div>
+  );
 
   return (
-    <div className="min-h-screen bg-[#0a0512] text-white">
-      <header className="border-b border-purple-500/20 bg-[#150822]/80 backdrop-blur-xl sticky top-0 z-10">
+    <div className="min-h-screen bg-[#0a0512] text-white relative overflow-hidden">
+      {/* background */}
+      <div className="pointer-events-none absolute inset-0 opacity-40" style={{
+        backgroundImage: "radial-gradient(circle at 20% 0%, rgba(168,85,247,0.18), transparent 50%), radial-gradient(circle at 80% 30%, rgba(236,72,153,0.12), transparent 55%)",
+      }} />
+      <div className="pointer-events-none absolute inset-0 opacity-[0.05]" style={{
+        backgroundImage: "linear-gradient(rgba(168,85,247,0.6) 1px,transparent 1px),linear-gradient(90deg,rgba(168,85,247,0.6) 1px,transparent 1px)",
+        backgroundSize: "56px 56px",
+      }} />
+
+      <header className="relative border-b border-purple-500/20 bg-[#0f0620]/80 backdrop-blur-xl sticky top-0 z-20">
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-purple-500/10 rounded-xl border border-purple-500/30 flex items-center justify-center">
-              <Video className="h-5 w-5 text-purple-400" />
+            <div className="w-11 h-11 bg-gradient-to-br from-purple-500/30 to-fuchsia-500/20 rounded-xl border border-purple-500/40 flex items-center justify-center shadow-[0_0_25px_rgba(168,85,247,0.35)]">
+              <Video className="h-5 w-5 text-purple-300" />
             </div>
             <div>
-              <h1 className="font-bold">Content Creator Panel</h1>
-              <p className="text-xs text-slate-400">{isHead ? "Head Content Creator" : "Content Creator"}</p>
+              <h1 className="font-bold tracking-tight flex items-center gap-2">
+                HDRP Content Creators
+                {isHead && <span className="text-[10px] uppercase tracking-widest bg-yellow-500/15 text-yellow-300 border border-yellow-500/40 px-2 py-0.5 rounded-full flex items-center gap-1"><Crown className="h-3 w-3" /> Head</span>}
+              </h1>
+              <p className="text-xs text-slate-400">Ingelogd als {me?.email?.split("@")[0]}</p>
             </div>
           </div>
           <div className="flex gap-2">
-            <button onClick={checkLive} className="flex items-center gap-2 bg-purple-600/20 hover:bg-purple-600/30 border border-purple-500/40 px-3 py-2 rounded-lg text-sm">
-              <RefreshCw className="h-4 w-4" /> Check live status
+            <button onClick={checkLive} disabled={checking} className="flex items-center gap-2 bg-purple-600/20 hover:bg-purple-600/30 border border-purple-500/40 px-3 py-2 rounded-lg text-sm disabled:opacity-50">
+              <RefreshCw className={`h-4 w-4 ${checking ? "animate-spin" : ""}`} /> Refresh live
             </button>
-            <button onClick={logout} className="flex items-center gap-2 bg-slate-800 hover:bg-slate-700 px-3 py-2 rounded-lg text-sm">
+            <button onClick={logout} className="flex items-center gap-2 bg-slate-800/80 hover:bg-slate-700 border border-slate-700 px-3 py-2 rounded-lg text-sm">
               <LogOut className="h-4 w-4" /> Uitloggen
             </button>
           </div>
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto px-6 py-8 space-y-8">
+      <main className="relative max-w-7xl mx-auto px-6 py-8 space-y-8">
+        {/* Overzicht stats */}
+        <section className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <StatCard icon={<Users className="h-4 w-4" />} label="Creators" value={totals.creators.toString()} tint="purple" />
+          <StatCard icon={<Radio className="h-4 w-4" />} label="Nu live" value={totals.liveNow.toString()} tint="red" pulse={totals.liveNow > 0} />
+          <StatCard icon={<Clock className="h-4 w-4" />} label="Totaal uren" value={totals.totalHours.toFixed(1)} tint="fuchsia" />
+          <StatCard icon={<Calendar className="h-4 w-4" />} label="Sessies" value={totals.totalSessions.toString()} tint="cyan" />
+        </section>
+
         {/* Mijn stats */}
         {myCreator && (
-          <section className="bg-[#150822] border border-purple-500/20 rounded-2xl p-6">
-            <h2 className="text-lg font-semibold mb-4 flex items-center gap-2"><Radio className="h-5 w-5 text-purple-400" /> Mijn stats</h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="bg-[#1a0f2e] rounded-xl p-4">
-                <div className="text-xs text-slate-400">TikTok</div>
-                <div className="font-mono text-purple-300">@{myCreator.twitch_username}</div>
+          <section className="relative bg-gradient-to-br from-[#180a2d] to-[#0f0620] border border-purple-500/25 rounded-2xl p-6 overflow-hidden">
+            <div className="absolute -top-16 -right-16 w-60 h-60 bg-fuchsia-500/10 rounded-full blur-3xl" />
+            <div className="relative flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
+              <div>
+                <h2 className="text-lg font-semibold flex items-center gap-2"><Sparkles className="h-5 w-5 text-fuchsia-400" /> Mijn dashboard</h2>
+                <p className="text-sm text-slate-400 mt-1">Live status & voortgang van jouw account</p>
               </div>
-              <div className="bg-[#1a0f2e] rounded-xl p-4">
-                <div className="text-xs text-slate-400 flex items-center gap-1"><Clock className="h-3 w-3" /> Totaal live</div>
-                <div className="text-xl font-bold">{fmtHours(myCreator.total_seconds)}</div>
-              </div>
-              <div className="bg-[#1a0f2e] rounded-xl p-4">
-                <div className="text-xs text-slate-400">Status</div>
-                <div className={`text-lg font-semibold ${myCreator.is_currently_live ? "text-red-400" : "text-slate-500"}`}>
-                  {myCreator.is_currently_live ? "🔴 LIVE" : "Offline"}
+              <a href={`https://tiktok.com/@${myCreator.twitch_username}/live`} target="_blank" className="text-xs bg-purple-600/20 border border-purple-500/40 px-3 py-2 rounded-lg flex items-center gap-2 self-start md:self-auto hover:bg-purple-600/30">
+                Open mijn TikTok LIVE <ExternalLink className="h-3 w-3" />
+              </a>
+            </div>
+            <div className="relative grid grid-cols-1 md:grid-cols-4 gap-4">
+              <MiniStat label="TikTok" value={`@${myCreator.twitch_username}`} accent />
+              <MiniStat label="Status" value={myCreator.is_currently_live ? "🔴 LIVE" : "Offline"} accent={myCreator.is_currently_live} />
+              <MiniStat label="Totaal live" value={fmtHours(myCreator.total_seconds)} />
+              <MiniStat label="Laatst gecheckt" value={timeAgo(myCreator.last_checked_at) + " geleden"} />
+            </div>
+
+            {nextReward && (
+              <div className="relative mt-6 bg-[#0f0620]/60 border border-purple-500/20 rounded-xl p-4">
+                <div className="flex items-center justify-between mb-2 text-sm">
+                  <span className="flex items-center gap-2 text-slate-300"><Award className="h-4 w-4 text-yellow-400" /> Volgende beloning: <span className="text-white font-semibold">{nextReward.title}</span></span>
+                  <span className="text-xs text-slate-400">{fmtHoursDecimal(myCreator.total_seconds)} / {nextReward.hours_required}u</span>
+                </div>
+                <div className="h-2.5 bg-slate-800 rounded-full overflow-hidden">
+                  <div className="h-full bg-gradient-to-r from-purple-500 via-fuchsia-500 to-pink-400 transition-all" style={{ width: `${Math.min(100, (myCreator.total_seconds / 3600 / nextReward.hours_required) * 100)}%` }} />
                 </div>
               </div>
-            </div>
+            )}
           </section>
         )}
 
-        {/* Voortgangslijn / beloningen */}
-        <section className="bg-[#150822] border border-purple-500/20 rounded-2xl p-6">
-          <h2 className="text-lg font-semibold mb-4 flex items-center gap-2"><Trophy className="h-5 w-5 text-yellow-400" /> Beloningen</h2>
-          {rewards.length === 0 ? (
-            <p className="text-slate-400 text-sm">Nog geen beloningen ingesteld.</p>
-          ) : (
-            <div className="space-y-3">
-              {rewards.map(r => {
-                const myHours = (myCreator?.total_seconds || 0) / 3600;
-                const pct = Math.min(100, (myHours / r.hours_required) * 100);
-                const reached = myHours >= r.hours_required;
-                const claimed = isClaimed(r.id);
-                return (
-                  <div key={r.id} className="bg-[#1a0f2e] rounded-xl p-4">
-                    <div className="flex items-start justify-between gap-4 mb-2">
-                      <div>
-                        <div className="font-semibold flex items-center gap-2">
-                          <Gift className="h-4 w-4 text-purple-400" />
-                          {r.title} <span className="text-xs text-slate-400">({r.hours_required}u)</span>
+        {/* Grid: rewards + leaderboard */}
+        <section className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Beloningen */}
+          <div className="lg:col-span-2 bg-[#150822]/80 border border-purple-500/20 rounded-2xl p-6">
+            <h2 className="text-lg font-semibold mb-4 flex items-center gap-2"><Trophy className="h-5 w-5 text-yellow-400" /> Beloningen</h2>
+            {rewards.length === 0 ? (
+              <p className="text-slate-400 text-sm">Nog geen beloningen ingesteld.</p>
+            ) : (
+              <div className="space-y-3">
+                {rewards.map(r => {
+                  const myHours = (myCreator?.total_seconds || 0) / 3600;
+                  const pct = Math.min(100, (myHours / r.hours_required) * 100);
+                  const reached = myHours >= r.hours_required;
+                  const claimed = isClaimed(r.id);
+                  return (
+                    <div key={r.id} className="bg-gradient-to-br from-[#1a0f2e] to-[#150822] border border-purple-500/10 rounded-xl p-4 hover:border-purple-500/30 transition">
+                      <div className="flex items-start justify-between gap-4 mb-2">
+                        <div className="min-w-0">
+                          <div className="font-semibold flex items-center gap-2 flex-wrap">
+                            <Gift className="h-4 w-4 text-purple-400 shrink-0" />
+                            <span>{r.title}</span>
+                            <span className="text-xs bg-purple-500/15 text-purple-300 border border-purple-500/30 px-2 py-0.5 rounded-full">{r.hours_required}u</span>
+                          </div>
+                          {r.description && <p className="text-sm text-slate-400 mt-1">{r.description}</p>}
                         </div>
-                        {r.description && <p className="text-sm text-slate-400 mt-1">{r.description}</p>}
+                        <div className="flex gap-2 items-center shrink-0">
+                          {myCreator && (
+                            claimed ? (
+                              <span className="text-xs bg-green-500/15 text-green-300 px-3 py-1.5 rounded-lg border border-green-500/30">✓ Geclaimd</span>
+                            ) : reached ? (
+                              <button onClick={() => claimReward(r)} className="text-xs bg-gradient-to-r from-purple-600 to-fuchsia-500 hover:brightness-110 px-3 py-1.5 rounded-lg flex items-center gap-1 shadow-[0_0_20px_rgba(168,85,247,0.4)]">
+                                <Ticket className="h-3 w-3" /> Claim
+                              </button>
+                            ) : (
+                              <span className="text-xs text-slate-500">Nog {(r.hours_required - myHours).toFixed(1)}u</span>
+                            )
+                          )}
+                          {isHead && (
+                            <button onClick={() => removeReward(r.id)} className="text-red-400/70 hover:text-red-300"><Trash2 className="h-4 w-4" /></button>
+                          )}
+                        </div>
                       </div>
-                      <div className="flex gap-2">
-                        {myCreator && (
-                          claimed ? (
-                            <span className="text-xs bg-green-500/20 text-green-300 px-3 py-1.5 rounded-lg border border-green-500/30">Geclaimd</span>
-                          ) : reached ? (
-                            <button onClick={() => claimReward(r)} className="text-xs bg-purple-600 hover:bg-purple-500 px-3 py-1.5 rounded-lg flex items-center gap-1">
-                              <Ticket className="h-3 w-3" /> Claim
-                            </button>
-                          ) : (
-                            <span className="text-xs text-slate-500">Nog {(r.hours_required - myHours).toFixed(1)}u</span>
-                          )
-                        )}
-                        {isHead && (
-                          <button onClick={() => removeReward(r.id)} className="text-red-400 hover:text-red-300"><Trash2 className="h-4 w-4" /></button>
-                        )}
-                      </div>
+                      {myCreator && (
+                        <div className="h-1.5 bg-slate-800/80 rounded-full overflow-hidden mt-2">
+                          <div className="h-full bg-gradient-to-r from-purple-500 to-fuchsia-400" style={{ width: `${pct}%` }} />
+                        </div>
+                      )}
+                      {claimed && (
+                        <p className="text-xs text-yellow-300/90 mt-2 flex items-center gap-1"><Ticket className="h-3 w-3" /> Maak een ticket aan in de Discord om je beloning op te halen.</p>
+                      )}
                     </div>
-                    {myCreator && (
-                      <div className="h-2 bg-slate-800 rounded-full overflow-hidden">
-                        <div className="h-full bg-gradient-to-r from-purple-500 to-fuchsia-400" style={{ width: `${pct}%` }} />
-                      </div>
-                    )}
-                    {claimed && (
-                      <p className="text-xs text-yellow-300 mt-2">→ Maak een ticket aan in de Discord om je beloning te claimen.</p>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-          )}
+                  );
+                })}
+              </div>
+            )}
 
-          {isHead && (
-            <form onSubmit={addReward} className="mt-6 border-t border-purple-500/20 pt-6 grid grid-cols-1 md:grid-cols-4 gap-3">
-              <input type="number" min={1} value={rh} onChange={e => setRh(+e.target.value)} placeholder="Uren" required className="bg-[#1a0f2e] border border-slate-700 rounded-lg px-3 py-2 text-sm" />
-              <input value={rt} onChange={e => setRt(e.target.value)} placeholder="Titel (bv. €10 Robux)" required className="bg-[#1a0f2e] border border-slate-700 rounded-lg px-3 py-2 text-sm" />
-              <input value={rd} onChange={e => setRd(e.target.value)} placeholder="Beschrijving" className="bg-[#1a0f2e] border border-slate-700 rounded-lg px-3 py-2 text-sm" />
-              <button type="submit" className="bg-purple-600 hover:bg-purple-500 rounded-lg text-sm flex items-center justify-center gap-1"><Plus className="h-4 w-4" /> Toevoegen</button>
-            </form>
-          )}
+            {isHead && (
+              <form onSubmit={addReward} className="mt-6 border-t border-purple-500/20 pt-6 grid grid-cols-1 md:grid-cols-4 gap-3">
+                <input type="number" min={1} value={rh} onChange={e => setRh(+e.target.value)} placeholder="Uren" required className="bg-[#1a0f2e] border border-slate-700 rounded-lg px-3 py-2 text-sm" />
+                <input value={rt} onChange={e => setRt(e.target.value)} placeholder="Titel (bv. €10 Robux)" required className="bg-[#1a0f2e] border border-slate-700 rounded-lg px-3 py-2 text-sm" />
+                <input value={rd} onChange={e => setRd(e.target.value)} placeholder="Beschrijving" className="bg-[#1a0f2e] border border-slate-700 rounded-lg px-3 py-2 text-sm" />
+                <button type="submit" className="bg-purple-600 hover:bg-purple-500 rounded-lg text-sm flex items-center justify-center gap-1"><Plus className="h-4 w-4" /> Toevoegen</button>
+              </form>
+            )}
+          </div>
+
+          {/* Leaderboard */}
+          <div className="bg-[#150822]/80 border border-purple-500/20 rounded-2xl p-6">
+            <h2 className="text-lg font-semibold mb-4 flex items-center gap-2"><TrendingUp className="h-5 w-5 text-fuchsia-400" /> Leaderboard</h2>
+            <div className="space-y-2">
+              {creators.slice(0, 8).map((c, i) => (
+                <div key={c.id} className={`flex items-center gap-3 p-2.5 rounded-lg ${c.user_id === me?.id ? "bg-purple-500/10 border border-purple-500/30" : "bg-[#1a0f2e]/60"}`}>
+                  <div className={`w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold shrink-0 ${
+                    i === 0 ? "bg-yellow-500/20 text-yellow-300 border border-yellow-500/40" :
+                    i === 1 ? "bg-slate-400/15 text-slate-300 border border-slate-400/30" :
+                    i === 2 ? "bg-orange-500/15 text-orange-300 border border-orange-500/30" :
+                    "bg-slate-800 text-slate-400"
+                  }`}>{i + 1}</div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 text-sm truncate">
+                      <span className="font-medium truncate">@{c.twitch_username}</span>
+                      {c.is_currently_live && <span className="text-[10px] bg-red-500/20 text-red-300 px-1.5 py-0.5 rounded animate-pulse">LIVE</span>}
+                    </div>
+                    <div className="text-xs text-slate-500 font-mono">{fmtHours(c.total_seconds)}</div>
+                  </div>
+                  {i === 0 && <Crown className="h-4 w-4 text-yellow-400 shrink-0" />}
+                </div>
+              ))}
+              {creators.length === 0 && <p className="text-slate-500 text-sm">Nog geen creators.</p>}
+            </div>
+          </div>
         </section>
 
         {/* Alle creators */}
-        <section className="bg-[#150822] border border-purple-500/20 rounded-2xl p-6">
-          <h2 className="text-lg font-semibold mb-4">Alle content creators</h2>
+        <section className="bg-[#150822]/80 border border-purple-500/20 rounded-2xl p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-semibold flex items-center gap-2"><Users className="h-5 w-5 text-purple-400" /> Alle content creators</h2>
+            <span className="text-xs text-slate-500">{creators.length} totaal</span>
+          </div>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
-              <thead className="text-slate-400 text-xs uppercase">
+              <thead className="text-slate-400 text-xs uppercase tracking-wider">
                 <tr className="border-b border-purple-500/20">
-                  <th className="text-left py-2">TikTok</th>
-                  <th className="text-left py-2">Status</th>
-                  <th className="text-left py-2">Totaal live</th>
-                  <th className="text-left py-2">Laatst gecheckt</th>
+                  <th className="text-left py-2 font-medium">TikTok</th>
+                  <th className="text-left py-2 font-medium">Login</th>
+                  <th className="text-left py-2 font-medium">Status</th>
+                  <th className="text-left py-2 font-medium">Uren</th>
+                  <th className="text-left py-2 font-medium">Beloningen</th>
+                  <th className="text-left py-2 font-medium">Laatst</th>
                   {isHead && <th></th>}
                 </tr>
               </thead>
               <tbody>
-                {creators.map(c => (
-                  <tr key={c.id} className="border-b border-slate-800/50">
-                    <td className="py-3">
-                      <a href={`https://tiktok.com/@${c.twitch_username}/live`} target="_blank" className="text-purple-300 hover:underline font-mono">@{c.twitch_username}</a>
-                    </td>
-                    <td className={c.is_currently_live ? "text-red-400 font-semibold" : "text-slate-500"}>
-                      {c.is_currently_live ? "🔴 LIVE" : "Offline"}
-                    </td>
-                    <td className="font-mono">{fmtHours(c.total_seconds)}</td>
-                    <td className="text-slate-500 text-xs">{c.last_checked_at ? new Date(c.last_checked_at).toLocaleString("nl-NL") : "-"}</td>
-                    {isHead && (
-                      <td className="text-right">
-                        <button onClick={() => removeCreator(c.id)} className="text-red-400 hover:text-red-300"><Trash2 className="h-4 w-4" /></button>
+                {creators.map(c => {
+                  const claimedCount = claims.filter(cl => cl.creator_id === c.id).length;
+                  return (
+                    <tr key={c.id} className="border-b border-slate-800/50 hover:bg-purple-500/5">
+                      <td className="py-3">
+                        <a href={`https://tiktok.com/@${c.twitch_username}/live`} target="_blank" className="text-purple-300 hover:underline font-mono flex items-center gap-1">
+                          @{c.twitch_username} <ExternalLink className="h-3 w-3 opacity-50" />
+                        </a>
                       </td>
-                    )}
-                  </tr>
-                ))}
+                      <td className="text-slate-400 font-mono text-xs">{c.login_username || "-"}</td>
+                      <td className={c.is_currently_live ? "text-red-400 font-semibold" : "text-slate-500"}>
+                        {c.is_currently_live ? <span className="inline-flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-red-400 animate-pulse" /> LIVE</span> : "Offline"}
+                      </td>
+                      <td className="font-mono">{fmtHours(c.total_seconds)}</td>
+                      <td className="text-slate-400"><span className="text-xs bg-purple-500/10 border border-purple-500/20 rounded-full px-2 py-0.5">{claimedCount}</span></td>
+                      <td className="text-slate-500 text-xs">{c.last_checked_at ? timeAgo(c.last_checked_at) + " geleden" : "-"}</td>
+                      {isHead && (
+                        <td className="text-right">
+                          <button onClick={() => removeCreator(c.id)} className="text-red-400/70 hover:text-red-300"><Trash2 className="h-4 w-4" /></button>
+                        </td>
+                      )}
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
         </section>
 
+        {/* Sessies & claims */}
+        <section className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="bg-[#150822]/80 border border-purple-500/20 rounded-2xl p-6">
+            <h2 className="text-lg font-semibold mb-4 flex items-center gap-2"><Flame className="h-5 w-5 text-orange-400" /> {myCreator ? "Mijn recente sessies" : "Recente sessies"}</h2>
+            <div className="space-y-2 max-h-80 overflow-y-auto">
+              {(myCreator ? mySessions : sessions).slice(0, 15).map(s => {
+                const creator = creators.find(c => c.id === s.creator_id);
+                return (
+                  <div key={s.id} className="flex items-center justify-between bg-[#1a0f2e]/60 rounded-lg px-3 py-2 text-sm">
+                    <div className="min-w-0">
+                      <div className="font-mono text-purple-300 truncate">@{creator?.twitch_username || "?"}</div>
+                      <div className="text-xs text-slate-500">{new Date(s.started_at).toLocaleString("nl-NL")}</div>
+                    </div>
+                    <div className="text-right">
+                      <div className="font-mono text-xs">{s.duration_seconds ? fmtHours(s.duration_seconds) : (s.ended_at ? "-" : <span className="text-red-400 animate-pulse">bezig</span>)}</div>
+                    </div>
+                  </div>
+                );
+              })}
+              {(myCreator ? mySessions : sessions).length === 0 && <p className="text-slate-500 text-sm">Nog geen sessies opgeslagen.</p>}
+            </div>
+          </div>
+
+          <div className="bg-[#150822]/80 border border-purple-500/20 rounded-2xl p-6">
+            <h2 className="text-lg font-semibold mb-4 flex items-center gap-2"><Ticket className="h-5 w-5 text-yellow-400" /> Recente claims</h2>
+            <div className="space-y-2 max-h-80 overflow-y-auto">
+              {claims.slice(0, 15).map(cl => {
+                const creator = creators.find(c => c.id === cl.creator_id);
+                const reward = rewards.find(r => r.id === cl.reward_id);
+                return (
+                  <div key={cl.id} className="flex items-center justify-between bg-[#1a0f2e]/60 rounded-lg px-3 py-2 text-sm">
+                    <div className="min-w-0">
+                      <div className="truncate">
+                        <span className="font-mono text-purple-300">@{creator?.twitch_username || "?"}</span>
+                        <span className="text-slate-500"> claimde </span>
+                        <span className="text-white font-medium">{reward?.title || "?"}</span>
+                      </div>
+                      <div className="text-xs text-slate-500">{new Date(cl.claimed_at).toLocaleString("nl-NL")}</div>
+                    </div>
+                    <span className="text-[10px] bg-yellow-500/15 text-yellow-300 border border-yellow-500/30 px-2 py-0.5 rounded-full uppercase">{cl.status || "open"}</span>
+                  </div>
+                );
+              })}
+              {claims.length === 0 && <p className="text-slate-500 text-sm">Nog geen claims.</p>}
+            </div>
+          </div>
+        </section>
+
         {/* Account aanmaken (head only) */}
         {isHead && (
-          <section className="bg-[#150822] border border-purple-500/20 rounded-2xl p-6">
-            <h2 className="text-lg font-semibold mb-4 flex items-center gap-2"><Plus className="h-5 w-5 text-purple-400" /> Nieuw account</h2>
-            <form onSubmit={createAccount} className="grid grid-cols-1 md:grid-cols-3 gap-3">
-              <input value={newUser} onChange={e => setNewUser(e.target.value)} placeholder="TikTok gebruikersnaam (zonder @)" required className="bg-[#1a0f2e] border border-slate-700 rounded-lg px-3 py-2 text-sm" />
-              <label className="flex items-center gap-2 text-sm">
-                <input type="checkbox" checked={newHead} onChange={e => setNewHead(e.target.checked)} />
+          <section className="bg-gradient-to-br from-[#180a2d] to-[#150822] border border-purple-500/25 rounded-2xl p-6">
+            <h2 className="text-lg font-semibold mb-1 flex items-center gap-2"><Plus className="h-5 w-5 text-purple-400" /> Nieuw creator account</h2>
+            <p className="text-xs text-slate-400 mb-4">De <b>login gebruikersnaam</b> wordt gebruikt om in te loggen. De <b>TikTok gebruikersnaam</b> wordt gemonitord voor livestatus.</p>
+            <form onSubmit={createAccount} className="grid grid-cols-1 md:grid-cols-4 gap-3">
+              <div>
+                <label className="text-xs text-slate-400 mb-1 block">Login gebruikersnaam</label>
+                <input value={newLogin} onChange={e => setNewLogin(e.target.value)} placeholder="bv. jan_creator" required className="w-full bg-[#1a0f2e] border border-slate-700 rounded-lg px-3 py-2 text-sm" />
+              </div>
+              <div>
+                <label className="text-xs text-slate-400 mb-1 block">TikTok gebruikersnaam</label>
+                <input value={newTikTok} onChange={e => setNewTikTok(e.target.value)} placeholder="@tiktok_naam" required className="w-full bg-[#1a0f2e] border border-slate-700 rounded-lg px-3 py-2 text-sm" />
+              </div>
+              <label className="flex items-center gap-2 text-sm mt-6">
+                <input type="checkbox" checked={newHead} onChange={e => setNewHead(e.target.checked)} className="accent-purple-500" />
                 Head Content Creator
               </label>
-              <button type="submit" className="bg-purple-600 hover:bg-purple-500 rounded-lg text-sm">Account aanmaken</button>
+              <button type="submit" disabled={creating} className="bg-gradient-to-r from-purple-600 to-fuchsia-500 hover:brightness-110 rounded-lg text-sm mt-6 disabled:opacity-50 shadow-[0_0_20px_rgba(168,85,247,0.35)]">
+                {creating ? "Aanmaken..." : "Account aanmaken"}
+              </button>
             </form>
             {tempPw && (
-              <div className="mt-4 p-3 bg-green-500/10 border border-green-500/30 rounded-lg text-sm">
-                Tijdelijk wachtwoord: <code className="font-mono font-bold">{tempPw}</code>
-                <p className="text-xs text-slate-400 mt-1">Geef dit door aan de creator (login op /contentcreator).</p>
+              <div className="mt-4 p-4 bg-green-500/10 border border-green-500/30 rounded-lg text-sm">
+                <div className="flex items-center justify-between gap-4 flex-wrap">
+                  <div>
+                    <div>Login: <code className="font-mono font-bold text-green-300">{tempPw.login}</code></div>
+                    <div>Tijdelijk wachtwoord: <code className="font-mono font-bold text-green-300">{tempPw.pw}</code></div>
+                  </div>
+                  <button
+                    onClick={() => { navigator.clipboard.writeText(`Login: ${tempPw.login}\nWachtwoord: ${tempPw.pw}`); toast.success("Gekopieerd"); }}
+                    className="flex items-center gap-1 text-xs bg-green-500/20 border border-green-500/40 hover:bg-green-500/30 px-3 py-1.5 rounded-lg"
+                  ><Copy className="h-3 w-3" /> Kopieer</button>
+                </div>
+                <p className="text-xs text-slate-400 mt-2">Geef dit door aan de creator — inloggen kan op /contentcreator.</p>
               </div>
             )}
           </section>
@@ -291,5 +478,30 @@ const ContentCreatorDashboard = () => {
     </div>
   );
 };
+
+const StatCard = ({ icon, label, value, tint, pulse }: { icon: React.ReactNode; label: string; value: string; tint: "purple" | "red" | "fuchsia" | "cyan"; pulse?: boolean }) => {
+  const tints: Record<string, string> = {
+    purple: "from-purple-500/15 to-transparent border-purple-500/30 text-purple-300",
+    red: "from-red-500/15 to-transparent border-red-500/30 text-red-300",
+    fuchsia: "from-fuchsia-500/15 to-transparent border-fuchsia-500/30 text-fuchsia-300",
+    cyan: "from-cyan-500/15 to-transparent border-cyan-500/30 text-cyan-300",
+  };
+  return (
+    <div className={`relative bg-gradient-to-br ${tints[tint]} border rounded-2xl p-4 backdrop-blur-sm`}>
+      <div className="flex items-center justify-between mb-2">
+        <span className="text-xs uppercase tracking-wider text-slate-400">{label}</span>
+        <span className={pulse ? "animate-pulse" : ""}>{icon}</span>
+      </div>
+      <div className="text-2xl font-bold text-white font-mono">{value}</div>
+    </div>
+  );
+};
+
+const MiniStat = ({ label, value, accent }: { label: string; value: string; accent?: boolean }) => (
+  <div className="bg-[#0f0620]/70 border border-purple-500/15 rounded-xl p-4">
+    <div className="text-xs text-slate-400 uppercase tracking-wider">{label}</div>
+    <div className={`mt-1 font-semibold ${accent ? "text-fuchsia-300" : "text-white"}`}>{value}</div>
+  </div>
+);
 
 export default ContentCreatorDashboard;

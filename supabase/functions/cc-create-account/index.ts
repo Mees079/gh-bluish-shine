@@ -18,10 +18,11 @@ Deno.serve(async (req) => {
     const { data: isHead } = await supa.rpc("is_head_content_creator", { _user_id: user.id });
     if (!isHead) return new Response(JSON.stringify({ error: "forbidden" }), { status: 403, headers: cors });
 
-    const { twitch_username, display_name, is_head = false } = await req.json();
-    if (!twitch_username) return new Response(JSON.stringify({ error: "twitch_username vereist" }), { status: 400, headers: cors });
+    const { login_username, tiktok_username, display_name, is_head = false } = await req.json();
+    if (!login_username) return new Response(JSON.stringify({ error: "login_username vereist" }), { status: 400, headers: cors });
+    if (!tiktok_username) return new Response(JSON.stringify({ error: "tiktok_username vereist" }), { status: 400, headers: cors });
 
-    const email = emailFor(twitch_username);
+    const email = emailFor(login_username);
     const password = tempPass();
     const { data: created, error: cErr } = await supa.auth.admin.createUser({ email, password, email_confirm: true });
     if (cErr || !created.user) return new Response(JSON.stringify({ error: cErr?.message }), { status: 500, headers: cors });
@@ -30,12 +31,13 @@ Deno.serve(async (req) => {
     await supa.from("user_roles").insert({ user_id: uid, role: is_head ? "head_content_creator" : "content_creator" });
     const { error: iErr } = await supa.from("cc_creators").insert({
       user_id: uid,
-      twitch_username: twitch_username.toLowerCase(),
-      display_name: display_name || twitch_username,
+      login_username: login_username.toLowerCase(),
+      twitch_username: tiktok_username.toLowerCase().replace(/^@/, ""),
+      display_name: display_name || tiktok_username,
     });
     if (iErr) return new Response(JSON.stringify({ error: iErr.message }), { status: 500, headers: cors });
 
-    return new Response(JSON.stringify({ ok: true, temp_password: password, email }), { headers: { ...cors, "Content-Type": "application/json" } });
+    return new Response(JSON.stringify({ ok: true, temp_password: password, login_username, email }), { headers: { ...cors, "Content-Type": "application/json" } });
   } catch (e: any) {
     return new Response(JSON.stringify({ error: e.message }), { status: 500, headers: cors });
   }
