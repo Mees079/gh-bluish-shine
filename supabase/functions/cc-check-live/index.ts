@@ -54,6 +54,24 @@ Deno.serve(async (req) => {
     const { data: creators, error: creatorsError } = await supa.from("cc_creators").select("*").eq("is_active", true);
     if (creatorsError) throw creatorsError;
 
+    const nowIso = new Date().toISOString();
+    const { data: activeBoosts } = await supa
+      .from("cc_boosts")
+      .select("*")
+      .lte("starts_at", nowIso)
+      .gt("ends_at", nowIso);
+
+    const boostsFor = (creatorId: string) => (activeBoosts || []).filter(
+      (b: any) => b.creator_id === null || b.creator_id === creatorId
+    );
+    const effectiveFor = (creatorId: string) => {
+      const bs = boostsFor(creatorId);
+      const mult = bs.reduce((m: number, b: any) => m * Number(b.multiplier || 1), 1);
+      const intervals = bs.map((b: any) => b.interval_seconds).filter((n: any) => typeof n === "number" && n > 0);
+      const interval = intervals.length ? Math.min(900, ...intervals) : 900;
+      return { mult: mult > 0 ? mult : 1, interval };
+    };
+
     const results: any[] = [];
     for (const c of creators || []) {
       const { live: tiktokLive, title } = await isLive(c.twitch_username);
