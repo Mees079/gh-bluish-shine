@@ -212,7 +212,7 @@ const OnderwereldDashboard = () => {
       </aside>
 
       {/* Main */}
-      <main className="min-h-screen">
+      <main className="min-h-screen relative z-10">
         <div className="max-w-6xl mx-auto p-8 pr-20">
           {nav === "overview" && <OverviewPanel me={me} role={role} onNav={setNav} onGang={openGangDetail} />}
           {nav === "gangs" && <GangsPanel isHoofd={isHoofd} onOpen={openGangDetail} />}
