@@ -412,6 +412,7 @@ const ContentCreatorDashboard = () => {
                         {c.is_in_game ? <span className="inline-flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" /> in-game</span> : "-"}
                       </td>
                       <td className="font-mono">{fmtHours(c.total_seconds)}</td>
+                      <td className="font-mono text-yellow-300">⭐ {c.points || 0}</td>
                       <td className="text-slate-400"><span className="text-xs bg-purple-500/10 border border-purple-500/20 rounded-full px-2 py-0.5">{claimedCount}</span></td>
                       <td className="text-slate-500 text-xs">{c.last_checked_at ? timeAgo(c.last_checked_at) + " geleden" : "-"}</td>
                       {isHead && (
