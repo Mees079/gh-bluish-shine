@@ -388,6 +388,7 @@ function OverviewPanel({ me, role, onNav, onGang }: any) {
           <button onClick={() => onNav("inbox")} className={`${btnGhost} w-full mt-4`}>Volledige inbox</button>
         </Card>
       </div>
+      </div>
     </div>
   );
 }
