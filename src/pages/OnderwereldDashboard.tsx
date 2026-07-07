@@ -59,6 +59,7 @@ const OnderwereldDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [nav, setNav] = useState<NavKey>("overview");
   const [selectedGang, setSelectedGang] = useState<string | null>(null);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const [gangsOpen, setGangsOpen] = useState(true);
   const [pointsOpen, setPointsOpen] = useState(true);
