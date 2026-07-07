@@ -54,7 +54,9 @@ export type Database = {
           is_in_game: boolean
           last_checked_at: string | null
           last_ingame_ping_at: string | null
+          last_point_awarded_at: string | null
           login_username: string | null
+          points: number
           roblox_username: string | null
           total_seconds: number
           twitch_user_id: string | null
@@ -71,7 +73,9 @@ export type Database = {
           is_in_game?: boolean
           last_checked_at?: string | null
           last_ingame_ping_at?: string | null
+          last_point_awarded_at?: string | null
           login_username?: string | null
+          points?: number
           roblox_username?: string | null
           total_seconds?: number
           twitch_user_id?: string | null
@@ -88,7 +92,9 @@ export type Database = {
           is_in_game?: boolean
           last_checked_at?: string | null
           last_ingame_ping_at?: string | null
+          last_point_awarded_at?: string | null
           login_username?: string | null
+          points?: number
           roblox_username?: string | null
           total_seconds?: number
           twitch_user_id?: string | null
@@ -139,22 +145,34 @@ export type Database = {
       cc_reward_claims: {
         Row: {
           claimed_at: string
+          code: string | null
           creator_id: string
           id: string
+          points_spent: number
+          redeemed_at: string | null
+          redeemed_by: string | null
           reward_id: string
           status: string
         }
         Insert: {
           claimed_at?: string
+          code?: string | null
           creator_id: string
           id?: string
+          points_spent?: number
+          redeemed_at?: string | null
+          redeemed_by?: string | null
           reward_id: string
           status?: string
         }
         Update: {
           claimed_at?: string
+          code?: string | null
           creator_id?: string
           id?: string
+          points_spent?: number
+          redeemed_at?: string | null
+          redeemed_by?: string | null
           reward_id?: string
           status?: string
         }
@@ -182,6 +200,7 @@ export type Database = {
           hours_required: number
           id: string
           is_active: boolean
+          points_required: number
           sort_order: number
           title: string
           updated_at: string
@@ -192,6 +211,7 @@ export type Database = {
           hours_required: number
           id?: string
           is_active?: boolean
+          points_required?: number
           sort_order?: number
           title: string
           updated_at?: string
@@ -202,6 +222,7 @@ export type Database = {
           hours_required?: number
           id?: string
           is_active?: boolean
+          points_required?: number
           sort_order?: number
           title?: string
           updated_at?: string
