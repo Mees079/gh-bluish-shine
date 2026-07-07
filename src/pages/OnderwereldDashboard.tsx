@@ -212,8 +212,8 @@ const OnderwereldDashboard = () => {
       </aside>
 
       {/* Main */}
-      <main className="min-h-screen relative z-10">
-        <div className="max-w-6xl mx-auto p-8 pr-20">
+      <main className="min-h-screen relative z-10 flex flex-col">
+        <div className="max-w-7xl w-full mx-auto p-6 lg:p-10 pr-16 lg:pr-20 flex-1">
           {nav === "overview" && <OverviewPanel me={me} role={role} onNav={setNav} onGang={openGangDetail} />}
           {nav === "gangs" && <GangsPanel isHoofd={isHoofd} onOpen={openGangDetail} />}
           {nav === "gang-new" && isHoofd && <GangNewPanel me={me} uid={uid} onDone={(id) => openGangDetail(id)} />}
@@ -226,6 +226,22 @@ const OnderwereldDashboard = () => {
           {nav === "settings" && <SettingsPanel me={me} setMe={setMe} setAvatarUrl={setAvatarUrl} />}
           {nav === "accounts" && isHoofd && <AccountsPanel meUid={uid} />}
         </div>
+
+        {/* Footer */}
+        <footer className="relative z-10 border-t border-slate-700 bg-slate-900/70 backdrop-blur mt-8">
+          <div className="max-w-7xl mx-auto px-6 lg:px-10 py-5 flex flex-col md:flex-row items-center justify-between gap-3 text-xs text-slate-400">
+            <div className="flex items-center gap-2">
+              <Skull className="h-4 w-4 text-slate-300" />
+              <span className="uppercase tracking-widest">HDRP · Onderwereld Portal</span>
+            </div>
+            <div className="flex items-center gap-4">
+              <span>Ingelogd als <span className="text-slate-200">{me.display_name}</span></span>
+              <span className="hidden md:inline text-slate-600">|</span>
+              <span>v1.0</span>
+            </div>
+            <div className="text-slate-500">© {new Date().getFullYear()} HDRP Hoofddorp Roleplay — Alle rechten voorbehouden</div>
+          </div>
+        </footer>
       </main>
     </div>
   );
