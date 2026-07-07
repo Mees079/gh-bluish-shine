@@ -300,7 +300,7 @@ function ProgressBar({ current, target, level }: { current: number; target: numb
         <span className="text-slate-400">{info.next ? `${info.needed} nodig voor LVL ${info.next}` : "MAX LEVEL"}</span>
       </div>
       <div className="h-2 bg-slate-800 rounded-full overflow-hidden border border-slate-600">
-        <div className="h-full bg-gradient-to-r from-zinc-300 via-white to-red-500 transition-all" style={{ width: `${info.progress}%` }} />
+        <div className="h-full bg-gradient-to-r from-blue-400 via-violet-500 to-pink-500 transition-all shadow-[0_0_10px_rgba(139,92,246,0.6)]" style={{ width: `${info.progress}%` }} />
       </div>
     </div>
   );
@@ -408,7 +408,7 @@ function OverviewPanel({ me, role, onNav, onGang }: any) {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card className="p-5">
-          <h3 className="text-white font-semibold mb-4 flex items-center gap-2"><Crown className="h-4 w-4 text-blue-300" /> Top gangs</h3>
+          <h3 className="text-white font-semibold mb-4 flex items-center gap-2"><Crown className="h-4 w-4 text-amber-400" /> Top gangs</h3>
           {topGangs.length === 0 && <p className="text-slate-400 text-sm">Nog geen gangs.</p>}
           <div className="space-y-3">
             {topGangs.map((g) => (
@@ -423,7 +423,7 @@ function OverviewPanel({ me, role, onNav, onGang }: any) {
           </div>
         </Card>
         <Card className="p-5">
-          <h3 className="text-white font-semibold mb-4 flex items-center gap-2"><Inbox className="h-4 w-4 text-blue-300" /> Recente meldingen</h3>
+          <h3 className="text-white font-semibold mb-4 flex items-center gap-2"><Inbox className="h-4 w-4 text-pink-400" /> Recente meldingen</h3>
           {recentInbox.length === 0 && <p className="text-slate-400 text-sm">Nog geen berichten.</p>}
           <div className="space-y-3">
             {recentInbox.map((m) => (

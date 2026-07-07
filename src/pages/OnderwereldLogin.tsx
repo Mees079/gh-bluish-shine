@@ -37,7 +37,10 @@ const OnderwereldLogin = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-900 flex items-center justify-center p-4 relative overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-900 to-indigo-950 flex items-center justify-center p-4 relative overflow-hidden">
+      <div className="absolute -top-40 -left-40 w-[500px] h-[500px] rounded-full bg-blue-600/25 blur-[120px]" />
+      <div className="absolute -bottom-40 -right-40 w-[500px] h-[500px] rounded-full bg-violet-600/25 blur-[120px]" />
+      <div className="absolute top-1/3 right-1/4 w-[400px] h-[400px] rounded-full bg-pink-600/15 blur-[120px]" />
       {/* Subtle diagonal grid background */}
       <div
         className="absolute inset-0 opacity-[0.06]"
