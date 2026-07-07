@@ -17,17 +17,12 @@ async function isLive(username: string): Promise<{ live: boolean; title?: string
     });
     if (!r.ok) return { live: false };
     const html = await r.text();
-    // If TikTok redirected to profile or shows "LIVE has ended" the room is not active.
-    const ended = /LIVE has ended|LIVE is over|isn't live/i.test(html);
-    if (ended) return { live: false };
-    // Active room indicators in the embedded JSON blob.
-    const liveMarkers = [
-      /"status":\s*2/,          // room status = live
-      /"liveRoomId":"\d+"/,
-      /"roomId":"\d{5,}"/,
-      /"isLive":true/i,
-    ];
-    const live = liveMarkers.some((re) => re.test(html));
+    // Active room indicators in the embedded JSON blob. "LIVE has ended"
+    // appears in the JS bundle regardless of state, so only trust the
+    // structured markers.
+    const hasRoomId = /"roomId":"\d{5,}"/.test(html) || /"liveRoomId":"\d+"/.test(html);
+    const statusLive = /"status":\s*2\b/.test(html) || /"isLive":true/i.test(html);
+    const live = hasRoomId && statusLive;
     let title: string | undefined;
     const m = html.match(/"title":"([^"]{1,120})"/);
     if (m) title = m[1];
