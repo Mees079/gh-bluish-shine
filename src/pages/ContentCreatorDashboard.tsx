@@ -150,8 +150,8 @@ const ContentCreatorDashboard = () => {
             <h2 className="text-lg font-semibold mb-4 flex items-center gap-2"><Radio className="h-5 w-5 text-purple-400" /> Mijn stats</h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="bg-[#1a0f2e] rounded-xl p-4">
-                <div className="text-xs text-slate-400">Twitch</div>
-                <div className="font-mono text-purple-300">{myCreator.twitch_username}</div>
+                <div className="text-xs text-slate-400">TikTok</div>
+                <div className="font-mono text-purple-300">@{myCreator.twitch_username}</div>
               </div>
               <div className="bg-[#1a0f2e] rounded-xl p-4">
                 <div className="text-xs text-slate-400 flex items-center gap-1"><Clock className="h-3 w-3" /> Totaal live</div>
@@ -237,7 +237,7 @@ const ContentCreatorDashboard = () => {
             <table className="w-full text-sm">
               <thead className="text-slate-400 text-xs uppercase">
                 <tr className="border-b border-purple-500/20">
-                  <th className="text-left py-2">Twitch</th>
+                  <th className="text-left py-2">TikTok</th>
                   <th className="text-left py-2">Status</th>
                   <th className="text-left py-2">Totaal live</th>
                   <th className="text-left py-2">Laatst gecheckt</th>
@@ -248,7 +248,7 @@ const ContentCreatorDashboard = () => {
                 {creators.map(c => (
                   <tr key={c.id} className="border-b border-slate-800/50">
                     <td className="py-3">
-                      <a href={`https://twitch.tv/${c.twitch_username}`} target="_blank" className="text-purple-300 hover:underline font-mono">{c.twitch_username}</a>
+                      <a href={`https://tiktok.com/@${c.twitch_username}/live`} target="_blank" className="text-purple-300 hover:underline font-mono">@{c.twitch_username}</a>
                     </td>
                     <td className={c.is_currently_live ? "text-red-400 font-semibold" : "text-slate-500"}>
                       {c.is_currently_live ? "🔴 LIVE" : "Offline"}
@@ -272,7 +272,7 @@ const ContentCreatorDashboard = () => {
           <section className="bg-[#150822] border border-purple-500/20 rounded-2xl p-6">
             <h2 className="text-lg font-semibold mb-4 flex items-center gap-2"><Plus className="h-5 w-5 text-purple-400" /> Nieuw account</h2>
             <form onSubmit={createAccount} className="grid grid-cols-1 md:grid-cols-3 gap-3">
-              <input value={newUser} onChange={e => setNewUser(e.target.value)} placeholder="Twitch gebruikersnaam" required className="bg-[#1a0f2e] border border-slate-700 rounded-lg px-3 py-2 text-sm" />
+              <input value={newUser} onChange={e => setNewUser(e.target.value)} placeholder="TikTok gebruikersnaam (zonder @)" required className="bg-[#1a0f2e] border border-slate-700 rounded-lg px-3 py-2 text-sm" />
               <label className="flex items-center gap-2 text-sm">
                 <input type="checkbox" checked={newHead} onChange={e => setNewHead(e.target.checked)} />
                 Head Content Creator

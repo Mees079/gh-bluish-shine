@@ -66,7 +66,7 @@ const ContentCreatorLogin = () => {
                   type="text"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
-                  placeholder="twitch_naam"
+                  placeholder="tiktok_naam"
                   required
                   className="w-full bg-[#1a0f2e] border border-slate-700 rounded-lg pl-10 pr-4 py-3 text-white placeholder-slate-600 focus:outline-none focus:border-purple-500/60 focus:ring-1 focus:ring-purple-500/40"
                 />
