@@ -100,6 +100,7 @@ const ContentCreatorDashboard = () => {
   // Create account form
   const [newLogin, setNewLogin] = useState("");
   const [newTikTok, setNewTikTok] = useState("");
+  const [newRoblox, setNewRoblox] = useState("");
   const [newHead, setNewHead] = useState(false);
   const [creating, setCreating] = useState(false);
   const createAccount = async (e: React.FormEvent) => {
@@ -110,6 +111,7 @@ const ContentCreatorDashboard = () => {
       body: {
         login_username: newLogin.trim(),
         tiktok_username: newTikTok.trim().replace(/^@/, ""),
+        roblox_username: newRoblox.trim(),
         display_name: newTikTok.trim(),
         is_head: newHead,
       },
@@ -117,7 +119,7 @@ const ContentCreatorDashboard = () => {
     setCreating(false);
     if (error || (data as any)?.error) return toast.error((data as any)?.error || "Aanmaken mislukt");
     setTempPw({ pw: (data as any).temp_password, login: (data as any).login_username });
-    setNewLogin(""); setNewTikTok(""); setNewHead(false);
+    setNewLogin(""); setNewTikTok(""); setNewRoblox(""); setNewHead(false);
     await load();
     toast.success("Account aangemaakt");
   };
