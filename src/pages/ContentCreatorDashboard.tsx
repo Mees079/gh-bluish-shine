@@ -230,6 +230,23 @@ const ContentCreatorDashboard = () => {
     return rewards.filter(r => r.points_required > (myCreator.points || 0)).sort((a, b) => a.points_required - b.points_required)[0] || null;
   }, [rewards, myCreator]);
 
+  const activeBoosts = useMemo(() => {
+    const now = Date.now();
+    return boosts.filter(b => new Date(b.starts_at).getTime() <= now && new Date(b.ends_at).getTime() > now);
+  }, [boosts]);
+
+  const myEffective = useMemo(() => {
+    if (!myCreator) return { mult: 1, interval: 15 };
+    const bs = activeBoosts.filter(b => b.creator_id === null || b.creator_id === myCreator.id);
+    const mult = bs.reduce((m, b) => m * Number(b.multiplier || 1), 1);
+    const intervals = bs.map(b => b.interval_seconds).filter((n): n is number => typeof n === "number" && n > 0);
+    const interval = intervals.length ? Math.min(900, ...intervals) : 900;
+    return { mult: mult > 0 ? mult : 1, interval: Math.round(interval / 60) };
+  }, [activeBoosts, myCreator]);
+
+  const boostShopItems = rewards.filter(r => r.boost_multiplier && r.boost_duration_minutes);
+  const productShopItems = rewards.filter(r => !r.boost_multiplier);
+
   if (loading) return (
     <div className="min-h-screen bg-[#0a0512] flex items-center justify-center text-purple-300">
       <div className="animate-pulse flex items-center gap-3"><Video className="h-5 w-5" /> Laden...</div>
