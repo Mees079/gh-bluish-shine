@@ -15,6 +15,8 @@ import DeveloperLogin from "./pages/DeveloperLogin";
 import DeveloperDashboard from "./pages/DeveloperDashboard";
 import MeosLogin from "./pages/MeosLogin";
 import MeosDashboard from "./pages/MeosDashboard";
+import ContentCreatorLogin from "./pages/ContentCreatorLogin";
+import ContentCreatorDashboard from "./pages/ContentCreatorDashboard";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -38,6 +40,8 @@ const App = () => (
           <Route path="/developer/dashboard" element={<DeveloperDashboard />} />
           <Route path="/meos" element={<MeosLogin />} />
           <Route path="/meos/dashboard" element={<MeosDashboard />} />
+          <Route path="/contentcreator" element={<ContentCreatorLogin />} />
+          <Route path="/contentcreator/dashboard" element={<ContentCreatorDashboard />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
