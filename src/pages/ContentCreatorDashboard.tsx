@@ -248,9 +248,10 @@ const ContentCreatorDashboard = () => {
                 Open mijn TikTok LIVE <ExternalLink className="h-3 w-3" />
               </a>
             </div>
-            <div className="relative grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div className="relative grid grid-cols-1 md:grid-cols-5 gap-4">
               <MiniStat label="TikTok" value={`@${myCreator.twitch_username}`} accent />
               <MiniStat label="Status" value={myCreator.is_currently_live ? "🔴 LIVE" : "Offline"} accent={myCreator.is_currently_live} />
+              <MiniStat label="Punten" value={`⭐ ${myCreator.points || 0}`} accent />
               <MiniStat label="Totaal live" value={fmtHours(myCreator.total_seconds)} />
               <MiniStat label="Laatst gecheckt" value={timeAgo(myCreator.last_checked_at) + " geleden"} />
             </div>
@@ -259,11 +260,23 @@ const ContentCreatorDashboard = () => {
               <div className="relative mt-6 bg-[#0f0620]/60 border border-purple-500/20 rounded-xl p-4">
                 <div className="flex items-center justify-between mb-2 text-sm">
                   <span className="flex items-center gap-2 text-slate-300"><Award className="h-4 w-4 text-yellow-400" /> Volgende beloning: <span className="text-white font-semibold">{nextReward.title}</span></span>
-                  <span className="text-xs text-slate-400">{fmtHoursDecimal(myCreator.total_seconds)} / {nextReward.hours_required}u</span>
+                  <span className="text-xs text-slate-400">{myCreator.points || 0} / {nextReward.points_required} punten</span>
                 </div>
                 <div className="h-2.5 bg-slate-800 rounded-full overflow-hidden">
-                  <div className="h-full bg-gradient-to-r from-purple-500 via-fuchsia-500 to-pink-400 transition-all" style={{ width: `${Math.min(100, (myCreator.total_seconds / 3600 / nextReward.hours_required) * 100)}%` }} />
+                  <div className="h-full bg-gradient-to-r from-purple-500 via-fuchsia-500 to-pink-400 transition-all" style={{ width: `${Math.min(100, ((myCreator.points || 0) / nextReward.points_required) * 100)}%` }} />
                 </div>
+                <p className="text-xs text-slate-500 mt-2">Je verdient <b>1 punt per 15 min</b> dat je TikTok LIVE bent én in-game zit.</p>
+              </div>
+            )}
+
+            {lastCode && (
+              <div className="relative mt-4 bg-emerald-500/10 border border-emerald-500/30 rounded-xl p-4">
+                <div className="flex items-center gap-2 text-emerald-300 text-sm font-semibold mb-1"><CheckCircle2 className="h-4 w-4" /> Aankoop gelukt: {lastCode.title}</div>
+                <div className="flex items-center gap-3 flex-wrap">
+                  <code className="font-mono font-bold text-2xl text-emerald-200 bg-black/30 px-3 py-1.5 rounded-lg tracking-widest">{lastCode.code}</code>
+                  <button onClick={() => { navigator.clipboard.writeText(lastCode.code); toast.success("Gekopieerd"); }} className="flex items-center gap-1 text-xs bg-emerald-500/20 border border-emerald-500/40 hover:bg-emerald-500/30 px-3 py-1.5 rounded-lg"><Copy className="h-3 w-3" /> Kopieer code</button>
+                </div>
+                <p className="text-xs text-slate-400 mt-2">Maak een ticket aan in Discord en stuur deze code — een Head Content Creator geeft je het product.</p>
               </div>
             )}
           </section>
@@ -271,18 +284,18 @@ const ContentCreatorDashboard = () => {
 
         {/* Grid: rewards + leaderboard */}
         <section className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Beloningen */}
+          {/* Beloningen (shop) */}
           <div className="lg:col-span-2 bg-[#150822]/80 border border-purple-500/20 rounded-2xl p-6">
-            <h2 className="text-lg font-semibold mb-4 flex items-center gap-2"><Trophy className="h-5 w-5 text-yellow-400" /> Beloningen</h2>
+            <h2 className="text-lg font-semibold mb-1 flex items-center gap-2"><Trophy className="h-5 w-5 text-yellow-400" /> Puntenshop</h2>
+            <p className="text-xs text-slate-400 mb-4">Koop een beloning met je verdiende punten. Je krijgt een unieke code die je in Discord inlevert.</p>
             {rewards.length === 0 ? (
               <p className="text-slate-400 text-sm">Nog geen beloningen ingesteld.</p>
             ) : (
               <div className="space-y-3">
                 {rewards.map(r => {
-                  const myHours = (myCreator?.total_seconds || 0) / 3600;
-                  const pct = Math.min(100, (myHours / r.hours_required) * 100);
-                  const reached = myHours >= r.hours_required;
-                  const claimed = isClaimed(r.id);
+                  const myPts = myCreator?.points || 0;
+                  const pct = Math.min(100, (myPts / r.points_required) * 100);
+                  const reached = myPts >= r.points_required;
                   return (
                     <div key={r.id} className="bg-gradient-to-br from-[#1a0f2e] to-[#150822] border border-purple-500/10 rounded-xl p-4 hover:border-purple-500/30 transition">
                       <div className="flex items-start justify-between gap-4 mb-2">
@@ -290,20 +303,18 @@ const ContentCreatorDashboard = () => {
                           <div className="font-semibold flex items-center gap-2 flex-wrap">
                             <Gift className="h-4 w-4 text-purple-400 shrink-0" />
                             <span>{r.title}</span>
-                            <span className="text-xs bg-purple-500/15 text-purple-300 border border-purple-500/30 px-2 py-0.5 rounded-full">{r.hours_required}u</span>
+                            <span className="text-xs bg-yellow-500/15 text-yellow-300 border border-yellow-500/30 px-2 py-0.5 rounded-full flex items-center gap-1"><Coins className="h-3 w-3" /> {r.points_required} pt</span>
                           </div>
                           {r.description && <p className="text-sm text-slate-400 mt-1">{r.description}</p>}
                         </div>
                         <div className="flex gap-2 items-center shrink-0">
                           {myCreator && (
-                            claimed ? (
-                              <span className="text-xs bg-green-500/15 text-green-300 px-3 py-1.5 rounded-lg border border-green-500/30">✓ Geclaimd</span>
-                            ) : reached ? (
+                            reached ? (
                               <button onClick={() => claimReward(r)} className="text-xs bg-gradient-to-r from-purple-600 to-fuchsia-500 hover:brightness-110 px-3 py-1.5 rounded-lg flex items-center gap-1 shadow-[0_0_20px_rgba(168,85,247,0.4)]">
-                                <Ticket className="h-3 w-3" /> Claim
+                                <Ticket className="h-3 w-3" /> Koop ({r.points_required})
                               </button>
                             ) : (
-                              <span className="text-xs text-slate-500">Nog {(r.hours_required - myHours).toFixed(1)}u</span>
+                              <span className="text-xs text-slate-500">Nog {r.points_required - myPts} pt</span>
                             )
                           )}
                           {isHead && (
@@ -316,9 +327,6 @@ const ContentCreatorDashboard = () => {
                           <div className="h-full bg-gradient-to-r from-purple-500 to-fuchsia-400" style={{ width: `${pct}%` }} />
                         </div>
                       )}
-                      {claimed && (
-                        <p className="text-xs text-yellow-300/90 mt-2 flex items-center gap-1"><Ticket className="h-3 w-3" /> Maak een ticket aan in de Discord om je beloning op te halen.</p>
-                      )}
                     </div>
                   );
                 })}
@@ -327,13 +335,14 @@ const ContentCreatorDashboard = () => {
 
             {isHead && (
               <form onSubmit={addReward} className="mt-6 border-t border-purple-500/20 pt-6 grid grid-cols-1 md:grid-cols-4 gap-3">
-                <input type="number" min={1} value={rh} onChange={e => setRh(+e.target.value)} placeholder="Uren" required className="bg-[#1a0f2e] border border-slate-700 rounded-lg px-3 py-2 text-sm" />
+                <input type="number" min={1} value={rp} onChange={e => setRp(+e.target.value)} placeholder="Punten" required className="bg-[#1a0f2e] border border-slate-700 rounded-lg px-3 py-2 text-sm" />
                 <input value={rt} onChange={e => setRt(e.target.value)} placeholder="Titel (bv. €10 Robux)" required className="bg-[#1a0f2e] border border-slate-700 rounded-lg px-3 py-2 text-sm" />
                 <input value={rd} onChange={e => setRd(e.target.value)} placeholder="Beschrijving" className="bg-[#1a0f2e] border border-slate-700 rounded-lg px-3 py-2 text-sm" />
                 <button type="submit" className="bg-purple-600 hover:bg-purple-500 rounded-lg text-sm flex items-center justify-center gap-1"><Plus className="h-4 w-4" /> Toevoegen</button>
               </form>
             )}
           </div>
+
 
           {/* Leaderboard */}
           <div className="bg-[#150822]/80 border border-purple-500/20 rounded-2xl p-6">
