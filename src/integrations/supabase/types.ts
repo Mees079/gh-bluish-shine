@@ -44,6 +44,56 @@ export type Database = {
         }
         Relationships: []
       }
+      cc_boosts: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          creator_id: string | null
+          ends_at: string
+          id: string
+          interval_seconds: number | null
+          label: string
+          multiplier: number
+          points_spent: number
+          source: string
+          starts_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          creator_id?: string | null
+          ends_at: string
+          id?: string
+          interval_seconds?: number | null
+          label?: string
+          multiplier?: number
+          points_spent?: number
+          source?: string
+          starts_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          creator_id?: string | null
+          ends_at?: string
+          id?: string
+          interval_seconds?: number | null
+          label?: string
+          multiplier?: number
+          points_spent?: number
+          source?: string
+          starts_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cc_boosts_creator_id_fkey"
+            columns: ["creator_id"]
+            isOneToOne: false
+            referencedRelation: "cc_creators"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       cc_creators: {
         Row: {
           created_at: string
@@ -195,6 +245,8 @@ export type Database = {
       }
       cc_rewards: {
         Row: {
+          boost_duration_minutes: number | null
+          boost_multiplier: number | null
           created_at: string
           description: string | null
           hours_required: number
@@ -206,6 +258,8 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          boost_duration_minutes?: number | null
+          boost_multiplier?: number | null
           created_at?: string
           description?: string | null
           hours_required: number
@@ -217,6 +271,8 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          boost_duration_minutes?: number | null
+          boost_multiplier?: number | null
           created_at?: string
           description?: string | null
           hours_required?: number

@@ -47,6 +47,33 @@ Deno.serve(async (req) => {
       .eq("points", creator.points); // optimistic concurrency
     if (updErr) return new Response(JSON.stringify({ error: "Puntenupdate mislukt" }), { status: 500, headers: cors });
 
+    const isBoostReward = reward.boost_multiplier && reward.boost_duration_minutes;
+
+    if (isBoostReward) {
+      const endsAt = new Date(Date.now() + reward.boost_duration_minutes * 60 * 1000);
+      const { data: boost, error: bErr } = await svc.from("cc_boosts").insert({
+        creator_id: creator.id,
+        label: reward.title,
+        multiplier: reward.boost_multiplier,
+        ends_at: endsAt.toISOString(),
+        source: "purchase",
+        points_spent: cost,
+      }).select().maybeSingle();
+      if (bErr) {
+        await svc.from("cc_creators").update({ points: creator.points }).eq("id", creator.id);
+        return new Response(JSON.stringify({ error: "Boost activeren mislukt" }), { status: 500, headers: cors });
+      }
+      const { data: claim } = await svc.from("cc_reward_claims").insert({
+        creator_id: creator.id,
+        reward_id: reward.id,
+        points_spent: cost,
+        status: "boost_active",
+      }).select().maybeSingle();
+      return new Response(JSON.stringify({ ok: true, boost, claim }), {
+        headers: { ...cors, "Content-Type": "application/json" },
+      });
+    }
+
     // Generate unique code (retry a few times if collision)
     let code = "";
     let inserted: any = null;
@@ -62,7 +89,6 @@ Deno.serve(async (req) => {
       if (!error) { inserted = data; break; }
     }
     if (!inserted) {
-      // rollback points
       await svc.from("cc_creators").update({ points: creator.points }).eq("id", creator.id);
       return new Response(JSON.stringify({ error: "Code genereren mislukt" }), { status: 500, headers: cors });
     }

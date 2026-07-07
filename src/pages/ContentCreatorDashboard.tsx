@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import {
   Video, LogOut, Plus, Trophy, RefreshCw, Trash2, Radio, Clock, Gift, Ticket,
   Users, Flame, TrendingUp, Crown, ExternalLink, Copy, Sparkles, Calendar, Award,
-  Coins, CheckCircle2, KeyRound,
+  Coins, CheckCircle2, KeyRound, Zap, Timer, ShoppingBag, Rocket,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -24,9 +24,10 @@ type Creator = {
   last_checked_at: string | null;
   created_at: string;
 };
-type Reward = { id: string; points_required: number; hours_required: number; title: string; description: string | null; sort_order: number; is_active: boolean };
+type Reward = { id: string; points_required: number; hours_required: number; title: string; description: string | null; sort_order: number; is_active: boolean; boost_multiplier: number | null; boost_duration_minutes: number | null };
 type Claim = { id: string; creator_id: string; reward_id: string; claimed_at: string; status: string; code: string | null; points_spent: number; redeemed_at: string | null };
 type Session = { id: string; creator_id: string; started_at: string; ended_at: string | null; duration_seconds: number | null; stream_title: string | null };
+type Boost = { id: string; creator_id: string | null; label: string; multiplier: number; interval_seconds: number | null; starts_at: string; ends_at: string; source: string; points_spent: number };
 
 const fmtHours = (s: number) => `${Math.floor(s / 3600)}u ${Math.floor((s % 3600) / 60)}m`;
 const fmtHoursDecimal = (s: number) => (s / 3600).toFixed(1);
@@ -47,21 +48,24 @@ const ContentCreatorDashboard = () => {
   const [rewards, setRewards] = useState<Reward[]>([]);
   const [claims, setClaims] = useState<Claim[]>([]);
   const [sessions, setSessions] = useState<Session[]>([]);
+  const [boosts, setBoosts] = useState<Boost[]>([]);
   const [loading, setLoading] = useState(true);
   const [tempPw, setTempPw] = useState<{ pw: string; login: string } | null>(null);
   const [checking, setChecking] = useState(false);
 
   const load = async () => {
-    const [{ data: cs }, { data: rs }, { data: cls }, { data: ss }] = await Promise.all([
+    const [{ data: cs }, { data: rs }, { data: cls }, { data: ss }, { data: bs }] = await Promise.all([
       supabase.from("cc_creators").select("*").order("points", { ascending: false }),
       supabase.from("cc_rewards").select("*").order("points_required"),
       supabase.from("cc_reward_claims").select("*").order("claimed_at", { ascending: false }),
       supabase.from("cc_live_sessions").select("*").order("started_at", { ascending: false }).limit(50),
+      supabase.from("cc_boosts").select("*").order("ends_at", { ascending: false }),
     ]);
     setCreators((cs as Creator[]) || []);
     setRewards((rs as Reward[]) || []);
     setClaims((cls as Claim[]) || []);
     setSessions((ss as Session[]) || []);
+    setBoosts((bs as Boost[]) || []);
     setLoading(false);
   };
 
@@ -136,16 +140,24 @@ const ContentCreatorDashboard = () => {
   const [rp, setRp] = useState(4);
   const [rt, setRt] = useState("");
   const [rd, setRd] = useState("");
+  const [rIsBoost, setRIsBoost] = useState(false);
+  const [rBoostMult, setRBoostMult] = useState(2);
+  const [rBoostDur, setRBoostDur] = useState(60);
   const addReward = async (e: React.FormEvent) => {
     e.preventDefault();
-    const { error } = await supabase.from("cc_rewards").insert({ points_required: rp, hours_required: 0, title: rt, description: rd, sort_order: rp });
+    const payload: any = { points_required: rp, hours_required: 0, title: rt, description: rd, sort_order: rp };
+    if (rIsBoost) {
+      payload.boost_multiplier = rBoostMult;
+      payload.boost_duration_minutes = rBoostDur;
+    }
+    const { error } = await supabase.from("cc_rewards").insert(payload);
     if (error) return toast.error(error.message);
-    setRp(4); setRt(""); setRd("");
+    setRp(4); setRt(""); setRd(""); setRIsBoost(false); setRBoostMult(2); setRBoostDur(60);
     await load();
-    toast.success("Beloning toegevoegd");
+    toast.success("Shop-item toegevoegd");
   };
   const removeReward = async (id: string) => {
-    if (!confirm("Beloning verwijderen?")) return;
+    if (!confirm("Item verwijderen?")) return;
     await supabase.from("cc_rewards").delete().eq("id", id);
     await load();
   };
@@ -154,11 +166,45 @@ const ContentCreatorDashboard = () => {
   const claimReward = async (reward: Reward) => {
     if (!myCreator) return toast.error("Geen creator profiel gekoppeld");
     if ((myCreator.points || 0) < reward.points_required) return toast.error("Niet genoeg punten");
-    if (!confirm(`Beloning "${reward.title}" kopen voor ${reward.points_required} punten?`)) return;
+    const boost = reward.boost_multiplier && reward.boost_duration_minutes;
+    if (!confirm(`"${reward.title}" kopen voor ${reward.points_required} punten?${boost ? `\n\nJe krijgt een x${reward.boost_multiplier} boost voor ${reward.boost_duration_minutes} min.` : ""}`)) return;
     const { data, error } = await supabase.functions.invoke("cc-claim-reward", { body: { reward_id: reward.id } });
     if (error || (data as any)?.error) return toast.error((data as any)?.error || "Aankoop mislukt");
-    setLastCode({ code: (data as any).code, title: reward.title });
-    toast.success("Aankoop gelukt! Kopieer je code.");
+    if (boost) toast.success(`Boost x${reward.boost_multiplier} actief!`);
+    else {
+      setLastCode({ code: (data as any).code, title: reward.title });
+      toast.success("Aankoop gelukt! Kopieer je code.");
+    }
+    await load();
+  };
+
+  // Boost management (head CC only)
+  const [bLabel, setBLabel] = useState("");
+  const [bMult, setBMult] = useState(2);
+  const [bInterval, setBInterval] = useState<number | "">(15);
+  const [bMinutes, setBMinutes] = useState(60);
+  const [bScope, setBScope] = useState<"global" | string>("global");
+  const addBoost = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const ends = new Date(Date.now() + bMinutes * 60 * 1000).toISOString();
+    const payload: any = {
+      label: bLabel || `x${bMult} boost`,
+      multiplier: bMult,
+      interval_seconds: bInterval === "" ? null : Number(bInterval) * 60,
+      ends_at: ends,
+      source: "admin",
+      created_by: me?.id,
+    };
+    if (bScope !== "global") payload.creator_id = bScope;
+    const { error } = await supabase.from("cc_boosts").insert(payload);
+    if (error) return toast.error(error.message);
+    setBLabel(""); setBMult(2); setBInterval(15); setBMinutes(60); setBScope("global");
+    await load();
+    toast.success("Boost gestart");
+  };
+  const stopBoost = async (id: string) => {
+    if (!confirm("Boost nu stoppen?")) return;
+    await supabase.from("cc_boosts").update({ ends_at: new Date().toISOString() }).eq("id", id);
     await load();
   };
 
@@ -183,6 +229,23 @@ const ContentCreatorDashboard = () => {
     if (!myCreator) return null;
     return rewards.filter(r => r.points_required > (myCreator.points || 0)).sort((a, b) => a.points_required - b.points_required)[0] || null;
   }, [rewards, myCreator]);
+
+  const activeBoosts = useMemo(() => {
+    const now = Date.now();
+    return boosts.filter(b => new Date(b.starts_at).getTime() <= now && new Date(b.ends_at).getTime() > now);
+  }, [boosts]);
+
+  const myEffective = useMemo(() => {
+    if (!myCreator) return { mult: 1, interval: 15 };
+    const bs = activeBoosts.filter(b => b.creator_id === null || b.creator_id === myCreator.id);
+    const mult = bs.reduce((m, b) => m * Number(b.multiplier || 1), 1);
+    const intervals = bs.map(b => b.interval_seconds).filter((n): n is number => typeof n === "number" && n > 0);
+    const interval = intervals.length ? Math.min(900, ...intervals) : 900;
+    return { mult: mult > 0 ? mult : 1, interval: Math.round(interval / 60) };
+  }, [activeBoosts, myCreator]);
+
+  const boostShopItems = rewards.filter(r => r.boost_multiplier && r.boost_duration_minutes);
+  const productShopItems = rewards.filter(r => !r.boost_multiplier);
 
   if (loading) return (
     <div className="min-h-screen bg-[#0a0512] flex items-center justify-center text-purple-300">
@@ -228,12 +291,47 @@ const ContentCreatorDashboard = () => {
 
       <main className="relative max-w-7xl mx-auto px-6 py-8 space-y-8">
         {/* Overzicht stats */}
-        <section className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <section className="grid grid-cols-2 md:grid-cols-5 gap-4">
           <StatCard icon={<Users className="h-4 w-4" />} label="Creators" value={totals.creators.toString()} tint="purple" />
           <StatCard icon={<Radio className="h-4 w-4" />} label="Nu live" value={totals.liveNow.toString()} tint="red" pulse={totals.liveNow > 0} />
           <StatCard icon={<Clock className="h-4 w-4" />} label="Totaal uren" value={totals.totalHours.toFixed(1)} tint="fuchsia" />
           <StatCard icon={<Calendar className="h-4 w-4" />} label="Sessies" value={totals.totalSessions.toString()} tint="cyan" />
+          <StatCard icon={<Zap className="h-4 w-4" />} label="Actieve boosts" value={activeBoosts.length.toString()} tint="yellow" pulse={activeBoosts.length > 0} />
         </section>
+
+        {/* Actieve boosts banner */}
+        {activeBoosts.length > 0 && (
+          <section className="relative overflow-hidden bg-gradient-to-r from-yellow-500/10 via-orange-500/10 to-fuchsia-500/10 border border-yellow-500/30 rounded-2xl p-5">
+            <div className="absolute inset-0 opacity-30 pointer-events-none" style={{ backgroundImage: "radial-gradient(circle at 20% 50%, rgba(250,204,21,0.2), transparent 40%)" }} />
+            <div className="relative flex items-start justify-between gap-4 flex-wrap">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-yellow-500/20 border border-yellow-500/50 flex items-center justify-center animate-pulse"><Zap className="h-5 w-5 text-yellow-300" /></div>
+                <div>
+                  <h3 className="font-bold text-yellow-100 flex items-center gap-2">Boost actief! <Rocket className="h-4 w-4" /></h3>
+                  {myCreator && (
+                    <p className="text-sm text-yellow-200/80">Jij verdient nu <b>x{myEffective.mult}</b> punten per <b>{myEffective.interval} min</b>.</p>
+                  )}
+                </div>
+              </div>
+              <div className="flex gap-2 flex-wrap">
+                {activeBoosts.map(b => {
+                  const scoped = b.creator_id ? creators.find(c => c.id === b.creator_id)?.twitch_username : null;
+                  const min = Math.max(0, Math.floor((new Date(b.ends_at).getTime() - Date.now()) / 60000));
+                  return (
+                    <div key={b.id} className="text-xs bg-black/30 border border-yellow-500/30 rounded-lg px-2.5 py-1.5 flex items-center gap-2">
+                      <span className="font-bold text-yellow-200">x{b.multiplier}</span>
+                      {b.interval_seconds && <span className="text-slate-300">/{Math.round(b.interval_seconds/60)}m</span>}
+                      <span className="text-slate-400">{scoped ? `@${scoped}` : "iedereen"}</span>
+                      <Timer className="h-3 w-3 text-yellow-300" /> <span className="text-slate-300">{min}m</span>
+                      {isHead && <button onClick={() => stopBoost(b.id)} className="text-red-400/80 hover:text-red-300 ml-1"><Trash2 className="h-3 w-3" /></button>}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </section>
+        )}
+
 
         {/* Mijn stats */}
         {myCreator && (
@@ -265,7 +363,7 @@ const ContentCreatorDashboard = () => {
                 <div className="h-2.5 bg-slate-800 rounded-full overflow-hidden">
                   <div className="h-full bg-gradient-to-r from-purple-500 via-fuchsia-500 to-pink-400 transition-all" style={{ width: `${Math.min(100, ((myCreator.points || 0) / nextReward.points_required) * 100)}%` }} />
                 </div>
-                <p className="text-xs text-slate-500 mt-2">Je verdient <b>1 punt per 15 min</b> dat je TikTok LIVE bent én in-game zit.</p>
+                <p className="text-xs text-slate-500 mt-2">Je verdient <b>x{myEffective.mult} punt per {myEffective.interval} min</b> dat je TikTok LIVE bent én in-game zit.</p>
               </div>
             )}
 
@@ -284,64 +382,128 @@ const ContentCreatorDashboard = () => {
 
         {/* Grid: rewards + leaderboard */}
         <section className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Beloningen (shop) */}
-          <div className="lg:col-span-2 bg-[#150822]/80 border border-purple-500/20 rounded-2xl p-6">
-            <h2 className="text-lg font-semibold mb-1 flex items-center gap-2"><Trophy className="h-5 w-5 text-yellow-400" /> Puntenshop</h2>
-            <p className="text-xs text-slate-400 mb-4">Koop een beloning met je verdiende punten. Je krijgt een unieke code die je in Discord inlevert.</p>
-            {rewards.length === 0 ? (
-              <p className="text-slate-400 text-sm">Nog geen beloningen ingesteld.</p>
-            ) : (
-              <div className="space-y-3">
-                {rewards.map(r => {
-                  const myPts = myCreator?.points || 0;
-                  const pct = Math.min(100, (myPts / r.points_required) * 100);
-                  const reached = myPts >= r.points_required;
-                  return (
-                    <div key={r.id} className="bg-gradient-to-br from-[#1a0f2e] to-[#150822] border border-purple-500/10 rounded-xl p-4 hover:border-purple-500/30 transition">
-                      <div className="flex items-start justify-between gap-4 mb-2">
-                        <div className="min-w-0">
-                          <div className="font-semibold flex items-center gap-2 flex-wrap">
-                            <Gift className="h-4 w-4 text-purple-400 shrink-0" />
-                            <span>{r.title}</span>
-                            <span className="text-xs bg-yellow-500/15 text-yellow-300 border border-yellow-500/30 px-2 py-0.5 rounded-full flex items-center gap-1"><Coins className="h-3 w-3" /> {r.points_required} pt</span>
+          <div className="lg:col-span-2 space-y-6">
+            {/* Boost items */}
+            <div className="bg-gradient-to-br from-[#1a0f2e]/90 to-[#150822]/90 border border-yellow-500/25 rounded-2xl p-6">
+              <div className="flex items-center justify-between mb-1">
+                <h2 className="text-lg font-semibold flex items-center gap-2"><Zap className="h-5 w-5 text-yellow-400" /> Boost shop</h2>
+                {myCreator && <span className="text-xs bg-yellow-500/10 border border-yellow-500/30 text-yellow-300 px-2 py-1 rounded-full font-mono">⭐ {myCreator.points || 0} pt</span>}
+              </div>
+              <p className="text-xs text-slate-400 mb-4">Koop een tijdelijke persoonlijke boost — je verdient dan sneller punten.</p>
+              {boostShopItems.length === 0 ? (
+                <p className="text-slate-500 text-sm italic">Nog geen boosts in de shop.</p>
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {boostShopItems.map(r => {
+                    const myPts = myCreator?.points || 0;
+                    const reached = myPts >= r.points_required;
+                    return (
+                      <div key={r.id} className="relative overflow-hidden bg-gradient-to-br from-yellow-500/10 via-orange-500/5 to-fuchsia-500/10 border border-yellow-500/20 rounded-xl p-4 hover:border-yellow-400/50 transition group">
+                        <div className="absolute -top-4 -right-4 w-20 h-20 bg-yellow-500/10 rounded-full blur-xl group-hover:bg-yellow-400/20 transition" />
+                        <div className="relative flex items-start justify-between gap-2 mb-1">
+                          <div className="min-w-0">
+                            <div className="text-2xl font-black text-yellow-300 flex items-center gap-1"><Rocket className="h-5 w-5" /> x{r.boost_multiplier}</div>
+                            <div className="text-sm font-semibold text-white truncate">{r.title}</div>
+                            <div className="text-xs text-slate-400">{r.boost_duration_minutes} min lang</div>
+                            {r.description && <p className="text-xs text-slate-500 mt-1 line-clamp-2">{r.description}</p>}
                           </div>
-                          {r.description && <p className="text-sm text-slate-400 mt-1">{r.description}</p>}
+                          {isHead && <button onClick={() => removeReward(r.id)} className="text-red-400/70 hover:text-red-300 shrink-0"><Trash2 className="h-4 w-4" /></button>}
                         </div>
-                        <div className="flex gap-2 items-center shrink-0">
+                        <div className="relative mt-3 flex items-center justify-between">
+                          <span className="text-xs bg-black/40 text-yellow-200 border border-yellow-500/30 px-2 py-1 rounded-full flex items-center gap-1"><Coins className="h-3 w-3" /> {r.points_required} pt</span>
                           {myCreator && (
                             reached ? (
-                              <button onClick={() => claimReward(r)} className="text-xs bg-gradient-to-r from-purple-600 to-fuchsia-500 hover:brightness-110 px-3 py-1.5 rounded-lg flex items-center gap-1 shadow-[0_0_20px_rgba(168,85,247,0.4)]">
-                                <Ticket className="h-3 w-3" /> Koop ({r.points_required})
+                              <button onClick={() => claimReward(r)} className="text-xs bg-gradient-to-r from-yellow-500 to-orange-500 hover:brightness-110 text-black font-bold px-3 py-1.5 rounded-lg flex items-center gap-1 shadow-[0_0_20px_rgba(250,204,21,0.35)]">
+                                Activeer <Zap className="h-3 w-3" />
                               </button>
                             ) : (
                               <span className="text-xs text-slate-500">Nog {r.points_required - myPts} pt</span>
                             )
                           )}
-                          {isHead && (
-                            <button onClick={() => removeReward(r.id)} className="text-red-400/70 hover:text-red-300"><Trash2 className="h-4 w-4" /></button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+
+            {/* Product items */}
+            <div className="bg-[#150822]/80 border border-purple-500/20 rounded-2xl p-6">
+              <div className="flex items-center justify-between mb-1">
+                <h2 className="text-lg font-semibold flex items-center gap-2"><ShoppingBag className="h-5 w-5 text-purple-400" /> Producten</h2>
+                {myCreator && <span className="text-xs bg-purple-500/10 border border-purple-500/30 text-purple-300 px-2 py-1 rounded-full font-mono">⭐ {myCreator.points || 0} pt</span>}
+              </div>
+              <p className="text-xs text-slate-400 mb-4">Wissel je punten in voor Robux, merch of andere beloningen. Je krijgt een code voor in Discord.</p>
+              {productShopItems.length === 0 ? (
+                <p className="text-slate-500 text-sm italic">Nog geen producten.</p>
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {productShopItems.map(r => {
+                    const myPts = myCreator?.points || 0;
+                    const pct = Math.min(100, (myPts / r.points_required) * 100);
+                    const reached = myPts >= r.points_required;
+                    return (
+                      <div key={r.id} className="bg-gradient-to-br from-[#1a0f2e] to-[#150822] border border-purple-500/10 rounded-xl p-4 hover:border-purple-500/40 transition group">
+                        <div className="flex items-start justify-between gap-2 mb-2">
+                          <div className="min-w-0">
+                            <div className="font-semibold flex items-center gap-2 flex-wrap">
+                              <Gift className="h-4 w-4 text-purple-400 shrink-0" />
+                              <span className="truncate">{r.title}</span>
+                            </div>
+                            {r.description && <p className="text-xs text-slate-400 mt-1 line-clamp-2">{r.description}</p>}
+                          </div>
+                          {isHead && <button onClick={() => removeReward(r.id)} className="text-red-400/70 hover:text-red-300 shrink-0"><Trash2 className="h-4 w-4" /></button>}
+                        </div>
+                        <div className="h-1.5 bg-slate-800/80 rounded-full overflow-hidden mt-2 mb-3">
+                          <div className="h-full bg-gradient-to-r from-purple-500 to-fuchsia-400" style={{ width: `${pct}%` }} />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs bg-yellow-500/15 text-yellow-300 border border-yellow-500/30 px-2 py-1 rounded-full flex items-center gap-1"><Coins className="h-3 w-3" /> {r.points_required} pt</span>
+                          {myCreator && (
+                            reached ? (
+                              <button onClick={() => claimReward(r)} className="text-xs bg-gradient-to-r from-purple-600 to-fuchsia-500 hover:brightness-110 px-3 py-1.5 rounded-lg flex items-center gap-1 shadow-[0_0_20px_rgba(168,85,247,0.4)]">
+                                <Ticket className="h-3 w-3" /> Koop
+                              </button>
+                            ) : (
+                              <span className="text-xs text-slate-500">Nog {r.points_required - myPts} pt</span>
+                            )
                           )}
                         </div>
                       </div>
-                      {myCreator && (
-                        <div className="h-1.5 bg-slate-800/80 rounded-full overflow-hidden mt-2">
-                          <div className="h-full bg-gradient-to-r from-purple-500 to-fuchsia-400" style={{ width: `${pct}%` }} />
-                        </div>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-            )}
+                    );
+                  })}
+                </div>
+              )}
 
-            {isHead && (
-              <form onSubmit={addReward} className="mt-6 border-t border-purple-500/20 pt-6 grid grid-cols-1 md:grid-cols-4 gap-3">
-                <input type="number" min={1} value={rp} onChange={e => setRp(+e.target.value)} placeholder="Punten" required className="bg-[#1a0f2e] border border-slate-700 rounded-lg px-3 py-2 text-sm" />
-                <input value={rt} onChange={e => setRt(e.target.value)} placeholder="Titel (bv. €10 Robux)" required className="bg-[#1a0f2e] border border-slate-700 rounded-lg px-3 py-2 text-sm" />
-                <input value={rd} onChange={e => setRd(e.target.value)} placeholder="Beschrijving" className="bg-[#1a0f2e] border border-slate-700 rounded-lg px-3 py-2 text-sm" />
-                <button type="submit" className="bg-purple-600 hover:bg-purple-500 rounded-lg text-sm flex items-center justify-center gap-1"><Plus className="h-4 w-4" /> Toevoegen</button>
-              </form>
-            )}
+              {isHead && (
+                <form onSubmit={addReward} className="mt-6 border-t border-purple-500/20 pt-5 space-y-3">
+                  <div className="text-xs text-slate-400 uppercase tracking-wider flex items-center gap-2"><Plus className="h-3 w-3" /> Nieuw shop-item</div>
+                  <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+                    <input type="number" min={1} value={rp} onChange={e => setRp(+e.target.value)} placeholder="Punten" required className="bg-[#1a0f2e] border border-slate-700 rounded-lg px-3 py-2 text-sm" />
+                    <input value={rt} onChange={e => setRt(e.target.value)} placeholder="Titel (bv. €10 Robux)" required className="bg-[#1a0f2e] border border-slate-700 rounded-lg px-3 py-2 text-sm md:col-span-2" />
+                    <label className="flex items-center gap-2 text-sm bg-[#1a0f2e]/50 border border-slate-700 rounded-lg px-3 py-2 cursor-pointer">
+                      <input type="checkbox" checked={rIsBoost} onChange={e => setRIsBoost(e.target.checked)} className="accent-yellow-400" />
+                      <Zap className="h-3.5 w-3.5 text-yellow-400" /> Boost item
+                    </label>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+                    <input value={rd} onChange={e => setRd(e.target.value)} placeholder="Beschrijving" className="bg-[#1a0f2e] border border-slate-700 rounded-lg px-3 py-2 text-sm md:col-span-2" />
+                    {rIsBoost && (
+                      <>
+                        <input type="number" min={2} step="0.5" value={rBoostMult} onChange={e => setRBoostMult(+e.target.value)} placeholder="Boost x?" required className="bg-[#1a0f2e] border border-yellow-500/30 rounded-lg px-3 py-2 text-sm" />
+                        <input type="number" min={5} value={rBoostDur} onChange={e => setRBoostDur(+e.target.value)} placeholder="Duur in min" required className="bg-[#1a0f2e] border border-yellow-500/30 rounded-lg px-3 py-2 text-sm" />
+                      </>
+                    )}
+                    <button type="submit" className={`rounded-lg text-sm flex items-center justify-center gap-1 ${rIsBoost ? "bg-gradient-to-r from-yellow-500 to-orange-500 text-black font-bold" : "bg-purple-600 hover:bg-purple-500"} ${rIsBoost ? "" : "md:col-start-4"}`}>
+                      <Plus className="h-4 w-4" /> Toevoegen
+                    </button>
+                  </div>
+                </form>
+              )}
+            </div>
           </div>
+
 
 
           {/* Leaderboard */}
@@ -556,17 +718,83 @@ const ContentCreatorDashboard = () => {
             )}
           </section>
         )}
+
+        {/* Head CC: boost beheer */}
+        {isHead && (
+          <section className="bg-gradient-to-br from-[#241407] to-[#180a2d] border border-yellow-500/25 rounded-2xl p-6">
+            <h2 className="text-lg font-semibold mb-1 flex items-center gap-2"><Zap className="h-5 w-5 text-yellow-400" /> Boost event starten (Head CC)</h2>
+            <p className="text-xs text-slate-400 mb-4">Zet een tijdelijke multiplier of kortere interval voor iedereen of één creator. Loopt automatisch af.</p>
+
+            <form onSubmit={addBoost} className="grid grid-cols-2 md:grid-cols-6 gap-3">
+              <input value={bLabel} onChange={e => setBLabel(e.target.value)} placeholder="Naam (bv. Weekend boost)" className="bg-[#1a0f2e] border border-slate-700 rounded-lg px-3 py-2 text-sm col-span-2" />
+              <select value={bScope} onChange={e => setBScope(e.target.value)} className="bg-[#1a0f2e] border border-slate-700 rounded-lg px-3 py-2 text-sm col-span-2">
+                <option value="global">🌍 Iedereen</option>
+                {creators.map(c => <option key={c.id} value={c.id}>👤 @{c.twitch_username}</option>)}
+              </select>
+              <div className="col-span-1">
+                <label className="text-[10px] text-slate-500 uppercase">Multiplier</label>
+                <input type="number" min={1} step="0.5" value={bMult} onChange={e => setBMult(+e.target.value)} required className="w-full bg-[#1a0f2e] border border-yellow-500/30 rounded-lg px-3 py-2 text-sm font-bold text-yellow-300" />
+              </div>
+              <div className="col-span-1">
+                <label className="text-[10px] text-slate-500 uppercase">Interval (min)</label>
+                <input type="number" min={1} max={60} value={bInterval} onChange={e => setBInterval(e.target.value === "" ? "" : +e.target.value)} placeholder="15" className="w-full bg-[#1a0f2e] border border-slate-700 rounded-lg px-3 py-2 text-sm" />
+              </div>
+              <div className="col-span-2 md:col-span-4">
+                <label className="text-[10px] text-slate-500 uppercase">Duur (minuten totaal)</label>
+                <div className="flex gap-2">
+                  <input type="number" min={5} value={bMinutes} onChange={e => setBMinutes(+e.target.value)} required className="flex-1 bg-[#1a0f2e] border border-slate-700 rounded-lg px-3 py-2 text-sm" />
+                  {[30, 60, 120, 240, 1440].map(m => (
+                    <button type="button" key={m} onClick={() => setBMinutes(m)} className="text-xs bg-slate-800/60 hover:bg-slate-700 border border-slate-700 px-2 rounded-lg">
+                      {m >= 60 ? `${m/60}u` : `${m}m`}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <button type="submit" className="col-span-2 md:col-span-2 bg-gradient-to-r from-yellow-500 to-orange-500 hover:brightness-110 text-black font-bold rounded-lg text-sm flex items-center justify-center gap-1 shadow-[0_0_20px_rgba(250,204,21,0.4)]">
+                <Rocket className="h-4 w-4" /> Start boost
+              </button>
+            </form>
+
+            {boosts.length > 0 && (
+              <div className="mt-6 border-t border-yellow-500/20 pt-4">
+                <div className="text-xs text-slate-400 uppercase tracking-wider mb-2">Recente boosts</div>
+                <div className="space-y-1.5 max-h-60 overflow-y-auto">
+                  {boosts.slice(0, 15).map(b => {
+                    const scoped = b.creator_id ? creators.find(c => c.id === b.creator_id)?.twitch_username : null;
+                    const active = new Date(b.ends_at).getTime() > Date.now() && new Date(b.starts_at).getTime() <= Date.now();
+                    return (
+                      <div key={b.id} className={`flex items-center justify-between gap-3 rounded-lg px-3 py-2 text-sm ${active ? "bg-yellow-500/10 border border-yellow-500/30" : "bg-[#1a0f2e]/50"}`}>
+                        <div className="flex items-center gap-2 min-w-0">
+                          <span className={`text-xs font-bold ${active ? "text-yellow-300" : "text-slate-500"}`}>x{b.multiplier}</span>
+                          {b.interval_seconds && <span className="text-xs text-slate-400">/{Math.round(b.interval_seconds/60)}m</span>}
+                          <span className="text-slate-300 truncate">{b.label || "boost"}</span>
+                          <span className="text-xs text-slate-500">· {scoped ? `@${scoped}` : "iedereen"}</span>
+                          <span className="text-xs text-slate-500">· {b.source}</span>
+                        </div>
+                        <div className="flex items-center gap-2 text-xs text-slate-500 shrink-0">
+                          <span>tot {new Date(b.ends_at).toLocaleString("nl-NL")}</span>
+                          {active && <button onClick={() => stopBoost(b.id)} className="text-red-400/70 hover:text-red-300"><Trash2 className="h-3.5 w-3.5" /></button>}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+          </section>
+        )}
       </main>
     </div>
   );
 };
 
-const StatCard = ({ icon, label, value, tint, pulse }: { icon: React.ReactNode; label: string; value: string; tint: "purple" | "red" | "fuchsia" | "cyan"; pulse?: boolean }) => {
+const StatCard = ({ icon, label, value, tint, pulse }: { icon: React.ReactNode; label: string; value: string; tint: "purple" | "red" | "fuchsia" | "cyan" | "yellow"; pulse?: boolean }) => {
   const tints: Record<string, string> = {
     purple: "from-purple-500/15 to-transparent border-purple-500/30 text-purple-300",
     red: "from-red-500/15 to-transparent border-red-500/30 text-red-300",
     fuchsia: "from-fuchsia-500/15 to-transparent border-fuchsia-500/30 text-fuchsia-300",
     cyan: "from-cyan-500/15 to-transparent border-cyan-500/30 text-cyan-300",
+    yellow: "from-yellow-500/15 to-transparent border-yellow-500/30 text-yellow-300",
   };
   return (
     <div className={`relative bg-gradient-to-br ${tints[tint]} border rounded-2xl p-4 backdrop-blur-sm`}>
