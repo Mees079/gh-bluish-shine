@@ -117,38 +117,54 @@ const OnderwereldDashboard = () => {
     </button>
   );
 
-  return (
-    <div className="min-h-screen bg-black text-white flex relative overflow-hidden">
-      {/* Background */}
-      <div className="absolute inset-0 opacity-[0.04] pointer-events-none" style={{
-        backgroundImage: `url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180' viewBox='0 0 180 180'><g fill='none' stroke='%23d4af37' stroke-width='0.8'><path d='M20 90 L45 78 L65 84 L72 70 L79 84 L100 78 L160 90 L100 102 L79 96 L72 110 L65 96 L45 102 Z'/><circle cx='90' cy='30' r='10'/><text x='84' y='35' font-family='serif' fill='%23d4af37' font-size='12'>$</text><rect x='30' y='135' width='45' height='27' rx='3'/><line x1='30' y1='148' x2='75' y2='148'/><path d='M120 130 L165 130 L165 162 L120 162 Z M126 138 L159 138 M126 145 L159 145 M126 152 L159 152'/><path d='M30 30 L38 26 L46 30 L38 34 Z' stroke-width='1.2'/></g></svg>")`,
-      }} />
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,_rgba(212,175,55,0.06)_0%,_transparent_50%),radial-gradient(ellipse_at_bottom_right,_rgba(139,0,0,0.08)_0%,_transparent_50%)] pointer-events-none" />
+  const closeNav = () => setSidebarOpen(false);
+  const NavItemClose = (props: any) => (
+    <div onClick={closeNav}><NavItem {...props} /></div>
+  );
 
-      {/* Sidebar */}
-      <aside className="relative w-72 bg-zinc-950/95 backdrop-blur-xl border-r border-zinc-800 flex flex-col z-10">
-        <div className="p-5 border-b border-zinc-900">
+  return (
+    <div className="min-h-screen bg-black text-white relative">
+      {/* Floating open button */}
+      <button
+        onClick={() => setSidebarOpen(true)}
+        className={`fixed top-4 right-4 z-40 p-2.5 rounded-lg bg-zinc-900 border border-zinc-800 hover:bg-zinc-800 text-white transition-all ${sidebarOpen ? "opacity-0 pointer-events-none" : "opacity-100"}`}
+        aria-label="Open menu"
+      >
+        <Menu className="h-5 w-5" />
+      </button>
+
+      {/* Backdrop */}
+      {sidebarOpen && (
+        <div onClick={closeNav} className="fixed inset-0 bg-black/60 z-40 backdrop-blur-sm" />
+      )}
+
+      {/* Sidebar (right, collapsible) */}
+      <aside className={`fixed top-0 right-0 h-full w-72 bg-zinc-950 border-l border-zinc-800 flex flex-col z-50 transition-transform duration-300 ${sidebarOpen ? "translate-x-0" : "translate-x-full"}`}>
+        <div className="p-5 border-b border-zinc-900 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-zinc-300 to-red-900 flex items-center justify-center">
-              <Skull className="h-5 w-5 text-black" />
+            <div className="w-10 h-10 rounded-lg bg-zinc-800 border border-zinc-700 flex items-center justify-center">
+              <Skull className="h-5 w-5 text-white" />
             </div>
             <div>
               <div className="text-white font-bold tracking-tight">Onderwereld</div>
               <div className="text-xs text-zinc-500 uppercase tracking-wider">HDRP</div>
             </div>
           </div>
+          <button onClick={closeNav} className="p-1.5 rounded hover:bg-zinc-800 text-zinc-400 hover:text-white">
+            <X className="h-4 w-4" />
+          </button>
         </div>
 
         <nav className="flex-1 overflow-y-auto p-3 space-y-1">
-          <NavItem k="overview" icon={LayoutDashboard} label="Overzicht" />
+          <NavItemClose k="overview" icon={LayoutDashboard} label="Overzicht" />
 
           <button onClick={() => setGangsOpen(!gangsOpen)} className="w-full flex items-center justify-between px-3 py-2 text-xs uppercase tracking-wider text-zinc-500 hover:text-zinc-300">
             <span className="flex items-center gap-2"><Users className="h-3.5 w-3.5" /> Gangs</span>
             {gangsOpen ? <ChevronDown className="h-3.5 w-3.5" /> : <ChevronRight className="h-3.5 w-3.5" />}
           </button>
           {gangsOpen && <>
-            <NavItem k="gangs" icon={Users} label="Alle gangs" indent />
-            {isHoofd && <NavItem k="gang-new" icon={Plus} label="Nieuwe gang" indent />}
+            <NavItemClose k="gangs" icon={Users} label="Alle gangs" indent />
+            {isHoofd && <NavItemClose k="gang-new" icon={Plus} label="Nieuwe gang" indent />}
           </>}
 
           <button onClick={() => setPointsOpen(!pointsOpen)} className="w-full flex items-center justify-between px-3 py-2 text-xs uppercase tracking-wider text-zinc-500 hover:text-zinc-300 mt-2">
@@ -156,24 +172,24 @@ const OnderwereldDashboard = () => {
             {pointsOpen ? <ChevronDown className="h-3.5 w-3.5" /> : <ChevronRight className="h-3.5 w-3.5" />}
           </button>
           {pointsOpen && <>
-            <NavItem k="points-new" icon={Plus} label="Punten invoeren" indent />
-            <NavItem k="points-recent" icon={ScrollText} label="Recent toegevoegd" indent />
+            <NavItemClose k="points-new" icon={Plus} label="Punten invoeren" indent />
+            <NavItemClose k="points-recent" icon={ScrollText} label="Recent toegevoegd" indent />
           </>}
 
           <div className="pt-2" />
-          <NavItem k="boosts" icon={Zap} label="Boosts" />
-          <NavItem k="warnings" icon={AlertTriangle} label="Waarschuwingen" />
-          <NavItem k="inbox" icon={Inbox} label="Inbox & chat" />
+          <NavItemClose k="boosts" icon={Zap} label="Boosts" />
+          <NavItemClose k="warnings" icon={AlertTriangle} label="Waarschuwingen" />
+          <NavItemClose k="inbox" icon={Inbox} label="Inbox & chat" />
 
           <div className="pt-3 mt-3 border-t border-zinc-900" />
-          <NavItem k="settings" icon={UserCircle} label="Mijn account" />
-          {isHoofd && <NavItem k="accounts" icon={ShieldAlert} label="Accounts beheren" />}
+          <NavItemClose k="settings" icon={UserCircle} label="Mijn account" />
+          {isHoofd && <NavItemClose k="accounts" icon={ShieldAlert} label="Accounts beheren" />}
         </nav>
 
         <div className="p-4 border-t border-zinc-900 flex items-center gap-3">
           {avatarUrl
             ? <img src={avatarUrl} className="w-9 h-9 rounded-full object-cover border border-zinc-700" alt="" />
-            : <div className="w-9 h-9 rounded-full bg-zinc-800 flex items-center justify-center text-zinc-100 font-bold">{me.display_name[0]?.toUpperCase()}</div>}
+            : <div className="w-9 h-9 rounded-full bg-zinc-800 flex items-center justify-center text-white font-bold">{me.display_name[0]?.toUpperCase()}</div>}
           <div className="flex-1 min-w-0">
             <div className="text-sm text-white truncate">{me.display_name}</div>
             <div className="text-xs text-zinc-400 truncate">{roleLabel}</div>
@@ -185,8 +201,8 @@ const OnderwereldDashboard = () => {
       </aside>
 
       {/* Main */}
-      <main className="flex-1 relative z-10 overflow-y-auto">
-        <div className="max-w-6xl mx-auto p-8">
+      <main className="min-h-screen">
+        <div className="max-w-6xl mx-auto p-8 pr-20">
           {nav === "overview" && <OverviewPanel me={me} role={role} onNav={setNav} onGang={openGangDetail} />}
           {nav === "gangs" && <GangsPanel isHoofd={isHoofd} onOpen={openGangDetail} />}
           {nav === "gang-new" && isHoofd && <GangNewPanel me={me} uid={uid} onDone={(id) => openGangDetail(id)} />}
