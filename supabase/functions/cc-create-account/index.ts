@@ -18,9 +18,10 @@ Deno.serve(async (req) => {
     const { data: isHead } = await supa.rpc("is_head_content_creator", { _user_id: user.id });
     if (!isHead) return new Response(JSON.stringify({ error: "forbidden" }), { status: 403, headers: cors });
 
-    const { login_username, tiktok_username, display_name, is_head = false } = await req.json();
+    const { login_username, tiktok_username, roblox_username, display_name, is_head = false } = await req.json();
     if (!login_username) return new Response(JSON.stringify({ error: "login_username vereist" }), { status: 400, headers: cors });
     if (!tiktok_username) return new Response(JSON.stringify({ error: "tiktok_username vereist" }), { status: 400, headers: cors });
+    if (!roblox_username) return new Response(JSON.stringify({ error: "roblox_username vereist" }), { status: 400, headers: cors });
 
     const email = emailFor(login_username);
     const password = tempPass();
@@ -33,6 +34,7 @@ Deno.serve(async (req) => {
       user_id: uid,
       login_username: login_username.toLowerCase(),
       twitch_username: tiktok_username.toLowerCase().replace(/^@/, ""),
+      roblox_username: roblox_username.trim(),
       display_name: display_name || tiktok_username,
     });
     if (iErr) return new Response(JSON.stringify({ error: iErr.message }), { status: 500, headers: cors });

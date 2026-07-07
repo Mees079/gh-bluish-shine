@@ -12,10 +12,13 @@ type Creator = {
   user_id: string | null;
   twitch_username: string;
   login_username: string | null;
+  roblox_username: string | null;
   display_name: string | null;
   is_active: boolean;
   total_seconds: number;
   is_currently_live: boolean;
+  is_in_game: boolean;
+  last_ingame_ping_at: string | null;
   last_checked_at: string | null;
   created_at: string;
 };
@@ -97,6 +100,7 @@ const ContentCreatorDashboard = () => {
   // Create account form
   const [newLogin, setNewLogin] = useState("");
   const [newTikTok, setNewTikTok] = useState("");
+  const [newRoblox, setNewRoblox] = useState("");
   const [newHead, setNewHead] = useState(false);
   const [creating, setCreating] = useState(false);
   const createAccount = async (e: React.FormEvent) => {
@@ -107,6 +111,7 @@ const ContentCreatorDashboard = () => {
       body: {
         login_username: newLogin.trim(),
         tiktok_username: newTikTok.trim().replace(/^@/, ""),
+        roblox_username: newRoblox.trim(),
         display_name: newTikTok.trim(),
         is_head: newHead,
       },
@@ -114,7 +119,7 @@ const ContentCreatorDashboard = () => {
     setCreating(false);
     if (error || (data as any)?.error) return toast.error((data as any)?.error || "Aanmaken mislukt");
     setTempPw({ pw: (data as any).temp_password, login: (data as any).login_username });
-    setNewLogin(""); setNewTikTok(""); setNewHead(false);
+    setNewLogin(""); setNewTikTok(""); setNewRoblox(""); setNewHead(false);
     await load();
     toast.success("Account aangemaakt");
   };
@@ -350,7 +355,9 @@ const ContentCreatorDashboard = () => {
                 <tr className="border-b border-purple-500/20">
                   <th className="text-left py-2 font-medium">TikTok</th>
                   <th className="text-left py-2 font-medium">Login</th>
+                  <th className="text-left py-2 font-medium">Roblox</th>
                   <th className="text-left py-2 font-medium">Status</th>
+                  <th className="text-left py-2 font-medium">In-game</th>
                   <th className="text-left py-2 font-medium">Uren</th>
                   <th className="text-left py-2 font-medium">Beloningen</th>
                   <th className="text-left py-2 font-medium">Laatst</th>
@@ -368,8 +375,12 @@ const ContentCreatorDashboard = () => {
                         </a>
                       </td>
                       <td className="text-slate-400 font-mono text-xs">{c.login_username || "-"}</td>
+                      <td className="text-slate-400 font-mono text-xs">{c.roblox_username || "-"}</td>
                       <td className={c.is_currently_live ? "text-red-400 font-semibold" : "text-slate-500"}>
                         {c.is_currently_live ? <span className="inline-flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-red-400 animate-pulse" /> LIVE</span> : "Offline"}
+                      </td>
+                      <td className={c.is_in_game ? "text-emerald-400 font-semibold" : "text-slate-500"}>
+                        {c.is_in_game ? <span className="inline-flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" /> in-game</span> : "-"}
                       </td>
                       <td className="font-mono">{fmtHours(c.total_seconds)}</td>
                       <td className="text-slate-400"><span className="text-xs bg-purple-500/10 border border-purple-500/20 rounded-full px-2 py-0.5">{claimedCount}</span></td>
@@ -439,8 +450,8 @@ const ContentCreatorDashboard = () => {
         {isHead && (
           <section className="bg-gradient-to-br from-[#180a2d] to-[#150822] border border-purple-500/25 rounded-2xl p-6">
             <h2 className="text-lg font-semibold mb-1 flex items-center gap-2"><Plus className="h-5 w-5 text-purple-400" /> Nieuw creator account</h2>
-            <p className="text-xs text-slate-400 mb-4">De <b>login gebruikersnaam</b> wordt gebruikt om in te loggen. De <b>TikTok gebruikersnaam</b> wordt gemonitord voor livestatus.</p>
-            <form onSubmit={createAccount} className="grid grid-cols-1 md:grid-cols-4 gap-3">
+            <p className="text-xs text-slate-400 mb-4">De <b>login gebruikersnaam</b> wordt gebruikt om in te loggen. De <b>TikTok gebruikersnaam</b> wordt gemonitord voor livestatus. De <b>Roblox gebruikersnaam</b> wordt gebruikt om te controleren of de creator daadwerkelijk in-game zit — anders telt de live-tijd niet.</p>
+            <form onSubmit={createAccount} className="grid grid-cols-1 md:grid-cols-5 gap-3">
               <div>
                 <label className="text-xs text-slate-400 mb-1 block">Login gebruikersnaam</label>
                 <input value={newLogin} onChange={e => setNewLogin(e.target.value)} placeholder="bv. jan_creator" required className="w-full bg-[#1a0f2e] border border-slate-700 rounded-lg px-3 py-2 text-sm" />
@@ -449,9 +460,13 @@ const ContentCreatorDashboard = () => {
                 <label className="text-xs text-slate-400 mb-1 block">TikTok gebruikersnaam</label>
                 <input value={newTikTok} onChange={e => setNewTikTok(e.target.value)} placeholder="@tiktok_naam" required className="w-full bg-[#1a0f2e] border border-slate-700 rounded-lg px-3 py-2 text-sm" />
               </div>
+              <div>
+                <label className="text-xs text-slate-400 mb-1 block">Roblox gebruikersnaam</label>
+                <input value={newRoblox} onChange={e => setNewRoblox(e.target.value)} placeholder="RobloxUser123" required className="w-full bg-[#1a0f2e] border border-slate-700 rounded-lg px-3 py-2 text-sm" />
+              </div>
               <label className="flex items-center gap-2 text-sm mt-6">
                 <input type="checkbox" checked={newHead} onChange={e => setNewHead(e.target.checked)} className="accent-purple-500" />
-                Head Content Creator
+                Head CC
               </label>
               <button type="submit" disabled={creating} className="bg-gradient-to-r from-purple-600 to-fuchsia-500 hover:brightness-110 rounded-lg text-sm mt-6 disabled:opacity-50 shadow-[0_0_20px_rgba(168,85,247,0.35)]">
                 {creating ? "Aanmaken..." : "Account aanmaken"}
