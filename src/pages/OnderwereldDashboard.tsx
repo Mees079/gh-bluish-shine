@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import {
   Skull, LogOut, LayoutDashboard, Users, Plus, ScrollText, Zap, AlertTriangle,
   Inbox, UserCircle, ShieldAlert, ChevronDown, ChevronRight, Upload, Trash2,
-  Send, MessageSquare, Sparkles, Copy, X, Crown, Star,
+  Send, MessageSquare, Sparkles, Copy, X, Crown, Star, Menu,
 } from "lucide-react";
 
 // ============ Types ============
