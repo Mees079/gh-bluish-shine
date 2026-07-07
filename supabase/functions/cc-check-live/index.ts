@@ -95,7 +95,31 @@ Deno.serve(async (req) => {
       } else {
         await supa.from("cc_creators").update({ last_checked_at: now.toISOString() }).eq("id", c.id);
       }
-      results.push({ user: c.twitch_username, tiktok_live: tiktokLive, in_game: !!ingameFresh, counted: live, total_seconds: totalSeconds });
+
+      // ---- Punten: 1 punt per 15 min live+ingame ----
+      let points = c.points || 0;
+      let lastAward = c.last_point_awarded_at ? new Date(c.last_point_awarded_at) : null;
+      if (live) {
+        if (!lastAward) {
+          lastAward = now;
+          await supa.from("cc_creators").update({ last_point_awarded_at: now.toISOString() }).eq("id", c.id);
+        } else {
+          const elapsed = Math.floor((now.getTime() - lastAward.getTime()) / 1000);
+          const blocks = Math.floor(elapsed / 900); // 15 min
+          if (blocks >= 1) {
+            points += blocks;
+            const advanced = new Date(lastAward.getTime() + blocks * 900 * 1000);
+            await supa.from("cc_creators").update({
+              points,
+              last_point_awarded_at: advanced.toISOString(),
+            }).eq("id", c.id);
+          }
+        }
+      } else if (lastAward) {
+        await supa.from("cc_creators").update({ last_point_awarded_at: null }).eq("id", c.id);
+      }
+
+      results.push({ user: c.twitch_username, tiktok_live: tiktokLive, in_game: !!ingameFresh, counted: live, total_seconds: totalSeconds, points });
     }
     return new Response(JSON.stringify({ ok: true, results }), { headers: { ...cors, "Content-Type": "application/json" } });
   } catch (e: any) {
