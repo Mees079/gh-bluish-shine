@@ -363,7 +363,7 @@ const ContentCreatorDashboard = () => {
                 <div className="h-2.5 bg-slate-800 rounded-full overflow-hidden">
                   <div className="h-full bg-gradient-to-r from-purple-500 via-fuchsia-500 to-pink-400 transition-all" style={{ width: `${Math.min(100, ((myCreator.points || 0) / nextReward.points_required) * 100)}%` }} />
                 </div>
-                <p className="text-xs text-slate-500 mt-2">Je verdient <b>1 punt per 15 min</b> dat je TikTok LIVE bent én in-game zit.</p>
+                <p className="text-xs text-slate-500 mt-2">Je verdient <b>x{myEffective.mult} punt per {myEffective.interval} min</b> dat je TikTok LIVE bent én in-game zit.</p>
               </div>
             )}
 
