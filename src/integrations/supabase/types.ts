@@ -51,8 +51,11 @@ export type Database = {
           id: string
           is_active: boolean
           is_currently_live: boolean
+          is_in_game: boolean
           last_checked_at: string | null
+          last_ingame_ping_at: string | null
           login_username: string | null
+          roblox_username: string | null
           total_seconds: number
           twitch_user_id: string | null
           twitch_username: string
@@ -65,8 +68,11 @@ export type Database = {
           id?: string
           is_active?: boolean
           is_currently_live?: boolean
+          is_in_game?: boolean
           last_checked_at?: string | null
+          last_ingame_ping_at?: string | null
           login_username?: string | null
+          roblox_username?: string | null
           total_seconds?: number
           twitch_user_id?: string | null
           twitch_username: string
@@ -79,8 +85,11 @@ export type Database = {
           id?: string
           is_active?: boolean
           is_currently_live?: boolean
+          is_in_game?: boolean
           last_checked_at?: string | null
+          last_ingame_ping_at?: string | null
           login_username?: string | null
+          roblox_username?: string | null
           total_seconds?: number
           twitch_user_id?: string | null
           twitch_username?: string
