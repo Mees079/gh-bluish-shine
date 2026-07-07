@@ -124,6 +124,17 @@ const OnderwereldDashboard = () => {
 
   return (
     <div className="min-h-screen bg-black text-white relative">
+      {/* Ambient background */}
+      <div
+        className="fixed inset-0 opacity-[0.05] pointer-events-none"
+        style={{
+          backgroundImage:
+            "linear-gradient(45deg, #ffffff 1px, transparent 1px), linear-gradient(-45deg, #ffffff 1px, transparent 1px)",
+          backgroundSize: "48px 48px",
+        }}
+      />
+      <div className="fixed inset-0 bg-[radial-gradient(ellipse_at_top,_rgba(255,255,255,0.05)_0%,_transparent_60%)] pointer-events-none" />
+      <div className="fixed inset-0 bg-[radial-gradient(ellipse_at_bottom,_rgba(255,255,255,0.03)_0%,_transparent_60%)] pointer-events-none" />
       {/* Floating open button */}
       <button
         onClick={() => setSidebarOpen(true)}
@@ -201,7 +212,7 @@ const OnderwereldDashboard = () => {
       </aside>
 
       {/* Main */}
-      <main className="min-h-screen">
+      <main className="min-h-screen relative z-10">
         <div className="max-w-6xl mx-auto p-8 pr-20">
           {nav === "overview" && <OverviewPanel me={me} role={role} onNav={setNav} onGang={openGangDetail} />}
           {nav === "gangs" && <GangsPanel isHoofd={isHoofd} onOpen={openGangDetail} />}
@@ -296,12 +307,25 @@ function OverviewPanel({ me, role, onNav, onGang }: any) {
   const roleLabel = role === "onderwereld_hoofd" ? "Hoofd Onderwereld Coordinator" : role === "onderwereld_coordinator" ? "Onderwereld Coordinator" : "Proef Onderwereld Coordinator";
 
   return (
-    <div>
-      <div className="mb-12 pt-4">
-        <p className="text-zinc-500 text-sm uppercase tracking-[0.3em] mb-3">{roleLabel}</p>
-        <h1 className="text-6xl md:text-7xl font-black text-white tracking-tight leading-none">Welkom <span className="text-zinc-400">{me.display_name}</span></h1>
-        <p className="text-zinc-400 mt-6 text-lg max-w-2xl">Hieronder zie je een overzicht van de gang-activiteit binnen HDRP. Scroll naar beneden voor de punten van deze week, top gangs en recente meldingen.</p>
-      </div>
+    <div className="-m-8 -mr-20">
+      {/* Full-height hero */}
+      <section className="min-h-screen flex flex-col justify-center px-8 pr-20 relative">
+        <p className="text-zinc-500 text-sm uppercase tracking-[0.4em] mb-6">{roleLabel}</p>
+        <h1 className="text-[clamp(4rem,14vw,12rem)] font-black text-white tracking-tighter leading-[0.85]">
+          Welkom
+        </h1>
+        <h2 className="text-[clamp(3rem,10vw,9rem)] font-black text-zinc-500 tracking-tighter leading-[0.85] mt-2">
+          {me.display_name}.
+        </h2>
+        <p className="text-zinc-400 mt-10 text-lg md:text-xl max-w-2xl">
+          Overzicht van gang-activiteit binnen HDRP. Scroll naar beneden voor de statistieken, top gangs en recente meldingen.
+        </p>
+        <div className="absolute bottom-10 left-8 text-zinc-600 text-xs uppercase tracking-widest animate-pulse">
+          ↓ Scroll voor overzicht
+        </div>
+      </section>
+
+      <div className="px-8 pr-20 pb-16 space-y-8">
 
       {stats.activeBoost && (
         <Card className="p-4 mb-6 border-zinc-700 bg-gradient-to-r from-zinc-900/60 to-zinc-900/40">
@@ -363,6 +387,7 @@ function OverviewPanel({ me, role, onNav, onGang }: any) {
           </div>
           <button onClick={() => onNav("inbox")} className={`${btnGhost} w-full mt-4`}>Volledige inbox</button>
         </Card>
+      </div>
       </div>
     </div>
   );
