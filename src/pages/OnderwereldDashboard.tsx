@@ -340,10 +340,10 @@ function OverviewPanel({ me, role, onNav, onGang }: any) {
   return (
     <div className="-m-6 lg:-m-10 -mr-16 lg:-mr-20">
       {/* Compact hero */}
-      <section className="px-6 lg:px-10 pr-16 lg:pr-20 pt-10 pb-8 relative border-b border-slate-700/60">
-        <p className="text-slate-400 text-xs uppercase tracking-[0.4em] mb-4">{roleLabel}</p>
+      <section className="px-6 lg:px-10 pr-16 lg:pr-20 pt-10 pb-8 relative border-b border-slate-700/60 bg-gradient-to-br from-blue-950/40 via-violet-950/30 to-transparent">
+        <p className="text-transparent bg-clip-text bg-gradient-to-r from-blue-300 via-violet-300 to-pink-300 text-xs uppercase tracking-[0.4em] mb-4 font-bold">{roleLabel}</p>
         <h1 className="text-[clamp(2.5rem,7vw,6rem)] font-black text-white tracking-tighter leading-[0.9]">
-          Welkom <span className="text-slate-400">{me.display_name}.</span>
+          Welkom <span className="bg-gradient-to-r from-blue-400 via-violet-400 to-pink-400 bg-clip-text text-transparent">{me.display_name}.</span>
         </h1>
         <p className="text-slate-300 mt-4 text-base md:text-lg max-w-3xl">
           Overzicht van gang-activiteit binnen HDRP. Beheer punten, boosts en waarschuwingen vanuit één centrale plek.
@@ -353,12 +353,14 @@ function OverviewPanel({ me, role, onNav, onGang }: any) {
       <div className="px-6 lg:px-10 pr-16 lg:pr-20 py-8 space-y-8">
 
       {stats.activeBoost && (
-        <Card className="p-4 border-blue-500/50 bg-gradient-to-r from-blue-950/50 to-slate-800/40">
+        <Card className="p-4 border-amber-500/50 bg-gradient-to-r from-amber-950/60 via-orange-950/40 to-red-950/40 shadow-lg shadow-amber-900/20">
           <div className="flex items-center gap-3">
-            <Zap className="h-6 w-6 text-blue-300" />
+            <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center shadow-lg shadow-amber-900/50">
+              <Zap className="h-5 w-5 text-white" />
+            </div>
             <div className="flex-1">
               <div className="text-white font-bold">Actieve boost: x{stats.activeBoost.multiplier}</div>
-              <div className="text-xs text-slate-300">Loopt tot {nlDate(stats.activeBoost.ends_at)}</div>
+              <div className="text-xs text-amber-200/80">Loopt tot {nlDate(stats.activeBoost.ends_at)}</div>
             </div>
           </div>
         </Card>
@@ -366,13 +368,15 @@ function OverviewPanel({ me, role, onNav, onGang }: any) {
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {[
-          { label: "Gangs", value: stats.gangs, icon: Users, tint: "text-blue-300" },
-          { label: "Punten deze week", value: stats.weekPoints, icon: ScrollText, tint: "text-white" },
-          { label: "Actieve warns", value: stats.activeWarns, icon: AlertTriangle, tint: "text-orange-400" },
-          { label: "Spoedmeldingen", value: stats.urgent, icon: ShieldAlert, tint: "text-red-500" },
+          { label: "Gangs", value: stats.gangs, icon: Users, grad: "from-blue-500 to-cyan-500", ring: "shadow-blue-900/40 border-blue-500/30" },
+          { label: "Punten deze week", value: stats.weekPoints, icon: ScrollText, grad: "from-emerald-500 to-teal-500", ring: "shadow-emerald-900/40 border-emerald-500/30" },
+          { label: "Actieve warns", value: stats.activeWarns, icon: AlertTriangle, grad: "from-orange-500 to-amber-500", ring: "shadow-orange-900/40 border-orange-500/30" },
+          { label: "Spoedmeldingen", value: stats.urgent, icon: ShieldAlert, grad: "from-red-500 to-pink-500", ring: "shadow-red-900/40 border-red-500/30" },
         ].map((s, i) => (
-          <Card key={i} className="p-5">
-            <s.icon className={`h-5 w-5 ${s.tint} mb-3`} />
+          <Card key={i} className={`p-5 shadow-lg ${s.ring}`}>
+            <div className={`w-10 h-10 rounded-lg bg-gradient-to-br ${s.grad} flex items-center justify-center mb-3 shadow-md`}>
+              <s.icon className="h-5 w-5 text-white" />
+            </div>
             <div className="text-3xl font-bold text-white">{s.value}</div>
             <div className="text-xs text-slate-400 uppercase tracking-wider mt-1">{s.label}</div>
           </Card>
@@ -384,15 +388,15 @@ function OverviewPanel({ me, role, onNav, onGang }: any) {
         <h3 className="text-slate-400 text-xs uppercase tracking-widest mb-3">Snelle acties</h3>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
           {[
-            { k: "points-new", icon: Plus, label: "Punten invoeren" },
-            { k: "gangs", icon: Users, label: "Alle gangs" },
-            { k: "warnings", icon: AlertTriangle, label: "Waarschuwingen" },
-            { k: "inbox", icon: Inbox, label: "Inbox & chat" },
+            { k: "points-new", icon: Plus, label: "Punten invoeren", grad: "from-emerald-500 to-teal-600", hover: "hover:border-emerald-400" },
+            { k: "gangs", icon: Users, label: "Alle gangs", grad: "from-violet-500 to-purple-600", hover: "hover:border-violet-400" },
+            { k: "warnings", icon: AlertTriangle, label: "Waarschuwingen", grad: "from-orange-500 to-red-500", hover: "hover:border-orange-400" },
+            { k: "inbox", icon: Inbox, label: "Inbox & chat", grad: "from-pink-500 to-rose-500", hover: "hover:border-pink-400" },
           ].map((a) => (
             <button key={a.k} onClick={() => onNav(a.k)} className="group">
-              <Card className="p-4 hover:border-blue-400 transition flex items-center gap-3">
-                <div className="w-10 h-10 rounded-lg bg-slate-700 border border-slate-600 flex items-center justify-center group-hover:bg-blue-500/20 group-hover:border-blue-400/60 transition">
-                  <a.icon className="h-5 w-5 text-slate-200 group-hover:text-blue-200" />
+              <Card className={`p-4 ${a.hover} transition flex items-center gap-3`}>
+                <div className={`w-11 h-11 rounded-lg bg-gradient-to-br ${a.grad} flex items-center justify-center shadow-md group-hover:scale-110 transition`}>
+                  <a.icon className="h-5 w-5 text-white" />
                 </div>
                 <span className="text-sm text-white font-medium">{a.label}</span>
               </Card>
@@ -400,6 +404,7 @@ function OverviewPanel({ me, role, onNav, onGang }: any) {
           ))}
         </div>
       </div>
+
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card className="p-5">
