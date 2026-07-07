@@ -440,6 +440,61 @@ const ContentCreatorDashboard = () => {
               )}
             </div>
 
+            {/* Mijn boost inventaris */}
+            {myCreator && (
+              <div className="bg-gradient-to-br from-[#1a0f2e]/90 to-[#150822]/90 border border-fuchsia-500/25 rounded-2xl p-6">
+                <div className="flex items-center justify-between mb-1">
+                  <h2 className="text-lg font-semibold flex items-center gap-2"><Rocket className="h-5 w-5 text-fuchsia-400" /> Mijn boosts</h2>
+                  <span className="text-xs bg-fuchsia-500/10 border border-fuchsia-500/30 text-fuchsia-300 px-2 py-1 rounded-full">
+                    {inventory.filter(i => i.creator_id === myCreator.id && !i.activated_at).length} klaar om te activeren
+                  </span>
+                </div>
+                <p className="text-xs text-slate-400 mb-4">Gekochte boosts wachten hier tot jij ze activeert. Timer start pas bij activatie.</p>
+                {(() => {
+                  const mine = inventory.filter(i => i.creator_id === myCreator.id);
+                  const ready = mine.filter(i => !i.activated_at);
+                  const used = mine.filter(i => i.activated_at).slice(0, 6);
+                  if (mine.length === 0) return <p className="text-slate-500 text-sm italic">Nog geen boosts gekocht. Ga naar de shop hierboven!</p>;
+                  return (
+                    <div className="space-y-4">
+                      {ready.length > 0 && (
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                          {ready.map(i => (
+                            <div key={i.id} className="bg-black/30 border border-fuchsia-500/30 rounded-xl p-4 flex flex-col gap-2 hover:border-fuchsia-400/60 transition">
+                              <div className="flex items-start justify-between gap-2">
+                                <div className="min-w-0">
+                                  <div className="text-xl font-black text-fuchsia-300 flex items-center gap-1"><Rocket className="h-4 w-4" /> x{i.multiplier}</div>
+                                  <div className="text-sm font-semibold text-white truncate">{i.label}</div>
+                                  <div className="text-xs text-slate-400">{i.duration_minutes} min duur</div>
+                                </div>
+                                <span className="text-[10px] text-slate-500 shrink-0">Gekocht {timeAgo(i.purchased_at)} geleden</span>
+                              </div>
+                              <button onClick={() => activateInventory(i)} className="mt-1 text-xs bg-gradient-to-r from-fuchsia-500 to-purple-500 hover:brightness-110 text-white font-bold px-3 py-2 rounded-lg flex items-center justify-center gap-1 shadow-[0_0_20px_rgba(217,70,239,0.35)]">
+                                <Zap className="h-3 w-3" /> Activeer nu
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                      {used.length > 0 && (
+                        <div>
+                          <div className="text-xs text-slate-400 uppercase tracking-wider mb-2">Recent geactiveerd</div>
+                          <div className="space-y-1">
+                            {used.map(i => (
+                              <div key={i.id} className="flex items-center justify-between text-xs bg-black/20 border border-slate-800 rounded-lg px-3 py-2">
+                                <span className="text-slate-300">x{i.multiplier} · {i.label}</span>
+                                <span className="text-slate-500">{timeAgo(i.activated_at)} geleden</span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })()}
+              </div>
+            )}
+
             {/* Product items */}
             <div className="bg-[#150822]/80 border border-purple-500/20 rounded-2xl p-6">
               <div className="flex items-center justify-between mb-1">
