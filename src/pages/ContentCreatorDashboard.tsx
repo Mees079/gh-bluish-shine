@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import {
   Video, LogOut, Plus, Trophy, RefreshCw, Trash2, Radio, Clock, Gift, Ticket,
   Users, Flame, TrendingUp, Crown, ExternalLink, Copy, Sparkles, Calendar, Award,
-  Coins, CheckCircle2, KeyRound,
+  Coins, CheckCircle2, KeyRound, Zap, Timer, ShoppingBag, Rocket,
 } from "lucide-react";
 import { toast } from "sonner";
 
