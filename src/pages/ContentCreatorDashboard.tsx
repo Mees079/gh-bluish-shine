@@ -450,29 +450,66 @@ const ContentCreatorDashboard = () => {
           </div>
 
           <div className="bg-[#150822]/80 border border-purple-500/20 rounded-2xl p-6">
-            <h2 className="text-lg font-semibold mb-4 flex items-center gap-2"><Ticket className="h-5 w-5 text-yellow-400" /> Recente claims</h2>
+            <h2 className="text-lg font-semibold mb-4 flex items-center gap-2"><Ticket className="h-5 w-5 text-yellow-400" /> Recente aankopen</h2>
             <div className="space-y-2 max-h-80 overflow-y-auto">
-              {claims.slice(0, 15).map(cl => {
+              {claims.slice(0, 20).map(cl => {
                 const creator = creators.find(c => c.id === cl.creator_id);
                 const reward = rewards.find(r => r.id === cl.reward_id);
+                const mine = creator?.user_id === me?.id;
+                const showCode = isHead || mine;
                 return (
-                  <div key={cl.id} className="flex items-center justify-between bg-[#1a0f2e]/60 rounded-lg px-3 py-2 text-sm">
-                    <div className="min-w-0">
-                      <div className="truncate">
-                        <span className="font-mono text-purple-300">@{creator?.twitch_username || "?"}</span>
-                        <span className="text-slate-500"> claimde </span>
-                        <span className="text-white font-medium">{reward?.title || "?"}</span>
+                  <div key={cl.id} className="bg-[#1a0f2e]/60 rounded-lg px-3 py-2 text-sm">
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="min-w-0">
+                        <div className="truncate">
+                          <span className="font-mono text-purple-300">@{creator?.twitch_username || "?"}</span>
+                          <span className="text-slate-500"> kocht </span>
+                          <span className="text-white font-medium">{reward?.title || "?"}</span>
+                          <span className="text-yellow-400 text-xs"> · {cl.points_spent}pt</span>
+                        </div>
+                        <div className="text-xs text-slate-500">{new Date(cl.claimed_at).toLocaleString("nl-NL")}</div>
                       </div>
-                      <div className="text-xs text-slate-500">{new Date(cl.claimed_at).toLocaleString("nl-NL")}</div>
+                      <span className={`text-[10px] px-2 py-0.5 rounded-full uppercase border ${cl.redeemed_at ? "bg-emerald-500/15 text-emerald-300 border-emerald-500/30" : "bg-yellow-500/15 text-yellow-300 border-yellow-500/30"}`}>
+                        {cl.redeemed_at ? "ingewisseld" : "open"}
+                      </span>
                     </div>
-                    <span className="text-[10px] bg-yellow-500/15 text-yellow-300 border border-yellow-500/30 px-2 py-0.5 rounded-full uppercase">{cl.status || "open"}</span>
+                    {showCode && cl.code && (
+                      <div className="mt-1.5 flex items-center gap-2">
+                        <code className="font-mono text-xs text-emerald-200 bg-black/40 px-2 py-0.5 rounded tracking-wider">{cl.code}</code>
+                        <button onClick={() => { navigator.clipboard.writeText(cl.code!); toast.success("Gekopieerd"); }} className="text-slate-500 hover:text-white"><Copy className="h-3 w-3" /></button>
+                      </div>
+                    )}
                   </div>
                 );
               })}
-              {claims.length === 0 && <p className="text-slate-500 text-sm">Nog geen claims.</p>}
+              {claims.length === 0 && <p className="text-slate-500 text-sm">Nog geen aankopen.</p>}
             </div>
           </div>
         </section>
+
+        {/* Head CC: code inwisselen */}
+        {isHead && (
+          <section className="bg-gradient-to-br from-[#180a2d] to-[#150822] border border-emerald-500/25 rounded-2xl p-6">
+            <h2 className="text-lg font-semibold mb-1 flex items-center gap-2"><KeyRound className="h-5 w-5 text-emerald-400" /> Code inwisselen (Head CC)</h2>
+            <p className="text-xs text-slate-400 mb-4">Vul de code in die een creator via Discord ticket doorgaf. Na inwisselen zie je welk product je moet uitreiken.</p>
+            <form onSubmit={doRedeem} className="flex gap-2">
+              <input value={redeemCode} onChange={e => setRedeemCode(e.target.value.toUpperCase())} placeholder="CC-XXXX-XXXX" required className="flex-1 bg-[#1a0f2e] border border-slate-700 rounded-lg px-3 py-2 text-sm font-mono tracking-widest" />
+              <button type="submit" disabled={redeeming} className="bg-emerald-600 hover:bg-emerald-500 rounded-lg text-sm px-4 flex items-center gap-1 disabled:opacity-50">
+                <CheckCircle2 className="h-4 w-4" /> Inwisselen
+              </button>
+            </form>
+            {redeemInfo && (
+              <div className="mt-4 p-4 bg-emerald-500/10 border border-emerald-500/30 rounded-lg text-sm space-y-1">
+                <div className="font-semibold text-emerald-300 flex items-center gap-2"><CheckCircle2 className="h-4 w-4" /> Geef dit uit:</div>
+                <div>Product: <b className="text-white">{redeemInfo.cc_rewards?.title}</b></div>
+                {redeemInfo.cc_rewards?.description && <div className="text-slate-400 text-xs">{redeemInfo.cc_rewards.description}</div>}
+                <div>Creator: <span className="font-mono text-purple-300">@{redeemInfo.cc_creators?.twitch_username}</span></div>
+                <div>Roblox: <span className="font-mono text-purple-300">{redeemInfo.cc_creators?.roblox_username || "-"}</span></div>
+                <div className="text-xs text-slate-400">Kosten: {redeemInfo.points_spent} pt</div>
+              </div>
+            )}
+          </section>
+        )}
 
         {/* Account aanmaken (head only) */}
         {isHead && (
