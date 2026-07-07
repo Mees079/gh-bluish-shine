@@ -171,14 +171,22 @@ const ContentCreatorDashboard = () => {
     if (!myCreator) return toast.error("Geen creator profiel gekoppeld");
     if ((myCreator.points || 0) < reward.points_required) return toast.error("Niet genoeg punten");
     const boost = reward.boost_multiplier && reward.boost_duration_minutes;
-    if (!confirm(`"${reward.title}" kopen voor ${reward.points_required} punten?${boost ? `\n\nJe krijgt een x${reward.boost_multiplier} boost voor ${reward.boost_duration_minutes} min.` : ""}`)) return;
+    if (!confirm(`"${reward.title}" kopen voor ${reward.points_required} punten?${boost ? `\n\nJe krijgt een x${reward.boost_multiplier} boost van ${reward.boost_duration_minutes} min in je inventaris — activeer zelf wanneer je wilt.` : ""}`)) return;
     const { data, error } = await supabase.functions.invoke("cc-claim-reward", { body: { reward_id: reward.id } });
     if (error || (data as any)?.error) return toast.error((data as any)?.error || "Aankoop mislukt");
-    if (boost) toast.success(`Boost x${reward.boost_multiplier} actief!`);
+    if (boost) toast.success("Boost toegevoegd aan je inventaris!");
     else {
       setLastCode({ code: (data as any).code, title: reward.title });
       toast.success("Aankoop gelukt! Kopieer je code.");
     }
+    await load();
+  };
+
+  const activateInventory = async (inv: BoostInventory) => {
+    if (!confirm(`Boost "${inv.label}" (x${inv.multiplier}, ${inv.duration_minutes} min) nu activeren?`)) return;
+    const { data, error } = await supabase.functions.invoke("cc-activate-boost", { body: { inventory_id: inv.id } });
+    if (error || (data as any)?.error) return toast.error((data as any)?.error || "Activeren mislukt");
+    toast.success(`Boost x${inv.multiplier} actief!`);
     await load();
   };
 
