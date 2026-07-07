@@ -124,6 +124,17 @@ const OnderwereldDashboard = () => {
 
   return (
     <div className="min-h-screen bg-black text-white relative">
+      {/* Ambient background */}
+      <div
+        className="fixed inset-0 opacity-[0.05] pointer-events-none"
+        style={{
+          backgroundImage:
+            "linear-gradient(45deg, #ffffff 1px, transparent 1px), linear-gradient(-45deg, #ffffff 1px, transparent 1px)",
+          backgroundSize: "48px 48px",
+        }}
+      />
+      <div className="fixed inset-0 bg-[radial-gradient(ellipse_at_top,_rgba(255,255,255,0.05)_0%,_transparent_60%)] pointer-events-none" />
+      <div className="fixed inset-0 bg-[radial-gradient(ellipse_at_bottom,_rgba(255,255,255,0.03)_0%,_transparent_60%)] pointer-events-none" />
       {/* Floating open button */}
       <button
         onClick={() => setSidebarOpen(true)}
