@@ -718,6 +718,71 @@ const ContentCreatorDashboard = () => {
             )}
           </section>
         )}
+
+        {/* Head CC: boost beheer */}
+        {isHead && (
+          <section className="bg-gradient-to-br from-[#241407] to-[#180a2d] border border-yellow-500/25 rounded-2xl p-6">
+            <h2 className="text-lg font-semibold mb-1 flex items-center gap-2"><Zap className="h-5 w-5 text-yellow-400" /> Boost event starten (Head CC)</h2>
+            <p className="text-xs text-slate-400 mb-4">Zet een tijdelijke multiplier of kortere interval voor iedereen of één creator. Loopt automatisch af.</p>
+
+            <form onSubmit={addBoost} className="grid grid-cols-2 md:grid-cols-6 gap-3">
+              <input value={bLabel} onChange={e => setBLabel(e.target.value)} placeholder="Naam (bv. Weekend boost)" className="bg-[#1a0f2e] border border-slate-700 rounded-lg px-3 py-2 text-sm col-span-2" />
+              <select value={bScope} onChange={e => setBScope(e.target.value)} className="bg-[#1a0f2e] border border-slate-700 rounded-lg px-3 py-2 text-sm col-span-2">
+                <option value="global">🌍 Iedereen</option>
+                {creators.map(c => <option key={c.id} value={c.id}>👤 @{c.twitch_username}</option>)}
+              </select>
+              <div className="col-span-1">
+                <label className="text-[10px] text-slate-500 uppercase">Multiplier</label>
+                <input type="number" min={1} step="0.5" value={bMult} onChange={e => setBMult(+e.target.value)} required className="w-full bg-[#1a0f2e] border border-yellow-500/30 rounded-lg px-3 py-2 text-sm font-bold text-yellow-300" />
+              </div>
+              <div className="col-span-1">
+                <label className="text-[10px] text-slate-500 uppercase">Interval (min)</label>
+                <input type="number" min={1} max={60} value={bInterval} onChange={e => setBInterval(e.target.value === "" ? "" : +e.target.value)} placeholder="15" className="w-full bg-[#1a0f2e] border border-slate-700 rounded-lg px-3 py-2 text-sm" />
+              </div>
+              <div className="col-span-2 md:col-span-4">
+                <label className="text-[10px] text-slate-500 uppercase">Duur (minuten totaal)</label>
+                <div className="flex gap-2">
+                  <input type="number" min={5} value={bMinutes} onChange={e => setBMinutes(+e.target.value)} required className="flex-1 bg-[#1a0f2e] border border-slate-700 rounded-lg px-3 py-2 text-sm" />
+                  {[30, 60, 120, 240, 1440].map(m => (
+                    <button type="button" key={m} onClick={() => setBMinutes(m)} className="text-xs bg-slate-800/60 hover:bg-slate-700 border border-slate-700 px-2 rounded-lg">
+                      {m >= 60 ? `${m/60}u` : `${m}m`}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <button type="submit" className="col-span-2 md:col-span-2 bg-gradient-to-r from-yellow-500 to-orange-500 hover:brightness-110 text-black font-bold rounded-lg text-sm flex items-center justify-center gap-1 shadow-[0_0_20px_rgba(250,204,21,0.4)]">
+                <Rocket className="h-4 w-4" /> Start boost
+              </button>
+            </form>
+
+            {boosts.length > 0 && (
+              <div className="mt-6 border-t border-yellow-500/20 pt-4">
+                <div className="text-xs text-slate-400 uppercase tracking-wider mb-2">Recente boosts</div>
+                <div className="space-y-1.5 max-h-60 overflow-y-auto">
+                  {boosts.slice(0, 15).map(b => {
+                    const scoped = b.creator_id ? creators.find(c => c.id === b.creator_id)?.twitch_username : null;
+                    const active = new Date(b.ends_at).getTime() > Date.now() && new Date(b.starts_at).getTime() <= Date.now();
+                    return (
+                      <div key={b.id} className={`flex items-center justify-between gap-3 rounded-lg px-3 py-2 text-sm ${active ? "bg-yellow-500/10 border border-yellow-500/30" : "bg-[#1a0f2e]/50"}`}>
+                        <div className="flex items-center gap-2 min-w-0">
+                          <span className={`text-xs font-bold ${active ? "text-yellow-300" : "text-slate-500"}`}>x{b.multiplier}</span>
+                          {b.interval_seconds && <span className="text-xs text-slate-400">/{Math.round(b.interval_seconds/60)}m</span>}
+                          <span className="text-slate-300 truncate">{b.label || "boost"}</span>
+                          <span className="text-xs text-slate-500">· {scoped ? `@${scoped}` : "iedereen"}</span>
+                          <span className="text-xs text-slate-500">· {b.source}</span>
+                        </div>
+                        <div className="flex items-center gap-2 text-xs text-slate-500 shrink-0">
+                          <span>tot {new Date(b.ends_at).toLocaleString("nl-NL")}</span>
+                          {active && <button onClick={() => stopBoost(b.id)} className="text-red-400/70 hover:text-red-300"><Trash2 className="h-3.5 w-3.5" /></button>}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+          </section>
+        )}
       </main>
     </div>
   );
