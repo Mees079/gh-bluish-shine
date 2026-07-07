@@ -140,16 +140,24 @@ const ContentCreatorDashboard = () => {
   const [rp, setRp] = useState(4);
   const [rt, setRt] = useState("");
   const [rd, setRd] = useState("");
+  const [rIsBoost, setRIsBoost] = useState(false);
+  const [rBoostMult, setRBoostMult] = useState(2);
+  const [rBoostDur, setRBoostDur] = useState(60);
   const addReward = async (e: React.FormEvent) => {
     e.preventDefault();
-    const { error } = await supabase.from("cc_rewards").insert({ points_required: rp, hours_required: 0, title: rt, description: rd, sort_order: rp });
+    const payload: any = { points_required: rp, hours_required: 0, title: rt, description: rd, sort_order: rp };
+    if (rIsBoost) {
+      payload.boost_multiplier = rBoostMult;
+      payload.boost_duration_minutes = rBoostDur;
+    }
+    const { error } = await supabase.from("cc_rewards").insert(payload);
     if (error) return toast.error(error.message);
-    setRp(4); setRt(""); setRd("");
+    setRp(4); setRt(""); setRd(""); setRIsBoost(false); setRBoostMult(2); setRBoostDur(60);
     await load();
-    toast.success("Beloning toegevoegd");
+    toast.success("Shop-item toegevoegd");
   };
   const removeReward = async (id: string) => {
-    if (!confirm("Beloning verwijderen?")) return;
+    if (!confirm("Item verwijderen?")) return;
     await supabase.from("cc_rewards").delete().eq("id", id);
     await load();
   };
@@ -158,11 +166,45 @@ const ContentCreatorDashboard = () => {
   const claimReward = async (reward: Reward) => {
     if (!myCreator) return toast.error("Geen creator profiel gekoppeld");
     if ((myCreator.points || 0) < reward.points_required) return toast.error("Niet genoeg punten");
-    if (!confirm(`Beloning "${reward.title}" kopen voor ${reward.points_required} punten?`)) return;
+    const boost = reward.boost_multiplier && reward.boost_duration_minutes;
+    if (!confirm(`"${reward.title}" kopen voor ${reward.points_required} punten?${boost ? `\n\nJe krijgt een x${reward.boost_multiplier} boost voor ${reward.boost_duration_minutes} min.` : ""}`)) return;
     const { data, error } = await supabase.functions.invoke("cc-claim-reward", { body: { reward_id: reward.id } });
     if (error || (data as any)?.error) return toast.error((data as any)?.error || "Aankoop mislukt");
-    setLastCode({ code: (data as any).code, title: reward.title });
-    toast.success("Aankoop gelukt! Kopieer je code.");
+    if (boost) toast.success(`Boost x${reward.boost_multiplier} actief!`);
+    else {
+      setLastCode({ code: (data as any).code, title: reward.title });
+      toast.success("Aankoop gelukt! Kopieer je code.");
+    }
+    await load();
+  };
+
+  // Boost management (head CC only)
+  const [bLabel, setBLabel] = useState("");
+  const [bMult, setBMult] = useState(2);
+  const [bInterval, setBInterval] = useState<number | "">(15);
+  const [bMinutes, setBMinutes] = useState(60);
+  const [bScope, setBScope] = useState<"global" | string>("global");
+  const addBoost = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const ends = new Date(Date.now() + bMinutes * 60 * 1000).toISOString();
+    const payload: any = {
+      label: bLabel || `x${bMult} boost`,
+      multiplier: bMult,
+      interval_seconds: bInterval === "" ? null : Number(bInterval) * 60,
+      ends_at: ends,
+      source: "admin",
+      created_by: me?.id,
+    };
+    if (bScope !== "global") payload.creator_id = bScope;
+    const { error } = await supabase.from("cc_boosts").insert(payload);
+    if (error) return toast.error(error.message);
+    setBLabel(""); setBMult(2); setBInterval(15); setBMinutes(60); setBScope("global");
+    await load();
+    toast.success("Boost gestart");
+  };
+  const stopBoost = async (id: string) => {
+    if (!confirm("Boost nu stoppen?")) return;
+    await supabase.from("cc_boosts").update({ ends_at: new Date().toISOString() }).eq("id", id);
     await load();
   };
 
