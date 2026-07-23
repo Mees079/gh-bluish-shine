@@ -14,16 +14,28 @@ export const AdminLogin = ({ onSuccess }: AdminLoginProps) => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [attempts, setAttempts] = useState(0);
+  const [lockedUntil, setLockedUntil] = useState<number | null>(null);
   const { toast } = useToast();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (lockedUntil && Date.now() < lockedUntil) {
+      const secs = Math.ceil((lockedUntil - Date.now()) / 1000);
+      toast({
+        variant: "destructive",
+        title: "Te veel pogingen",
+        description: `Probeer opnieuw over ${secs}s`,
+      });
+      return;
+    }
+
     setLoading(true);
 
     try {
-      // Login met email format (username@hdrp.local)
       const email = `${username}@hdrp.local`;
-      
+
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
@@ -32,7 +44,6 @@ export const AdminLogin = ({ onSuccess }: AdminLoginProps) => {
       if (error) throw error;
 
       if (data.user) {
-        // Check admin status using backend function (supports admin & super_admin)
         const { data: isAdmin, error: roleCheckError } = await supabase.rpc('is_admin', { _user_id: data.user.id });
 
         if (roleCheckError || !isAdmin) {
@@ -40,6 +51,8 @@ export const AdminLogin = ({ onSuccess }: AdminLoginProps) => {
           throw new Error("Geen admin toegang");
         }
 
+        setAttempts(0);
+        setLockedUntil(null);
         toast({
           title: "Ingelogd!",
           description: `Welkom, ${username}`,
@@ -47,15 +60,22 @@ export const AdminLogin = ({ onSuccess }: AdminLoginProps) => {
         onSuccess();
       }
     } catch (error: any) {
+      console.error('admin login failed', error);
+      const next = attempts + 1;
+      setAttempts(next);
+      if (next >= 5) {
+        setLockedUntil(Date.now() + 5 * 60 * 1000);
+      }
       toast({
         variant: "destructive",
-        title: "Fout",
-        description: error.message || "Login mislukt",
+        title: "Login mislukt",
+        description: "Ongeldige gebruikersnaam of wachtwoord.",
       });
     } finally {
       setLoading(false);
     }
   };
+
 
   return (
     <div className="p-8">
