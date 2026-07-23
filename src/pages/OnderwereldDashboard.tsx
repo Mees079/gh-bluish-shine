@@ -742,12 +742,26 @@ function PointsNewPanel({ me, uid }: any) {
     e.preventDefault();
     setMsg(null); setBusy(true);
     try {
-      const { error } = await supabase.from("ow_point_entries").insert({
-        gang_id: gangId, scenario_key: scenario, scenario_time: new Date(when).toISOString(),
+      const scenarioIso = new Date(when).toISOString();
+      const { data: inserted, error } = await supabase.from("ow_point_entries").insert({
+        gang_id: gangId, scenario_key: scenario, scenario_time: scenarioIso,
         clip_url: clip.trim(), base_points: base, effective_points: base, boost_multiplier: 1,
         entered_by: uid, entered_by_name: me.display_name,
-      });
+      }).select().single();
       if (error) throw error;
+      // Fire Discord webhook (non-blocking failure)
+      supabase.functions.invoke("ow-notify-points", {
+        body: {
+          gang_id: gangId,
+          scenario_key: scenario,
+          scenario_time: scenarioIso,
+          clip_url: clip.trim(),
+          base_points: (inserted as any)?.base_points ?? base,
+          effective_points: (inserted as any)?.effective_points ?? base,
+          boost_multiplier: (inserted as any)?.boost_multiplier ?? 1,
+          entered_by_name: me.display_name,
+        },
+      }).catch(() => {});
       setMsg({ ok: "Punten toegevoegd!" });
       setScenario(""); setClip("");
     } catch (e: any) { setMsg({ err: e.message }); } finally { setBusy(false); }
