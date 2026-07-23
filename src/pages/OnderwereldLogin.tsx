@@ -37,10 +37,10 @@ const OnderwereldLogin = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-900 to-indigo-950 flex items-center justify-center p-4 relative overflow-hidden">
-      <div className="absolute -top-40 -left-40 w-[500px] h-[500px] rounded-full bg-blue-600/25 blur-[120px]" />
-      <div className="absolute -bottom-40 -right-40 w-[500px] h-[500px] rounded-full bg-violet-600/25 blur-[120px]" />
-      <div className="absolute top-1/3 right-1/4 w-[400px] h-[400px] rounded-full bg-pink-600/15 blur-[120px]" />
+    <div className="min-h-screen bg-gradient-to-br from-[#050a14] via-[#0a0e1a] to-[#050a14] flex items-center justify-center p-4 relative overflow-hidden">
+      <div className="absolute -top-40 -left-40 w-[500px] h-[500px] rounded-full bg-[#00ff88]/20 blur-[120px]" />
+      <div className="absolute -bottom-40 -right-40 w-[500px] h-[500px] rounded-full bg-[#00ff88]/12 blur-[120px]" />
+      <div className="absolute top-1/3 right-1/4 w-[400px] h-[400px] rounded-full bg-[#00ff88]/8 blur-[120px]" />
       {/* Subtle diagonal grid background */}
       <div
         className="absolute inset-0 opacity-[0.06]"
@@ -56,7 +56,7 @@ const OnderwereldLogin = () => {
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_rgba(255,255,255,0.06)_0%,_transparent_60%)]" />
 
       <div className="relative w-full max-w-md">
-        <div className="bg-slate-800/90 backdrop-blur-xl border border-slate-600 rounded-2xl p-8 shadow-[0_0_80px_rgba(255,255,255,0.05)]">
+        <div className="bg-[#0a0e1a]/90 backdrop-blur-xl border border-slate-600 rounded-2xl p-8 shadow-[0_0_80px_rgba(255,255,255,0.05)]">
           <div className="text-center mb-8">
             <div className="mx-auto w-16 h-16 bg-slate-800 rounded-2xl flex items-center justify-center mb-4 border border-slate-500">
               <Skull className="h-8 w-8 text-white" />
@@ -80,7 +80,7 @@ const OnderwereldLogin = () => {
                   onChange={(e) => setUsername(e.target.value)}
                   placeholder="hdrp"
                   required
-                  className="w-full bg-slate-900/60 border border-slate-600 rounded-lg pl-10 pr-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-blue-400 focus:ring-1 focus:ring-blue-400"
+                  className="w-full bg-[#050a14]/60 border border-slate-600 rounded-lg pl-10 pr-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-[#00ff88] focus:ring-1 focus:ring-[#00ff88]"
                 />
               </div>
             </div>
@@ -94,14 +94,14 @@ const OnderwereldLogin = () => {
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••"
                   required
-                  className="w-full bg-slate-900/60 border border-slate-600 rounded-lg pl-10 pr-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-blue-400 focus:ring-1 focus:ring-blue-400"
+                  className="w-full bg-[#050a14]/60 border border-slate-600 rounded-lg pl-10 pr-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-[#00ff88] focus:ring-1 focus:ring-[#00ff88]"
                 />
               </div>
             </div>
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-blue-500 hover:bg-blue-400 text-white font-bold py-3 rounded-lg transition-all disabled:opacity-50 uppercase tracking-wider text-sm"
+              className="w-full bg-[#00ff88] hover:bg-[#00dd77] text-[#0a0e1a] font-bold py-3 rounded-lg transition-all disabled:opacity-50 uppercase tracking-wider text-sm"
             >
               {loading ? "Inloggen..." : "Toegang"}
             </button>
