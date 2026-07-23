@@ -134,12 +134,12 @@ const OnderwereldDashboard = () => {
   );
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-900 to-indigo-950 text-white relative overflow-x-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-[#050a14] via-[#0a0e1a] to-[#050a14] text-white relative overflow-x-hidden">
       {/* Colored ambient blobs */}
-      <div className="fixed -top-40 -left-40 w-[500px] h-[500px] rounded-full bg-blue-600/20 blur-[120px] pointer-events-none" />
-      <div className="fixed top-1/3 -right-40 w-[500px] h-[500px] rounded-full bg-violet-600/20 blur-[120px] pointer-events-none" />
-      <div className="fixed -bottom-40 left-1/3 w-[500px] h-[500px] rounded-full bg-pink-600/15 blur-[120px] pointer-events-none" />
-      <div className="fixed bottom-1/4 -left-20 w-[400px] h-[400px] rounded-full bg-emerald-600/10 blur-[120px] pointer-events-none" />
+      <div className="fixed -top-40 -left-40 w-[500px] h-[500px] rounded-full bg-[#00ff88]/15 blur-[120px] pointer-events-none" />
+      <div className="fixed top-1/3 -right-40 w-[500px] h-[500px] rounded-full bg-[#00ff88]/10 blur-[120px] pointer-events-none" />
+      <div className="fixed -bottom-40 left-1/3 w-[500px] h-[500px] rounded-full bg-[#00ff88]/8 blur-[120px] pointer-events-none" />
+      <div className="fixed bottom-1/4 -left-20 w-[400px] h-[400px] rounded-full bg-[#00ff88]/8 blur-[120px] pointer-events-none" />
       {/* Grid overlay */}
       <div
         className="fixed inset-0 opacity-[0.04] pointer-events-none"
@@ -152,7 +152,7 @@ const OnderwereldDashboard = () => {
       {/* Floating open button */}
       <button
         onClick={() => setSidebarOpen(true)}
-        className={`fixed top-4 right-4 z-40 p-2.5 rounded-lg bg-gradient-to-br from-blue-600 to-violet-600 hover:from-blue-500 hover:to-violet-500 shadow-lg shadow-blue-900/50 text-white transition-all ${sidebarOpen ? "opacity-0 pointer-events-none" : "opacity-100"}`}
+        className={`fixed top-4 right-4 z-40 p-2.5 rounded-lg bg-gradient-to-br from-[#00ff88] to-[#00dd77] hover:from-[#00dd77] hover:to-[#00bb66] shadow-lg shadow-[#00ff88]/30 text-white transition-all ${sidebarOpen ? "opacity-0 pointer-events-none" : "opacity-100"}`}
         aria-label="Open menu"
       >
         <Menu className="h-5 w-5" />
@@ -160,19 +160,19 @@ const OnderwereldDashboard = () => {
 
       {/* Backdrop */}
       {sidebarOpen && (
-        <div onClick={closeNav} className="fixed inset-0 bg-slate-900/60 z-40 backdrop-blur-sm" />
+        <div onClick={closeNav} className="fixed inset-0 bg-[#050a14]/60 z-40 backdrop-blur-sm" />
       )}
 
       {/* Sidebar (right, collapsible) */}
-      <aside className={`fixed top-0 right-0 h-full w-72 bg-slate-800/95 backdrop-blur-xl border-l border-slate-600 flex flex-col z-50 transition-transform duration-300 ${sidebarOpen ? "translate-x-0" : "translate-x-full"}`}>
-        <div className="p-5 border-b border-slate-700 flex items-center justify-between bg-gradient-to-r from-blue-950/40 to-violet-950/40">
+      <aside className={`fixed top-0 right-0 h-full w-72 bg-[#0a0e1a]/95 backdrop-blur-xl border-l border-slate-600 flex flex-col z-50 transition-transform duration-300 ${sidebarOpen ? "translate-x-0" : "translate-x-full"}`}>
+        <div className="p-5 border-b border-slate-700 flex items-center justify-between bg-gradient-to-r from-[#00ff88]/10 to-transparent">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-500 to-violet-600 flex items-center justify-center shadow-lg shadow-blue-900/50">
+            <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-[#00ff88] to-[#00dd77] flex items-center justify-center shadow-lg shadow-[#00ff88]/30">
               <Skull className="h-5 w-5 text-white" />
             </div>
             <div>
               <div className="text-white font-bold tracking-tight">Onderwereld</div>
-              <div className="text-xs bg-gradient-to-r from-blue-300 to-violet-300 bg-clip-text text-transparent uppercase tracking-wider font-semibold">HDRP</div>
+              <div className="text-xs bg-gradient-to-r from-[#00ff88] to-[#00ff88] bg-clip-text text-transparent uppercase tracking-wider font-semibold">HDRP</div>
             </div>
           </div>
           <button onClick={closeNav} className="p-1.5 rounded hover:bg-slate-700 text-slate-300 hover:text-white">
@@ -212,10 +212,10 @@ const OnderwereldDashboard = () => {
           {isHoofd && <NavItemClose k="accounts" icon={ShieldAlert} label="Accounts beheren" color="red" />}
         </nav>
 
-        <div className="p-4 border-t border-slate-700 flex items-center gap-3 bg-gradient-to-r from-slate-900/60 to-violet-950/30">
+        <div className="p-4 border-t border-slate-700 flex items-center gap-3 bg-gradient-to-r from-[#050a14] to-[#0a0e1a]">
           {avatarUrl
-            ? <img src={avatarUrl} className="w-9 h-9 rounded-full object-cover border-2 border-blue-400/60" alt="" />
-            : <div className="w-9 h-9 rounded-full bg-gradient-to-br from-blue-500 to-violet-600 flex items-center justify-center text-white font-bold">{me.display_name[0]?.toUpperCase()}</div>}
+            ? <img src={avatarUrl} className="w-9 h-9 rounded-full object-cover border-2 border-[#00ff88]/60" alt="" />
+            : <div className="w-9 h-9 rounded-full bg-gradient-to-br from-[#00ff88] to-[#00dd77] flex items-center justify-center text-white font-bold">{me.display_name[0]?.toUpperCase()}</div>}
           <div className="flex-1 min-w-0">
             <div className="text-sm text-white truncate">{me.display_name}</div>
             <div className="text-xs text-slate-300 truncate">{roleLabel}</div>
@@ -243,7 +243,7 @@ const OnderwereldDashboard = () => {
         </div>
 
         {/* Footer */}
-        <footer className="relative z-10 border-t border-slate-700 bg-slate-900/70 backdrop-blur mt-8">
+        <footer className="relative z-10 border-t border-slate-700 bg-[#050a14]/70 backdrop-blur mt-8">
           <div className="max-w-7xl mx-auto px-6 lg:px-10 py-5 flex flex-col md:flex-row items-center justify-between gap-3 text-xs text-slate-400">
             <div className="flex items-center gap-2">
               <Skull className="h-4 w-4 text-slate-300" />
@@ -269,7 +269,7 @@ export default OnderwereldDashboard;
 // =============================================================
 
 function Card({ children, className = "" }: any) {
-  return <div className={`bg-slate-800/80 backdrop-blur border border-slate-600/60 rounded-xl ${className}`}>{children}</div>;
+  return <div className={`bg-[#111827]/80 backdrop-blur border border-slate-600/60 rounded-xl ${className}`}>{children}</div>;
 }
 function SectionTitle({ children, sub }: any) {
   return (
@@ -280,8 +280,8 @@ function SectionTitle({ children, sub }: any) {
   );
 }
 function Label({ children }: any) { return <label className="block text-xs font-medium uppercase tracking-wider text-slate-400 mb-2">{children}</label>; }
-const inputCls = "w-full bg-slate-900/60 border border-slate-600 rounded-lg px-3 py-2.5 text-white text-sm focus:outline-none focus:border-blue-400 focus:ring-1 focus:ring-blue-500/40 placeholder-slate-500";
-const btnPrimary = "bg-gradient-to-r from-blue-600 to-blue-400 hover:from-blue-500 hover:to-blue-300 text-white font-bold px-5 py-2.5 rounded-lg text-sm uppercase tracking-wider transition-all disabled:opacity-40";
+const inputCls = "w-full bg-[#050a14]/60 border border-slate-600 rounded-lg px-3 py-2.5 text-white text-sm focus:outline-none focus:border-[#00ff88] focus:ring-1 focus:ring-[#00ff88]/40 placeholder-slate-500";
+const btnPrimary = "bg-gradient-to-r from-[#00ff88] to-[#00dd77] hover:from-[#00dd77] hover:to-[#00bb66] text-[#0a0e1a] font-bold px-5 py-2.5 rounded-lg text-sm uppercase tracking-wider transition-all disabled:opacity-40";
 const btnGhost = "border border-slate-600 hover:border-slate-400 text-slate-200 hover:text-white px-4 py-2 rounded-lg text-sm transition-all";
 const btnDanger = "border border-red-900/60 hover:bg-red-900/30 text-red-400 px-3 py-1.5 rounded-lg text-xs transition-all inline-flex items-center gap-1.5";
 
@@ -300,7 +300,7 @@ function ProgressBar({ current, target, level }: { current: number; target: numb
         <span className="text-slate-400">{info.next ? `${info.needed} nodig voor LVL ${info.next}` : "MAX LEVEL"}</span>
       </div>
       <div className="h-2 bg-slate-800 rounded-full overflow-hidden border border-slate-600">
-        <div className="h-full bg-gradient-to-r from-blue-400 via-violet-500 to-pink-500 transition-all shadow-[0_0_10px_rgba(139,92,246,0.6)]" style={{ width: `${info.progress}%` }} />
+        <div className="h-full bg-gradient-to-r from-[#00ff88] via-[#00dd77] to-[#00ff88] transition-all shadow-[0_0_10px_rgba(0,255,136,0.6)]" style={{ width: `${info.progress}%` }} />
       </div>
     </div>
   );
@@ -340,10 +340,10 @@ function OverviewPanel({ me, role, onNav, onGang }: any) {
   return (
     <div className="-m-6 lg:-m-10 -mr-16 lg:-mr-20">
       {/* Compact hero */}
-      <section className="px-6 lg:px-10 pr-16 lg:pr-20 pt-10 pb-8 relative border-b border-slate-700/60 bg-gradient-to-br from-blue-950/40 via-violet-950/30 to-transparent">
-        <p className="text-transparent bg-clip-text bg-gradient-to-r from-blue-300 via-violet-300 to-pink-300 text-xs uppercase tracking-[0.4em] mb-4 font-bold">{roleLabel}</p>
+      <section className="px-6 lg:px-10 pr-16 lg:pr-20 pt-10 pb-8 relative border-b border-slate-700/60 bg-gradient-to-br from-[#00ff88]/10 via-transparent to-transparent">
+        <p className="text-transparent bg-clip-text bg-gradient-to-r from-[#00ff88] via-[#00ff88] to-[#00ff88] text-xs uppercase tracking-[0.4em] mb-4 font-bold">{roleLabel}</p>
         <h1 className="text-[clamp(2.5rem,7vw,6rem)] font-black text-white tracking-tighter leading-[0.9]">
-          Welkom <span className="bg-gradient-to-r from-blue-400 via-violet-400 to-pink-400 bg-clip-text text-transparent">{me.display_name}.</span>
+          Welkom <span className="bg-gradient-to-r from-[#00ff88] via-[#00ff88] to-[#00dd77] bg-clip-text text-transparent">{me.display_name}.</span>
         </h1>
         <p className="text-slate-300 mt-4 text-base md:text-lg max-w-3xl">
           Overzicht van gang-activiteit binnen HDRP. Beheer punten, boosts en waarschuwingen vanuit één centrale plek.
@@ -368,7 +368,7 @@ function OverviewPanel({ me, role, onNav, onGang }: any) {
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {[
-          { label: "Gangs", value: stats.gangs, icon: Users, grad: "from-blue-500 to-cyan-500", ring: "shadow-blue-900/40 border-blue-500/30" },
+          { label: "Gangs", value: stats.gangs, icon: Users, grad: "from-blue-500 to-cyan-500", ring: "shadow-[#00ff88]/20 border-blue-500/30" },
           { label: "Punten deze week", value: stats.weekPoints, icon: ScrollText, grad: "from-emerald-500 to-teal-500", ring: "shadow-emerald-900/40 border-emerald-500/30" },
           { label: "Actieve warns", value: stats.activeWarns, icon: AlertTriangle, grad: "from-orange-500 to-amber-500", ring: "shadow-orange-900/40 border-orange-500/30" },
           { label: "Spoedmeldingen", value: stats.urgent, icon: ShieldAlert, grad: "from-red-500 to-pink-500", ring: "shadow-red-900/40 border-red-500/30" },
@@ -1136,7 +1136,7 @@ function InboxPanel({ me, uid, isHoofd }: any) {
             <div key={m.id} className={`group flex ${m.kind === "chat" && m.author_id === uid ? "justify-end" : "justify-start"}`}>
               <div className={`max-w-2xl rounded-xl px-4 py-2.5 text-sm border relative ${
                 m.kind === "urgent" ? "bg-red-950/40 border-red-500/60 text-red-100"
-                : m.kind === "system" ? "bg-slate-800/70 border-slate-600 text-slate-200"
+                : m.kind === "system" ? "bg-[#111827]/70 border-slate-600 text-slate-200"
                 : m.author_id === uid ? "bg-gradient-to-r from-zinc-800 to-zinc-800 border-slate-600/50 text-white"
                 : "bg-slate-800 border-slate-600 text-white"
               }`}>
@@ -1282,7 +1282,7 @@ function AccountsPanel({ meUid }: any) {
         <Card className="p-4 mb-4 border-green-500/40 bg-green-950/30">
           <div className="text-green-200 text-sm mb-2">Account aangemaakt! Deel deze gegevens met de gebruiker:</div>
           <div className="text-xs text-green-100 font-mono flex items-center gap-2">
-            {msg.email} / <span className="bg-slate-900/60 px-2 py-1 rounded">{msg.temp_password}</span>
+            {msg.email} / <span className="bg-[#050a14]/60 px-2 py-1 rounded">{msg.temp_password}</span>
             <button onClick={() => navigator.clipboard.writeText(msg.temp_password)} className={btnGhost + " !py-1 !text-xs"}><Copy className="h-3 w-3" /></button>
           </div>
         </Card>
