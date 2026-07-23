@@ -107,11 +107,11 @@ const OnderwereldDashboard = () => {
 
   const NavItem = ({ k, icon: I, label, indent = false, color = "blue" }: any) => {
     const colorMap: any = {
-      blue: { on: "text-blue-300", bar: "border-blue-400", glow: "from-blue-500/20" },
-      violet: { on: "text-violet-300", bar: "border-violet-400", glow: "from-violet-500/20" },
+      blue: { on: "text-[#00ff88]", bar: "border-[#00ff88]", glow: "from-[#00ff88]/15" },
+      violet: { on: "text-[#00ff88]", bar: "border-[#00ff88]", glow: "from-[#00ff88]/15" },
       emerald: { on: "text-emerald-300", bar: "border-emerald-400", glow: "from-emerald-500/20" },
       amber: { on: "text-amber-300", bar: "border-amber-400", glow: "from-amber-500/20" },
-      pink: { on: "text-pink-300", bar: "border-pink-400", glow: "from-pink-500/20" },
+      pink: { on: "text-[#00ff88]", bar: "border-[#00ff88]", glow: "from-[#00ff88]/15" },
       red: { on: "text-red-300", bar: "border-red-400", glow: "from-red-500/20" },
     };
     const c = colorMap[color] || colorMap.blue;
@@ -184,7 +184,7 @@ const OnderwereldDashboard = () => {
         <nav className="flex-1 overflow-y-auto p-3 space-y-1">
           <NavItemClose k="overview" icon={LayoutDashboard} label="Overzicht" color="blue" />
 
-          <button onClick={() => setGangsOpen(!gangsOpen)} className="w-full flex items-center justify-between px-3 py-2 text-xs uppercase tracking-wider text-violet-300/80 hover:text-violet-200 mt-2">
+          <button onClick={() => setGangsOpen(!gangsOpen)} className="w-full flex items-center justify-between px-3 py-2 text-xs uppercase tracking-wider text-[#00ff88]/70 hover:text-[#00ff88] mt-2">
             <span className="flex items-center gap-2"><Users className="h-3.5 w-3.5" /> Gangs</span>
             {gangsOpen ? <ChevronDown className="h-3.5 w-3.5" /> : <ChevronRight className="h-3.5 w-3.5" />}
           </button>
@@ -368,7 +368,7 @@ function OverviewPanel({ me, role, onNav, onGang }: any) {
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {[
-          { label: "Gangs", value: stats.gangs, icon: Users, grad: "from-blue-500 to-cyan-500", ring: "shadow-[#00ff88]/20 border-blue-500/30" },
+          { label: "Gangs", value: stats.gangs, icon: Users, grad: "from-[#00ff88] to-[#00dd77]", ring: "shadow-[#00ff88]/20 border-[#00ff88]/30" },
           { label: "Punten deze week", value: stats.weekPoints, icon: ScrollText, grad: "from-emerald-500 to-teal-500", ring: "shadow-emerald-900/40 border-emerald-500/30" },
           { label: "Actieve warns", value: stats.activeWarns, icon: AlertTriangle, grad: "from-orange-500 to-amber-500", ring: "shadow-orange-900/40 border-orange-500/30" },
           { label: "Spoedmeldingen", value: stats.urgent, icon: ShieldAlert, grad: "from-red-500 to-pink-500", ring: "shadow-red-900/40 border-red-500/30" },
@@ -389,9 +389,9 @@ function OverviewPanel({ me, role, onNav, onGang }: any) {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
           {[
             { k: "points-new", icon: Plus, label: "Punten invoeren", grad: "from-emerald-500 to-teal-600", hover: "hover:border-emerald-400" },
-            { k: "gangs", icon: Users, label: "Alle gangs", grad: "from-violet-500 to-purple-600", hover: "hover:border-violet-400" },
+            { k: "gangs", icon: Users, label: "Alle gangs", grad: "from-[#00ff88] to-[#00cc66]", hover: "hover:border-[#00ff88]" },
             { k: "warnings", icon: AlertTriangle, label: "Waarschuwingen", grad: "from-orange-500 to-red-500", hover: "hover:border-orange-400" },
-            { k: "inbox", icon: Inbox, label: "Inbox & chat", grad: "from-pink-500 to-rose-500", hover: "hover:border-pink-400" },
+            { k: "inbox", icon: Inbox, label: "Inbox & chat", grad: "from-[#00ff88] to-emerald-500", hover: "hover:border-[#00ff88]" },
           ].map((a) => (
             <button key={a.k} onClick={() => onNav(a.k)} className="group">
               <Card className={`p-4 ${a.hover} transition flex items-center gap-3`}>
@@ -423,7 +423,7 @@ function OverviewPanel({ me, role, onNav, onGang }: any) {
           </div>
         </Card>
         <Card className="p-5">
-          <h3 className="text-white font-semibold mb-4 flex items-center gap-2"><Inbox className="h-4 w-4 text-pink-400" /> Recente meldingen</h3>
+          <h3 className="text-white font-semibold mb-4 flex items-center gap-2"><Inbox className="h-4 w-4 text-[#00ff88]" /> Recente meldingen</h3>
           {recentInbox.length === 0 && <p className="text-slate-400 text-sm">Nog geen berichten.</p>}
           <div className="space-y-3">
             {recentInbox.map((m) => (
