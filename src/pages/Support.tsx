@@ -106,13 +106,10 @@ const Support = () => {
     if (savedTicketNumber) {
       setLoading(true);
       const { data, error } = await supabase
-        .from('support_tickets')
-        .select('*')
-        .eq('ticket_number', savedTicketNumber)
-        .single();
-      
-      if (data && !error) {
-        setActiveTicket(data);
+        .rpc('get_support_ticket_by_number', { _ticket_number: savedTicketNumber });
+
+      if (data && data.length > 0 && !error) {
+        setActiveTicket(data[0] as SupportTicket);
       } else {
         localStorage.removeItem('support_ticket_number');
       }
@@ -122,17 +119,15 @@ const Support = () => {
 
   const loadMessages = async () => {
     if (!activeTicket) return;
-    
+
     const { data, error } = await supabase
-      .from('support_messages')
-      .select('*')
-      .eq('ticket_id', activeTicket.id)
-      .order('created_at', { ascending: true });
+      .rpc('get_support_messages_by_ticket_number', { _ticket_number: activeTicket.ticket_number });
 
     if (data && !error) {
-      setMessages(data);
+      setMessages(data as SupportMessage[]);
     }
   };
+
 
   const generateTicketNumber = () => {
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
@@ -158,54 +153,32 @@ const Support = () => {
     setLoading(true);
     const ticketNumber = generateTicketNumber();
 
-    // Create ticket
     const { data: ticketData, error: ticketError } = await supabase
-      .from('support_tickets')
-      .insert({
-        ticket_number: ticketNumber,
-        name: formData.name,
-        email: formData.email,
-        roblox_name: formData.roblox_name,
-        discord_name: formData.discord_name,
-        subject: formData.subject,
-        recipient: formData.recipient
-      })
-      .select()
-      .single();
+      .rpc('create_support_ticket', {
+        _ticket_number: ticketNumber,
+        _name: formData.name,
+        _email: formData.email,
+        _roblox_name: formData.roblox_name,
+        _discord_name: formData.discord_name,
+        _subject: formData.subject,
+        _recipient: formData.recipient,
+        _message: formData.message,
+      });
 
-    if (ticketError) {
+    if (ticketError || !ticketData) {
+      console.error('create ticket failed', ticketError);
       toast({
         title: "Fout",
-        description: "Kon ticket niet aanmaken",
+        description: "Kon ticket niet aanmaken. Probeer het opnieuw.",
         variant: "destructive"
       });
       setLoading(false);
       return;
     }
 
-    // Add first message
-    const { error: messageError } = await supabase
-      .from('support_messages')
-      .insert({
-        ticket_id: ticketData.id,
-        message: formData.message,
-        is_admin_reply: false
-      });
-
-    if (messageError) {
-      toast({
-        title: "Fout",
-        description: "Kon bericht niet versturen",
-        variant: "destructive"
-      });
-      setLoading(false);
-      return;
-    }
-
-    // Save ticket number to localStorage
     localStorage.setItem('support_ticket_number', ticketNumber);
-    setActiveTicket(ticketData);
-    
+    setActiveTicket(ticketData as SupportTicket);
+
     toast({
       title: "Ticket aangemaakt!",
       description: `Je ticketnummer is ${ticketNumber}. Bewaar dit nummer!`
@@ -218,25 +191,29 @@ const Support = () => {
     if (!newMessage.trim() || !activeTicket) return;
 
     setSendingMessage(true);
-    const { error } = await supabase
-      .from('support_messages')
-      .insert({
-        ticket_id: activeTicket.id,
-        message: newMessage,
-        is_admin_reply: false
+    const { data, error } = await supabase
+      .rpc('add_support_message_by_number', {
+        _ticket_number: activeTicket.ticket_number,
+        _message: newMessage,
       });
 
     if (error) {
+      console.error('send message failed', error);
       toast({
         title: "Fout",
-        description: "Kon bericht niet versturen",
+        description: "Kon bericht niet versturen. Probeer het opnieuw.",
         variant: "destructive"
       });
     } else {
       setNewMessage("");
+      if (data) {
+        // Optimistically append; realtime may not fire for anon subscribers
+        setMessages((prev) => [...prev, data as SupportMessage]);
+      }
     }
     setSendingMessage(false);
   };
+
 
   const handleNewTicket = () => {
     localStorage.removeItem('support_ticket_number');

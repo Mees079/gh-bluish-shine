@@ -1968,6 +1968,91 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      add_support_message_by_number: {
+        Args: { _message: string; _ticket_number: string }
+        Returns: {
+          created_at: string
+          id: string
+          is_admin_reply: boolean
+          message: string
+          ticket_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "support_messages"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      create_support_ticket: {
+        Args: {
+          _discord_name: string
+          _email: string
+          _message: string
+          _name: string
+          _recipient: string
+          _roblox_name: string
+          _subject: string
+          _ticket_number: string
+        }
+        Returns: {
+          created_at: string
+          discord_name: string
+          email: string
+          id: string
+          name: string
+          recipient: string
+          roblox_name: string
+          status: string
+          subject: string
+          ticket_number: string
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "support_tickets"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      get_support_messages_by_ticket_number: {
+        Args: { _ticket_number: string }
+        Returns: {
+          created_at: string
+          id: string
+          is_admin_reply: boolean
+          message: string
+          ticket_id: string
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "support_messages"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
+      get_support_ticket_by_number: {
+        Args: { _ticket_number: string }
+        Returns: {
+          created_at: string
+          discord_name: string
+          email: string
+          id: string
+          name: string
+          recipient: string
+          roblox_name: string
+          status: string
+          subject: string
+          ticket_number: string
+          updated_at: string
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "support_tickets"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
