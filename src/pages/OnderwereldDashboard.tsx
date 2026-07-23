@@ -1044,8 +1044,30 @@ function WarningsPanel({ me, uid, isCoord, isHoofd }: any) {
     setShowForm(false); setReason(""); setGangId(""); load();
   };
 
-  const resolve = async (id: string) => { await supabase.from("ow_warnings").update({ resolved_at: new Date().toISOString() }).eq("id", id); load(); };
-  const del = async (id: string) => { if (!confirm("Verwijderen?")) return; await supabase.from("ow_warnings").delete().eq("id", id); load(); };
+  const resolve = async (id: string) => {
+    const w = warns.find(x => x.id === id);
+    await supabase.from("ow_warnings").update({ resolved_at: new Date().toISOString() }).eq("id", id);
+    // Remove related inbox system/urgent messages for this gang referencing warning context
+    if (w) {
+      await supabase.from("ow_inbox_messages").delete()
+        .eq("gang_id", w.gang_id)
+        .in("kind", ["system", "urgent"] as any)
+        .or("body.ilike.%waarschuwing%,body.ilike.%inactiviteit%,body.ilike.%SPOED%");
+    }
+    load();
+  };
+  const del = async (id: string) => {
+    if (!confirm("Verwijderen?")) return;
+    const w = warns.find(x => x.id === id);
+    await supabase.from("ow_warnings").delete().eq("id", id);
+    if (w) {
+      await supabase.from("ow_inbox_messages").delete()
+        .eq("gang_id", w.gang_id)
+        .in("kind", ["system", "urgent"] as any)
+        .or("body.ilike.%waarschuwing%,body.ilike.%inactiviteit%,body.ilike.%SPOED%");
+    }
+    load();
+  };
 
   const active = warns.filter(w => !w.resolved_at);
   const resolved = warns.filter(w => w.resolved_at);
