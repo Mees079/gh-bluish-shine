@@ -174,7 +174,7 @@ export const ProductsManager = () => {
       toast({
         variant: "destructive",
         title: "Fout",
-        description: error.message,
+        description: "Er is een fout opgetreden. Probeer het opnieuw.",
       });
     }
   };
@@ -187,7 +187,7 @@ export const ProductsManager = () => {
       toast({
         variant: "destructive",
         title: "Fout",
-        description: error.message,
+        description: "Er is een fout opgetreden. Probeer het opnieuw.",
       });
     } else {
       toast({
@@ -233,7 +233,7 @@ export const ProductsManager = () => {
       toast({
         variant: "destructive",
         title: "Fout",
-        description: error.message,
+        description: "Er is een fout opgetreden. Probeer het opnieuw.",
       });
     }
   };
@@ -267,7 +267,7 @@ export const ProductsManager = () => {
       toast({
         variant: "destructive",
         title: "Fout",
-        description: error.message,
+        description: "Er is een fout opgetreden. Probeer het opnieuw.",
       });
     }
   };
@@ -299,7 +299,7 @@ export const ProductsManager = () => {
       toast({
         variant: "destructive",
         title: "Fout",
-        description: error.message,
+        description: "Er is een fout opgetreden. Probeer het opnieuw.",
       });
     }
   };
@@ -606,7 +606,7 @@ export const ProductsManager = () => {
                       toast({
                         variant: "destructive",
                         title: "Fout bij uploaden",
-                        description: error.message,
+                        description: "Er is een fout opgetreden. Probeer het opnieuw.",
                       });
                     }
                   }}
