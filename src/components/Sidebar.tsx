@@ -28,6 +28,7 @@ export const Sidebar = ({ activeCategory, onCategoryChange }: SidebarProps) => {
     const { data } = await supabase
       .from('categories')
       .select('*')
+      .eq('active', true)
       .order('display_order');
     
     if (data) {
