@@ -16,6 +16,7 @@ export type Database = {
     Tables: {
       categories: {
         Row: {
+          active: boolean
           created_at: string | null
           display_order: number
           icon: string
@@ -25,6 +26,7 @@ export type Database = {
           updated_at: string | null
         }
         Insert: {
+          active?: boolean
           created_at?: string | null
           display_order?: number
           icon?: string
@@ -34,6 +36,7 @@ export type Database = {
           updated_at?: string | null
         }
         Update: {
+          active?: boolean
           created_at?: string | null
           display_order?: number
           icon?: string
