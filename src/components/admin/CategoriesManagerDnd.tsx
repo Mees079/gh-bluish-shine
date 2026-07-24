@@ -234,6 +234,17 @@ export const CategoriesManager = () => {
     }
   };
 
+  const handleToggleActive = async (id: string, active: boolean) => {
+    setCategories(prev => prev.map(c => c.id === id ? { ...c, active } : c));
+    const { error } = await supabase.from('categories').update({ active }).eq('id', id);
+    if (error) {
+      toast({ variant: "destructive", title: "Fout", description: error.message });
+      loadCategories();
+    } else {
+      toast({ title: active ? "Categorie aan" : "Categorie uit", description: active ? "Categorie zichtbaar in shop" : "Categorie verborgen. Producten blijven bewaard." });
+    }
+  };
+
   const filteredCategories = categories.filter(cat =>
     cat.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     cat.label.toLowerCase().includes(searchQuery.toLowerCase())
