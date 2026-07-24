@@ -51,7 +51,7 @@ const SortableCategory = ({ category, onEdit, onDelete, onToggleActive }: Sortab
     <div
       ref={setNodeRef}
       style={style}
-      className="border rounded-lg p-4 flex justify-between items-center bg-card"
+      className={`border rounded-lg p-4 flex justify-between items-center bg-card ${category.active === false ? 'opacity-60' : ''}`}
     >
       <div className="flex items-center gap-3 flex-1">
         <button
@@ -62,7 +62,12 @@ const SortableCategory = ({ category, onEdit, onDelete, onToggleActive }: Sortab
           <GripVertical className="h-5 w-5" />
         </button>
         <div>
-          <h4 className="font-semibold">{category.label}</h4>
+          <h4 className="font-semibold flex items-center gap-2">
+            {category.label}
+            {category.active === false && (
+              <span className="text-xs px-2 py-0.5 rounded bg-muted text-muted-foreground">Uit</span>
+            )}
+          </h4>
           <p className="text-sm text-muted-foreground">Code: {category.name}</p>
           <div className="flex items-center gap-1 mt-1">
             {(category.icon || '').split(',').filter(Boolean).map((iconName: string, i: number) => {
@@ -72,7 +77,13 @@ const SortableCategory = ({ category, onEdit, onDelete, onToggleActive }: Sortab
           </div>
         </div>
       </div>
-      <div className="flex gap-2">
+      <div className="flex gap-2 items-center">
+        <div className="flex items-center gap-2 mr-2" title="Categorie aan/uit">
+          <Switch
+            checked={category.active !== false}
+            onCheckedChange={(v) => onToggleActive(category.id, v)}
+          />
+        </div>
         <Button
           size="sm"
           variant="outline"
