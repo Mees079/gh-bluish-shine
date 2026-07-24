@@ -30,9 +30,10 @@ interface SortableCategoryProps {
   category: any;
   onEdit: (category: any) => void;
   onDelete: (id: string) => void;
+  onToggleActive: (id: string, active: boolean) => void;
 }
 
-const SortableCategory = ({ category, onEdit, onDelete }: SortableCategoryProps) => {
+const SortableCategory = ({ category, onEdit, onDelete, onToggleActive }: SortableCategoryProps) => {
   const {
     attributes,
     listeners,
