@@ -382,6 +382,7 @@ export const CategoriesManager = () => {
                   setDialogOpen(true);
                 }}
                 onDelete={handleDelete}
+                onToggleActive={handleToggleActive}
               />
             ))}
           </div>
