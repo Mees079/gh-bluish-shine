@@ -38,12 +38,18 @@ const Shop = () => {
     }
   }, [activeCategory]);
 
-  // Realtime: update prijzen direct bij wijzigingen
+  // Realtime: update producten direct bij wijzigingen
   useEffect(() => {
     if (!activeCategory) return;
     const channel = supabase
       .channel('products-realtime')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'products' }, (payload) => {
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'products' }, () => {
+        loadProducts();
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'product_images' }, () => {
+        loadProducts();
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'categories' }, () => {
         loadProducts();
       })
       .subscribe();
@@ -52,6 +58,7 @@ const Shop = () => {
       supabase.removeChannel(channel);
     };
   }, [activeCategory]);
+
 
   const loadDiscordLink = async () => {
     const { data } = await supabase
