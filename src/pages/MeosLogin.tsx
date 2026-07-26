@@ -18,8 +18,7 @@ export default function MeosLogin() {
 
   useEffect(() => {
     document.title = "MEOS - Politie Login";
-    // Init super account once
-    fetch(`${FN_URL}/meos-init-super`, { method: "POST" }).catch(() => {});
+    // Super account wordt niet bij elke pageload opnieuw aangemaakt (backend-load).
     supabase.auth.getSession().then(({ data }) => {
       if (data.session) nav("/meos/dashboard");
     });

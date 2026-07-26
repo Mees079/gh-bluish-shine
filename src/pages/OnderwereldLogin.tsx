@@ -10,9 +10,8 @@ const OnderwereldLogin = () => {
   const [error, setError] = useState("");
   const navigate = useNavigate();
 
-  useEffect(() => {
-    supabase.functions.invoke("ow-init-hdrp").catch(() => {});
-  }, []);
+  // Note: HDRP seed account wordt niet meer bij elke pageload opnieuw geïnitialiseerd
+  // (dat gaf onnodige backend-load). Roep ow-init-hdrp handmatig aan indien nodig.
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
