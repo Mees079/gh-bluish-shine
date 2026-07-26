@@ -22,7 +22,19 @@ export const Sidebar = ({ activeCategory, onCategoryChange }: SidebarProps) => {
 
   useEffect(() => {
     loadCategories();
+
+    const channel = supabase
+      .channel('categories-realtime')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'categories' }, () => {
+        loadCategories();
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, []);
+
 
   const loadCategories = async () => {
     const { data } = await supabase
