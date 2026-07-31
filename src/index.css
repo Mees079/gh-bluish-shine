@@ -45,56 +45,62 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    --background: 220 26% 6%;
-    --foreground: 210 40% 98%;
+    /* Corporate light theme */
+    --background: 0 0% 100%;
+    --foreground: 218 78% 20%;
 
-    --card: 220 26% 9%;
-    --card-foreground: 210 40% 98%;
+    --card: 0 0% 100%;
+    --card-foreground: 218 78% 20%;
 
-    --popover: 220 26% 9%;
-    --popover-foreground: 210 40% 98%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 218 78% 20%;
 
-    --primary: 210 100% 56%;
-    --primary-foreground: 210 40% 98%;
-    --primary-glow: 210 100% 70%;
+    --primary: 219 100% 56%;
+    --primary-foreground: 0 0% 100%;
+    --primary-glow: 219 100% 66%;
 
-    --secondary: 217 32% 20%;
-    --secondary-foreground: 210 40% 98%;
+    /* Diep navy voor headers/footers */
+    --navy: 217 79% 20%;
+    --navy-foreground: 0 0% 100%;
 
-    --muted: 217 32% 17%;
-    --muted-foreground: 215 20% 65%;
+    --secondary: 214 33% 96%;
+    --secondary-foreground: 217 79% 20%;
 
-    --accent: 210 100% 56%;
-    --accent-foreground: 210 40% 98%;
+    --muted: 214 33% 96%;
+    --muted-foreground: 215 16% 45%;
 
-    --destructive: 0 63% 31%;
-    --destructive-foreground: 210 40% 98%;
+    --accent: 214 33% 96%;
+    --accent-foreground: 217 79% 20%;
 
-    --border: 217 32% 17%;
-    --input: 217 32% 17%;
-    --ring: 210 100% 56%;
+    --destructive: 0 72% 45%;
+    --destructive-foreground: 0 0% 100%;
 
-    --radius: 0.75rem;
+    --border: 214 25% 88%;
+    --input: 214 25% 88%;
+    --ring: 219 100% 56%;
 
-    --sidebar-background: 220 26% 9%;
-    --sidebar-foreground: 210 40% 98%;
-    --sidebar-primary: 210 100% 56%;
-    --sidebar-primary-foreground: 210 40% 98%;
-    --sidebar-accent: 217 32% 17%;
-    --sidebar-accent-foreground: 210 40% 98%;
-    --sidebar-border: 217 32% 17%;
-    --sidebar-ring: 210 100% 56%;
+    --radius: 0.5rem;
+
+    --sidebar-background: 0 0% 100%;
+    --sidebar-foreground: 217 79% 20%;
+    --sidebar-primary: 219 100% 56%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 214 33% 96%;
+    --sidebar-accent-foreground: 217 79% 20%;
+    --sidebar-border: 214 25% 88%;
+    --sidebar-ring: 219 100% 56%;
 
     /* Custom tokens */
-    --glow-blue: 210 100% 56%;
-    --gradient-primary: linear-gradient(135deg, hsl(210 100% 56%), hsl(210 100% 70%));
-    --gradient-dark: linear-gradient(180deg, hsl(220 26% 6%), hsl(220 26% 9%));
-    --gradient-hero: linear-gradient(180deg, rgba(0,0,0,0.7), rgba(0,0,0,0.4));
-    --shadow-glow: 0 0 40px hsl(210 100% 56% / 0.3);
-    --shadow-glow-strong: 0 0 60px hsl(210 100% 56% / 0.5);
-    --shadow-card: 0 10px 30px -10px hsl(210 100% 10% / 0.5);
+    --glow-blue: 219 100% 56%;
+    --gradient-primary: linear-gradient(135deg, hsl(219 100% 56%), hsl(219 100% 66%));
+    --gradient-dark: linear-gradient(180deg, hsl(217 79% 20%), hsl(217 79% 14%));
+    --gradient-hero: linear-gradient(90deg, rgba(11,42,91,0.92), rgba(11,42,91,0.35));
+    --shadow-glow: 0 1px 2px hsl(217 79% 20% / 0.08);
+    --shadow-glow-strong: 0 8px 24px -8px hsl(217 79% 20% / 0.22);
+    --shadow-card: 0 1px 3px hsl(217 79% 20% / 0.08), 0 8px 24px -16px hsl(217 79% 20% / 0.2);
   }
 }
+
 
 @layer base {
   * {
