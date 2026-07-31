@@ -7,7 +7,7 @@ import { ChevronDown, Users, Server, Shield, Zap } from "lucide-react";
 import heroBanner from "@/assets/hero-banner.png";
 import hdrpLogo from "@/assets/hdrp-logo.png";
 
-import { Card } from "@/components/ui/card";
+
 
 interface HomeConfig {
   hero_image_url: string | null;
