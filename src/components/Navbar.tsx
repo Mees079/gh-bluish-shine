@@ -94,7 +94,7 @@ export const Navbar = ({ discordLink: propDiscordLink }: NavbarProps) => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16 gap-3 sm:gap-6">
             <Link to="/" className="flex items-center gap-3 shrink-0">
-              <img src={hdrpLogo} alt="HDRP logo" className="h-9 w-9 object-contain" />
+              <img src={hdrpLogo} alt="HDRP logo" className="h-9 w-9 object-contain brightness-0 invert" />
               <span className="hidden sm:flex flex-col leading-none notranslate">
                 <span className="font-heading text-lg font-bold tracking-tight">HDRP</span>
                 <span className="text-[10px] uppercase tracking-[0.18em] text-navy-foreground/55">Hoofddorp Roleplay</span>
