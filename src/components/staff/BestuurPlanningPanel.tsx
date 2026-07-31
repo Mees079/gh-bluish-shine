@@ -246,7 +246,7 @@ export const BestuurPlanningPanel = ({ currentUserId, staffProfiles, onClose }: 
               value={search}
               onChange={e => setSearch(e.target.value)}
               placeholder="Zoek op taaknaam, beschrijving of persoon..."
-              className="w-full bg-[#080d17] border border-[#25303f] rounded-lg pl-9 pr-9 py-2 text-sm text-white placeholder:text-[#4b5563] focus:outline-none focus:border-[#337aff]/40"
+              className="w-full bg-[#080d17] border border-[#25303f] rounded-lg pl-9 pr-9 py-2 text-sm text-white placeholder:text-[#64748b] focus:outline-none focus:border-[#337aff]/40"
             />
             {search && (
               <button onClick={() => setSearch("")} className="absolute right-2 top-1/2 -translate-y-1/2 text-[#9ba7ba] hover:text-white">
@@ -510,7 +510,7 @@ export const BestuurPlanningPanel = ({ currentUserId, staffProfiles, onClose }: 
                 <button onClick={() => setEditing(null)} className="px-4 py-2 text-sm text-[#9ba7ba] hover:text-white">Annuleren</button>
                 <button
                   onClick={saveEdit}
-                  className="flex items-center gap-1.5 bg-[#337aff] hover:bg-[#337aff]/90 text-[#080d17] text-sm font-semibold px-4 py-2 rounded-lg"
+                  className="flex items-center gap-1.5 bg-[#337aff] hover:bg-[#337aff]/90 text-white text-sm font-semibold px-4 py-2 rounded-lg"
                 ><Save className="h-4 w-4" /> Opslaan</button>
               </div>
             </div>

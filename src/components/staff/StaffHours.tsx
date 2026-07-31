@@ -130,7 +130,7 @@ export const StaffHours = ({ isBestuur, currentUserId, staffProfiles }: Props) =
         <div className="bg-[#0e1524]/60 border border-[#25303f] rounded-2xl p-8 text-center">
           <Clock className="h-10 w-10 text-[#3a465c] mx-auto mb-3" />
           <p className="text-[#9ba7ba] text-sm">Nog geen uren ingevuld voor deze week.</p>
-          <p className="text-[#4b5563] text-xs mt-1">Uren worden ingevuld via een "Week uren" taak bij Taken.</p>
+          <p className="text-[#64748b] text-xs mt-1">Uren worden ingevuld via een "Week uren" taak bij Taken.</p>
         </div>
       ) : (
         <>
@@ -194,7 +194,7 @@ export const StaffHours = ({ isBestuur, currentUserId, staffProfiles }: Props) =
           </div>
 
           {hours[0]?.submitted_by && (
-            <p className="text-xs text-[#4b5563] text-center">
+            <p className="text-xs text-[#64748b] text-center">
               Ingevuld door {getUsername(hours[0].submitted_by)}
             </p>
           )}

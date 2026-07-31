@@ -216,7 +216,7 @@ export const StaffAbsences = ({ isBestuur, currentUserId, staffProfiles }: Props
             />
           </div>
 
-          <button onClick={handleAdd} disabled={!endDate || !startDate || (selectedName === '__custom__' && !customName.trim())} className="px-4 py-2 bg-[#337aff] text-[#080d17] rounded-lg text-sm font-semibold disabled:opacity-50 transition-all">
+          <button onClick={handleAdd} disabled={!endDate || !startDate || (selectedName === '__custom__' && !customName.trim())} className="px-4 py-2 bg-[#337aff] text-white rounded-lg text-sm font-semibold disabled:opacity-50 transition-all">
             Bevestigen
           </button>
         </div>
@@ -274,7 +274,7 @@ export const StaffAbsences = ({ isBestuur, currentUserId, staffProfiles }: Props
                     <p className="text-sm text-[#9ba7ba]">{getDisplayName(a)}</p>
                     {getCleanReason(a) && <p className="text-xs text-[#9ba7ba] mt-0.5">{getCleanReason(a)}</p>}
                   </div>
-                  <span className="text-xs text-[#4b5563]">
+                  <span className="text-xs text-[#64748b]">
                     {fmt(a.start_date, 'd MMM')} – {fmt(a.end_date, 'd MMM yyyy')}
                   </span>
                 </div>

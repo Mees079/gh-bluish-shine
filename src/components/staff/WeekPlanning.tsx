@@ -454,7 +454,7 @@ export const WeekPlanning = ({ isBestuur, currentUserId, staffProfiles }: WeekPl
     switch (p) {
       case 'high': return 'border-red-500/50 bg-red-500/5';
       case 'normal': return 'border-[#337aff]/30 bg-[#337aff]/5';
-      case 'low': return 'border-[#4b5563] bg-[#25303f]/50';
+      case 'low': return 'border-[#64748b] bg-[#25303f]/50';
       default: return 'border-[#3a465c]';
     }
   };
@@ -463,7 +463,7 @@ export const WeekPlanning = ({ isBestuur, currentUserId, staffProfiles }: WeekPl
     switch (s) {
       case 'done': return <CheckCircle2 className="h-4 w-4 text-[#337aff]" />;
       case 'in_progress': return <Clock className="h-4 w-4 text-amber-400" />;
-      default: return <Circle className="h-4 w-4 text-[#4b5563]" />;
+      default: return <Circle className="h-4 w-4 text-[#64748b]" />;
     }
   };
 
@@ -483,7 +483,7 @@ export const WeekPlanning = ({ isBestuur, currentUserId, staffProfiles }: WeekPl
         <div className="flex justify-end">
           <button
             onClick={() => setShowPlanningPanel(true)}
-            className="flex items-center gap-2 bg-gradient-to-r from-[#337aff] to-emerald-400 hover:from-emerald-400 hover:to-[#337aff] text-[#080d17] text-sm font-semibold px-4 py-2 rounded-lg shadow-[0_0_20px_rgba(51,122,255,0.25)] transition-all"
+            className="flex items-center gap-2 bg-gradient-to-r from-[#337aff] to-[#7aa8ff] hover:from-[#5b95ff] hover:to-[#337aff] text-white text-sm font-semibold px-4 py-2 rounded-lg shadow-[0_0_20px_rgba(51,122,255,0.25)] transition-all"
           >
             <LayoutGrid className="h-4 w-4" /> Planning Beheer
           </button>
@@ -543,7 +543,7 @@ export const WeekPlanning = ({ isBestuur, currentUserId, staffProfiles }: WeekPl
       </div>
 
       {/* Day columns */}
-      <div className="grid grid-cols-1 md:grid-cols-7 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7 gap-3">
         {days.map(day => {
           const dayTasks = getTasksForDay(day);
           const today = isToday(day);
@@ -610,7 +610,7 @@ export const WeekPlanning = ({ isBestuur, currentUserId, staffProfiles }: WeekPl
                     ))}
                   </select>
                 </div>
-                <button onClick={() => handleAddWeekUren(addDate)} className="px-4 py-2 bg-[#337aff] text-[#080d17] rounded-lg text-sm font-semibold whitespace-nowrap">
+                <button onClick={() => handleAddWeekUren(addDate)} className="px-4 py-2 bg-[#337aff] text-white rounded-lg text-sm font-semibold whitespace-nowrap">
                   + Week uren
                 </button>
               </div>
@@ -618,7 +618,7 @@ export const WeekPlanning = ({ isBestuur, currentUserId, staffProfiles }: WeekPl
 
             <div className="relative flex items-center gap-2 mb-4">
               <div className="flex-1 h-px bg-[#25303f]" />
-              <span className="text-xs text-[#4b5563]">of maak een gewone taak</span>
+              <span className="text-xs text-[#64748b]">of maak een gewone taak</span>
               <div className="flex-1 h-px bg-[#25303f]" />
             </div>
 
@@ -648,7 +648,7 @@ export const WeekPlanning = ({ isBestuur, currentUserId, staffProfiles }: WeekPl
                   <option value="high">Hoog</option>
                 </select>
               </div>
-              <button onClick={handleAddTask} disabled={!newTitle} className="w-full bg-[#337aff] hover:bg-[#00dd77] text-[#080d17] font-semibold py-2.5 rounded-lg transition-all disabled:opacity-50">Toevoegen</button>
+              <button onClick={handleAddTask} disabled={!newTitle} className="w-full bg-[#337aff] hover:bg-[#5b95ff] text-white font-semibold py-2.5 rounded-lg transition-all disabled:opacity-50">Toevoegen</button>
             </div>
           </div>
         </div>
@@ -691,7 +691,7 @@ export const WeekPlanning = ({ isBestuur, currentUserId, staffProfiles }: WeekPl
 
             {/* Hours task: enter hours (only assigned person) */}
             {canEnterHours(selectedTask) && (
-              <button onClick={() => openHoursEntry(selectedTask, false)} className="w-full mb-4 px-4 py-2 bg-[#337aff] text-[#080d17] rounded-lg text-sm font-semibold transition-all hover:shadow-[0_0_20px_rgba(51,122,255,0.2)]">
+              <button onClick={() => openHoursEntry(selectedTask, false)} className="w-full mb-4 px-4 py-2 bg-[#337aff] text-white rounded-lg text-sm font-semibold transition-all hover:shadow-[0_0_20px_rgba(51,122,255,0.2)]">
                 Uren invullen
               </button>
             )}
@@ -707,7 +707,7 @@ export const WeekPlanning = ({ isBestuur, currentUserId, staffProfiles }: WeekPl
             {(isBestuur || selectedTask.assigned_to === currentUserId) && (
               <div className="flex gap-2 mb-4">
                 {['open', 'in_progress', 'done'].map(s => (
-                  <button key={s} onClick={() => handleStatusChange(selectedTask, s)} className={`flex-1 text-xs py-2 rounded-lg font-medium transition-all ${selectedTask.status === s ? s === 'done' ? 'bg-[#337aff] text-[#080d17]' : s === 'in_progress' ? 'bg-amber-400 text-[#080d17]' : 'bg-[#3a465c] text-white' : 'bg-[#25303f] text-[#9ba7ba] hover:text-white'}`}>
+                  <button key={s} onClick={() => handleStatusChange(selectedTask, s)} className={`flex-1 text-xs py-2 rounded-lg font-medium transition-all ${selectedTask.status === s ? s === 'done' ? 'bg-[#337aff] text-white' : s === 'in_progress' ? 'bg-amber-400 text-white' : 'bg-[#3a465c] text-white' : 'bg-[#25303f] text-[#9ba7ba] hover:text-white'}`}>
                     {s === 'open' ? 'Open' : s === 'in_progress' ? 'Bezig' : 'Gedaan'}
                   </button>
                 ))}
@@ -729,7 +729,7 @@ export const WeekPlanning = ({ isBestuur, currentUserId, staffProfiles }: WeekPl
                   <div key={u.id} className="bg-[#25303f] rounded-lg p-3">
                     <div className="flex items-center justify-between mb-1">
                       <span className="text-xs text-[#337aff] font-medium">{getUsername(u.user_id)}</span>
-                      <span className="text-[10px] text-[#4b5563]">{format(new Date(u.created_at), 'dd/MM HH:mm')}</span>
+                      <span className="text-[10px] text-[#64748b]">{format(new Date(u.created_at), 'dd/MM HH:mm')}</span>
                     </div>
                     {u.message && <p className="text-xs text-[#d1d5db]">{u.message}</p>}
                   </div>
@@ -740,7 +740,7 @@ export const WeekPlanning = ({ isBestuur, currentUserId, staffProfiles }: WeekPl
               {(isBestuur || selectedTask.assigned_to === currentUserId) && (
                 <div className="flex gap-2">
                   <input value={updateMessage} onChange={e => setUpdateMessage(e.target.value)} placeholder="Voeg een update toe..." onKeyDown={e => e.key === 'Enter' && handleAddUpdate()} className="flex-1 bg-[#080d17] border border-[#3a465c] rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-[#337aff]/50" />
-                  <button onClick={handleAddUpdate} disabled={!updateMessage.trim()} className="px-4 py-2 bg-[#337aff] text-[#080d17] rounded-lg text-sm font-medium disabled:opacity-50 transition-all">Verstuur</button>
+                  <button onClick={handleAddUpdate} disabled={!updateMessage.trim()} className="px-4 py-2 bg-[#337aff] text-white rounded-lg text-sm font-medium disabled:opacity-50 transition-all">Verstuur</button>
                 </div>
               )}
             </div>
@@ -973,7 +973,7 @@ export const WeekPlanning = ({ isBestuur, currentUserId, staffProfiles }: WeekPl
                 <button
                   onClick={handleHoursSubmit}
                   disabled={hoursSubmitting || hoursLoading}
-                  className="px-5 py-2.5 bg-[#337aff] text-[#080d17] rounded-lg text-sm font-semibold disabled:opacity-50 transition-all"
+                  className="px-5 py-2.5 bg-[#337aff] text-white rounded-lg text-sm font-semibold disabled:opacity-50 transition-all"
                 >
                   {hoursSubmitting ? 'Opslaan...' : 'Uren opslaan'}
                 </button>
@@ -1003,7 +1003,7 @@ export const WeekPlanning = ({ isBestuur, currentUserId, staffProfiles }: WeekPl
                 <label className="text-[#9ba7ba] text-sm mb-1 block">Toelichting</label>
                 <textarea value={requestMessage} onChange={e => setRequestMessage(e.target.value)} placeholder="Waarom kun je deze taak niet doen..." rows={3} className="w-full bg-[#25303f] border border-[#3a465c] rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-[#337aff]/50 resize-none" />
               </div>
-              <button onClick={handleCreateRequest} className="w-full bg-amber-500 hover:bg-amber-600 text-[#080d17] font-semibold py-2.5 rounded-lg transition-all">Verzoek indienen</button>
+              <button onClick={handleCreateRequest} className="w-full bg-amber-500 hover:bg-amber-600 text-white font-semibold py-2.5 rounded-lg transition-all">Verzoek indienen</button>
             </div>
           </div>
         </div>

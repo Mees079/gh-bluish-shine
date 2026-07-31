@@ -103,7 +103,7 @@ export const StaffAnnouncements = ({ isBestuur, currentUserId, staffProfiles }: 
             rows={4}
             className="w-full bg-[#25303f] border border-[#3a465c] rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-[#337aff]/50 resize-none"
           />
-          <button onClick={handleAdd} disabled={!message.trim()} className="px-4 py-2 bg-[#337aff] text-[#080d17] rounded-lg text-sm font-semibold disabled:opacity-50 transition-all">
+          <button onClick={handleAdd} disabled={!message.trim()} className="px-4 py-2 bg-[#337aff] text-white rounded-lg text-sm font-semibold disabled:opacity-50 transition-all">
             Plaatsen
           </button>
         </div>
@@ -118,11 +118,11 @@ export const StaffAnnouncements = ({ isBestuur, currentUserId, staffProfiles }: 
                 <p className="text-sm text-[#d1d5db] whitespace-pre-wrap">{a.message}</p>
                 <div className="flex items-center gap-3 mt-3">
                   <span className="text-xs text-[#337aff] font-medium">{getUsername(a.created_by)}</span>
-                  <span className="text-xs text-[#4b5563]">{format(new Date(a.created_at), "d MMM yyyy 'om' HH:mm", { locale: nl })}</span>
+                  <span className="text-xs text-[#64748b]">{format(new Date(a.created_at), "d MMM yyyy 'om' HH:mm", { locale: nl })}</span>
                 </div>
               </div>
               {isBestuur && (
-                <button onClick={() => handleDelete(a.id)} className="text-[#4b5563] hover:text-red-400 ml-3 transition-colors">
+                <button onClick={() => handleDelete(a.id)} className="text-[#64748b] hover:text-red-400 ml-3 transition-colors">
                   <Trash2 className="h-4 w-4" />
                 </button>
               )}

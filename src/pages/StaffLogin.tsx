@@ -79,14 +79,14 @@ const StaffLogin = () => {
             <div>
               <label className="text-[#9ba7ba] text-sm font-medium mb-2 block">Gebruikersnaam</label>
               <div className="relative">
-                <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#4b5563]" />
+                <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#64748b]" />
                 <input
                   type="text"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
                   placeholder="Gebruikersnaam"
                   required
-                  className="w-full bg-[#25303f] border border-[#3a465c] rounded-lg pl-10 pr-4 py-3 text-white placeholder-[#4b5563] focus:outline-none focus:border-[#337aff]/50 focus:ring-1 focus:ring-[#337aff]/30 transition-all"
+                  className="w-full bg-[#25303f] border border-[#3a465c] rounded-lg pl-10 pr-4 py-3 text-white placeholder-[#64748b] focus:outline-none focus:border-[#337aff]/50 focus:ring-1 focus:ring-[#337aff]/30 transition-all"
                 />
               </div>
             </div>
@@ -94,14 +94,14 @@ const StaffLogin = () => {
             <div>
               <label className="text-[#9ba7ba] text-sm font-medium mb-2 block">Wachtwoord</label>
               <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#4b5563]" />
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#64748b]" />
                 <input
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
                   required
-                  className="w-full bg-[#25303f] border border-[#3a465c] rounded-lg pl-10 pr-4 py-3 text-white placeholder-[#4b5563] focus:outline-none focus:border-[#337aff]/50 focus:ring-1 focus:ring-[#337aff]/30 transition-all"
+                  className="w-full bg-[#25303f] border border-[#3a465c] rounded-lg pl-10 pr-4 py-3 text-white placeholder-[#64748b] focus:outline-none focus:border-[#337aff]/50 focus:ring-1 focus:ring-[#337aff]/30 transition-all"
                 />
               </div>
             </div>
@@ -109,7 +109,7 @@ const StaffLogin = () => {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-[#337aff] hover:bg-[#00dd77] text-[#080d17] font-semibold py-3 rounded-lg transition-all duration-200 disabled:opacity-50 shadow-[0_0_20px_rgba(51,122,255,0.3)] hover:shadow-[0_0_30px_rgba(51,122,255,0.5)]"
+              className="w-full bg-[#337aff] hover:bg-[#5b95ff] text-white font-semibold py-3 rounded-lg transition-all duration-200 disabled:opacity-50 shadow-[0_0_20px_rgba(51,122,255,0.3)] hover:shadow-[0_0_30px_rgba(51,122,255,0.5)]"
             >
               {loading ? "Inloggen..." : "Inloggen"}
             </button>
