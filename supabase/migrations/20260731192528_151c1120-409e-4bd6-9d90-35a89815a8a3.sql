@@ -1,0 +1,1 @@
+UPDATE public.home_config SET tiktok_link = 'https://www.tiktok.com/@hdrp_mees' WHERE tiktok_link IS NULL OR tiktok_link = '';
