@@ -28,25 +28,25 @@ const panels = [
 export const Navbar = ({ discordLink: propDiscordLink }: NavbarProps) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [discordLink, setDiscordLink] = useState(propDiscordLink);
+  const [robloxLink, setRobloxLink] = useState<string | null>(null);
+  const [tiktokLink, setTiktokLink] = useState<string | null>(null);
   const [query, setQuery] = useState("");
   const location = useLocation();
   const navigate = useNavigate();
 
   useEffect(() => {
-    const loadDiscordLink = async () => {
+    const loadLinks = async () => {
       const { data } = await supabase
         .from('home_config')
-        .select('discord_link')
+        .select('discord_link, roblox_link, tiktok_link')
         .single();
 
-      if (data?.discord_link) {
-        setDiscordLink(data.discord_link);
-      }
+      if (data?.discord_link && !propDiscordLink) setDiscordLink(data.discord_link);
+      setRobloxLink(data?.roblox_link ?? null);
+      setTiktokLink(data?.tiktok_link ?? null);
     };
 
-    if (!propDiscordLink) {
-      loadDiscordLink();
-    }
+    loadLinks();
   }, [propDiscordLink]);
 
   const isActive = (path: string) => location.pathname === path;
