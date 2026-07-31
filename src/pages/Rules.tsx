@@ -6,6 +6,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { RichTextDisplay } from "@/components/RichTextDisplay";
 
 interface Subsection {
   title: string;
@@ -324,7 +325,7 @@ const Rules = () => {
                           </h3>
                         </div>
                         <div className="space-y-2 pl-4">
-                          {renderContent(subsection.content)}
+                          <RichTextDisplay content={subsection.content} />
                         </div>
                       </div>
                     ))}
