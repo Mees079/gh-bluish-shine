@@ -33,131 +33,109 @@ export const Navbar = ({ discordLink: propDiscordLink }: NavbarProps) => {
 
   const isActive = (path: string) => location.pathname === path;
 
+  const links = [
+    { to: "/", label: "Home" },
+    { to: "/regels", label: "Regels" },
+    { to: "/shop", label: "Shop" },
+    { to: "/support", label: "Support" },
+  ];
+
   return (
-    <nav className="sticky top-0 z-50 bg-background/80 backdrop-blur-md border-b border-border/50 shadow-lg">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
-          {/* Logo */}
-          <Link to="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
-            <img src={hdrpLogo} alt="HDRP logo" className="h-9 w-9 object-contain" />
-            <span className="flex flex-col leading-none">
-              <span className="text-lg font-semibold tracking-tight text-foreground">HDRP</span>
-              <span className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Hoofddorp Roleplay</span>
-            </span>
-          </Link>
+    <header className="sticky top-0 z-50">
+      {/* Hoofdbalk */}
+      <div className="bg-navy text-navy-foreground">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16 gap-4">
+            <Link to="/" className="flex items-center gap-3 shrink-0">
+              <img src={hdrpLogo} alt="HDRP logo" className="h-8 w-8 object-contain brightness-0 invert" />
+              <span className="flex flex-col leading-none">
+                <span className="font-heading text-lg font-bold tracking-tight">HDRP</span>
+                <span className="text-[10px] uppercase tracking-[0.18em] text-navy-foreground/60">Hoofddorp Roleplay</span>
+              </span>
+            </Link>
 
-
-          {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center gap-8">
-            <Link 
-              to="/" 
-              className={`relative font-medium transition-colors ${
-                isActive('/') ? 'text-primary' : 'text-foreground hover:text-primary'
-              }`}
-            >
-              Home
-              {isActive('/') && (
-                <span className="absolute -bottom-2 left-0 right-0 h-0.5 bg-primary rounded-full" />
+            <div className="hidden md:flex items-center gap-3">
+              {discordLink && (
+                <a
+                  href={discordLink}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-sm font-medium text-navy-foreground/80 hover:text-navy-foreground transition-colors"
+                >
+                  Discord
+                </a>
               )}
-            </Link>
-            <Link 
-              to="/regels" 
-              className={`relative font-medium transition-colors ${
-                isActive('/regels') ? 'text-primary' : 'text-foreground hover:text-primary'
-              }`}
-            >
-              Regels
-              {isActive('/regels') && (
-                <span className="absolute -bottom-2 left-0 right-0 h-0.5 bg-primary rounded-full" />
-              )}
-            </Link>
-            <Link 
-              to="/shop" 
-              className={`relative font-medium transition-colors ${
-                isActive('/shop') ? 'text-primary' : 'text-foreground hover:text-primary'
-              }`}
-            >
-              Shop
-              {isActive('/shop') && (
-                <span className="absolute -bottom-2 left-0 right-0 h-0.5 bg-primary rounded-full" />
-              )}
-            </Link>
-            <Link 
-              to="/support" 
-              className={`relative font-medium transition-colors ${
-                isActive('/support') ? 'text-primary' : 'text-foreground hover:text-primary'
-              }`}
-            >
-              Support
-              {isActive('/support') && (
-                <span className="absolute -bottom-2 left-0 right-0 h-0.5 bg-primary rounded-full" />
-              )}
-            </Link>
-            {discordLink && (
-              <a 
-                href={discordLink} 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="font-medium text-foreground hover:text-primary transition-colors"
+              <Link
+                to="/shop"
+                className="bg-primary hover:bg-primary/90 text-primary-foreground text-sm font-semibold px-5 py-2.5 rounded-md transition-colors"
               >
-                Discord
-              </a>
-            )}
-          </div>
+                Naar de shop
+              </Link>
+            </div>
 
-          {/* Mobile menu button */}
-          <button
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="md:hidden p-2 rounded-md text-foreground hover:bg-accent"
-          >
-            <Menu className="h-6 w-6" />
-          </button>
+            <button
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="md:hidden p-2 rounded-md hover:bg-white/10"
+              aria-label="Menu"
+            >
+              {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+            </button>
+          </div>
         </div>
+      </div>
 
-        {/* Mobile Navigation */}
-        {mobileMenuOpen && (
-          <div className="md:hidden pb-4 space-y-2">
-            <Link 
-              to="/" 
-              className="block px-4 py-2 text-foreground hover:bg-accent rounded-md"
-              onClick={() => setMobileMenuOpen(false)}
-            >
-              Home
-            </Link>
-            <Link 
-              to="/regels" 
-              className="block px-4 py-2 text-foreground hover:bg-accent rounded-md"
-              onClick={() => setMobileMenuOpen(false)}
-            >
-              Regels
-            </Link>
-            <Link 
-              to="/shop" 
-              className="block px-4 py-2 text-foreground hover:bg-accent rounded-md"
-              onClick={() => setMobileMenuOpen(false)}
-            >
-              Shop
-            </Link>
-            <Link 
-              to="/support" 
-              className="block px-4 py-2 text-foreground hover:bg-accent rounded-md"
-              onClick={() => setMobileMenuOpen(false)}
-            >
-              Support
-            </Link>
+      {/* Navigatiebalk */}
+      <nav className="hidden md:block bg-white border-b border-border">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center gap-1 h-12">
+            {links.map((link) => (
+              <Link
+                key={link.to}
+                to={link.to}
+                className={`relative h-12 flex items-center px-4 text-sm font-semibold transition-colors ${
+                  isActive(link.to)
+                    ? "text-primary"
+                    : "text-foreground/70 hover:text-foreground"
+                }`}
+              >
+                {link.label}
+                {isActive(link.to) && (
+                  <span className="absolute bottom-0 left-3 right-3 h-[3px] bg-primary rounded-t-full" />
+                )}
+              </Link>
+            ))}
+          </div>
+        </div>
+      </nav>
+
+      {/* Mobiel menu */}
+      {mobileMenuOpen && (
+        <div className="md:hidden bg-white border-b border-border shadow-sm">
+          <div className="px-4 py-2">
+            {links.map((link) => (
+              <Link
+                key={link.to}
+                to={link.to}
+                className="block px-2 py-3 text-sm font-semibold text-foreground border-b border-border last:border-0"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                {link.label}
+              </Link>
+            ))}
             {discordLink && (
-              <a 
-                href={discordLink} 
-                target="_blank" 
+              <a
+                href={discordLink}
+                target="_blank"
                 rel="noopener noreferrer"
-                className="block px-4 py-2 text-foreground hover:bg-accent rounded-md"
+                className="block px-2 py-3 text-sm font-semibold text-primary"
               >
                 Discord
               </a>
             )}
           </div>
-        )}
-      </div>
-    </nav>
+        </div>
+      )}
+    </header>
   );
 };
+
