@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import { Sidebar } from "@/components/Sidebar";
 import { ProductCard, Product } from "@/components/ProductCard";
 import { ProductModal } from "@/components/ProductModal";
