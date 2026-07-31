@@ -6,8 +6,8 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Suspense, lazy } from "react";
 
 import Home from "./pages/Home";
+import { AdminPanelGate } from "@/components/admin/AdminPanelGate";
 
-const AdminPanel = lazy(() => import("@/components/admin/AdminPanel").then(m => ({ default: m.AdminPanel })));
 const Shop = lazy(() => import("./pages/Shop"));
 const Rules = lazy(() => import("./pages/Rules"));
 const Support = lazy(() => import("./pages/Support"));
@@ -40,9 +40,7 @@ const App = () => (
       <Sonner />
 
       <BrowserRouter>
-        <Suspense fallback={null}>
-          <AdminPanel />
-        </Suspense>
+        <AdminPanelGate />
         <Suspense fallback={<PageFallback />}>
           <Routes>
             <Route path="/" element={<Home />} />
