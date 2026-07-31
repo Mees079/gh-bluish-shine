@@ -202,13 +202,16 @@ const Home = () => {
         
         {/* Hero content */}
         <div className="relative z-10 text-center space-y-8 px-4 max-w-6xl">
-          <div className="inline-block px-6 py-2 bg-primary/20 border border-primary/50 rounded-full backdrop-blur-md mb-4 animate-fade-in">
-            <span className="text-primary font-semibold">🎮 Nu Live & Speelbaar</span>
-          </div>
-          
-          <h1 className="text-5xl sm:text-7xl lg:text-8xl font-bold text-white drop-shadow-2xl leading-tight animate-fade-in">
+          <img
+            src={hdrpLogo.url}
+            alt="HDRP logo"
+            className="h-20 sm:h-24 w-auto mx-auto mb-2 animate-fade-in"
+          />
+
+          <h1 className="text-4xl sm:text-6xl lg:text-7xl font-semibold tracking-tight text-white leading-tight animate-fade-in">
             {config.hero_title}
           </h1>
+
           
           {config.hero_subtitle && (
             <p className="text-2xl sm:text-3xl text-white/90 font-light drop-shadow-lg max-w-3xl mx-auto animate-fade-in" style={{ animationDelay: '0.1s' }}>
