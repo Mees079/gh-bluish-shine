@@ -2,6 +2,8 @@ import { Link, useLocation } from "react-router-dom";
 import { Menu } from "lucide-react";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import hdrpLogo from "@/assets/hdrp-logo.png.asset.json";
+
 
 interface NavbarProps {
   discordLink?: string | null;
