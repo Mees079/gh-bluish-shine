@@ -469,11 +469,18 @@ const Home = () => {
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
             <div>
-              <h3 className="font-bold text-lg mb-4 text-foreground">HDRP</h3>
+              <div className="flex items-center gap-3 mb-4">
+                <img src={hdrpLogo.url} alt="HDRP logo" className="h-9 w-9 object-contain" />
+                <div className="leading-none">
+                  <p className="font-semibold text-foreground">HDRP</p>
+                  <p className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Hoofddorp Roleplay</p>
+                </div>
+              </div>
               <p className="text-muted-foreground text-sm">
-                {config?.footer_description || "De beste Nederlandse Roblox roleplay server met realisme en kwaliteit."}
+                {config?.footer_description || "Nederlandse Roblox roleplay-community met focus op realisme en kwaliteit."}
               </p>
             </div>
+
             <div>
               <h4 className="font-semibold mb-4 text-foreground">Links</h4>
               <div className="space-y-2">
