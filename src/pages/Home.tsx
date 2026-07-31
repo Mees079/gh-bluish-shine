@@ -269,7 +269,7 @@ const Home = () => {
         {/* Over ons */}
         {config.show_about_section && (
           <section ref={aboutRef} className="bg-white border border-border rounded-lg overflow-hidden">
-            <div className="grid grid-cols-1 lg:grid-cols-2">
+            <div className={`grid grid-cols-1 ${config.about_image_url ? "lg:grid-cols-2" : ""}`}>
               <div className="p-8 sm:p-10 flex flex-col justify-center gap-4">
                 <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-primary">Over ons</p>
                 <h2 className="text-2xl sm:text-3xl font-bold text-navy">{config.about_title}</h2>
