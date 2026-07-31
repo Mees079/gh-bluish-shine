@@ -1,0 +1,1 @@
+ALTER TABLE public.home_config ADD COLUMN IF NOT EXISTS tiktok_link text;
