@@ -47,7 +47,7 @@ export const StaffChangePassword = ({ onComplete }: StaffChangePasswordProps) =>
   };
 
   return (
-    <div className="min-h-screen bg-[#0a0e1a] flex items-center justify-center p-4">
+    <div className="min-h-dvh bg-[#0a0e1a] flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_rgba(0,255,136,0.08)_0%,_transparent_60%)]" />
       
       <div className="relative w-full max-w-md">

@@ -208,7 +208,7 @@ export const SupportManager = () => {
             Terug naar overzicht
           </Button>
           <Select value={selectedTicket.status} onValueChange={updateTicketStatus}>
-            <SelectTrigger className="w-[180px]">
+            <SelectTrigger className="w-full sm:w-[180px]">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -335,7 +335,7 @@ export const SupportManager = () => {
         </div>
         <div className="flex items-center gap-2">
           <Select value={statusFilter} onValueChange={setStatusFilter}>
-            <SelectTrigger className="w-[150px]">
+            <SelectTrigger className="w-full sm:w-[150px]">
               <SelectValue placeholder="Filter status" />
             </SelectTrigger>
             <SelectContent>

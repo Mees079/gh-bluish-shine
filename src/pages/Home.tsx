@@ -178,7 +178,7 @@ const Home = () => {
   if (!config) return null;
 
   return (
-    <div className="min-h-screen bg-background relative overflow-hidden">
+    <div className="min-h-dvh bg-background relative overflow-hidden">
       {/* Animated background shapes with hexagons */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden">
         {/* Glowing orbs */}

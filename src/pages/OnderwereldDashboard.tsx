@@ -96,7 +96,7 @@ const OnderwereldDashboard = () => {
   const handleLogout = async () => { await supabase.auth.signOut(); navigate("/onderwereld"); };
 
   if (loading || !uid || !role || !me) {
-    return <div className="min-h-screen bg-slate-900 flex items-center justify-center text-white">Laden...</div>;
+    return <div className="min-h-dvh bg-slate-900 flex items-center justify-center text-white">Laden...</div>;
   }
 
   const roleLabel = role === "onderwereld_hoofd" ? "Hoofd Coordinator" : role === "onderwereld_coordinator" ? "Coordinator" : "Proef Coordinator";
@@ -134,7 +134,7 @@ const OnderwereldDashboard = () => {
   );
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#050a14] via-[#0a0e1a] to-[#050a14] text-white relative overflow-x-hidden">
+    <div className="min-h-dvh bg-gradient-to-br from-[#050a14] via-[#0a0e1a] to-[#050a14] text-white relative overflow-x-hidden">
       {/* Colored ambient blobs */}
       <div className="fixed -top-40 -left-40 w-[500px] h-[500px] rounded-full bg-[#00ff88]/15 blur-[120px] pointer-events-none" />
       <div className="fixed top-1/3 -right-40 w-[500px] h-[500px] rounded-full bg-[#00ff88]/10 blur-[120px] pointer-events-none" />
@@ -227,7 +227,7 @@ const OnderwereldDashboard = () => {
       </aside>
 
       {/* Main */}
-      <main className="min-h-screen relative z-10 flex flex-col">
+      <main className="min-h-dvh relative z-10 flex flex-col">
         <div className="max-w-7xl w-full mx-auto p-6 lg:p-10 pr-16 lg:pr-20 flex-1">
           {nav === "overview" && <OverviewPanel me={me} role={role} onNav={setNav} onGang={openGangDetail} />}
           {nav === "gangs" && <GangsPanel isHoofd={isHoofd} onOpen={openGangDetail} />}

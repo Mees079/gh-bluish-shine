@@ -110,7 +110,7 @@ const StaffDashboard = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#0a0e1a] flex items-center justify-center">
+      <div className="min-h-dvh bg-[#0a0e1a] flex items-center justify-center">
         <div className="w-8 h-8 border-2 border-[#00ff88] border-t-transparent rounded-full animate-spin" />
       </div>
     );
@@ -150,7 +150,7 @@ const StaffDashboard = () => {
     });
 
   return (
-    <div className="min-h-screen bg-[#0a0e1a]">
+    <div className="min-h-dvh bg-[#0a0e1a]">
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,_rgba(0,255,136,0.04)_0%,_transparent_50%)]" />
 
       {/* Header */}

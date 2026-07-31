@@ -76,7 +76,7 @@ const DeveloperDashboard = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#050a14] flex items-center justify-center">
+      <div className="min-h-dvh bg-[#050a14] flex items-center justify-center">
         <div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
       </div>
     );
@@ -96,7 +96,7 @@ const DeveloperDashboard = () => {
   ] as const;
 
   return (
-    <div className="min-h-screen bg-[#050a14] relative">
+    <div className="min-h-dvh bg-[#050a14] relative">
       <div
         className="absolute inset-0 opacity-20 pointer-events-none"
         style={{

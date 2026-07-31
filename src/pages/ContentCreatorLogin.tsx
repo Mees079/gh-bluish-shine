@@ -33,7 +33,7 @@ const ContentCreatorLogin = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#0a0512] flex items-center justify-center p-4 relative overflow-hidden">
+    <div className="min-h-dvh bg-[#0a0512] flex items-center justify-center p-4 relative overflow-hidden">
       <div
         className="absolute inset-0 opacity-30"
         style={{

@@ -196,7 +196,7 @@ const Shop = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-dvh bg-background">
       <Navbar discordLink={discordLink} />
       
       <div className="flex flex-col sm:flex-row">

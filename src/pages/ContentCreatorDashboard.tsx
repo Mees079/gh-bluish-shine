@@ -260,13 +260,13 @@ const ContentCreatorDashboard = () => {
   const productShopItems = rewards.filter(r => !r.boost_multiplier);
 
   if (loading) return (
-    <div className="min-h-screen bg-[#0a0512] flex items-center justify-center text-purple-300">
+    <div className="min-h-dvh bg-[#0a0512] flex items-center justify-center text-purple-300">
       <div className="animate-pulse flex items-center gap-3"><Video className="h-5 w-5" /> Laden...</div>
     </div>
   );
 
   return (
-    <div className="min-h-screen bg-[#0a0512] text-white relative overflow-hidden">
+    <div className="min-h-dvh bg-[#0a0512] text-white relative overflow-hidden">
       {/* background */}
       <div className="pointer-events-none absolute inset-0 opacity-40" style={{
         backgroundImage: "radial-gradient(circle at 20% 0%, rgba(168,85,247,0.18), transparent 50%), radial-gradient(circle at 80% 30%, rgba(236,72,153,0.12), transparent 55%)",
