@@ -179,54 +179,13 @@ const Home = () => {
 
   return (
     <div className="min-h-dvh bg-background relative overflow-hidden">
-      {/* Animated background shapes with hexagons */}
+      {/* Subtiele, professionele achtergrond */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden">
-        {/* Glowing orbs */}
-        <div className="absolute top-20 left-10 w-72 h-72 bg-primary/20 rounded-full blur-3xl animate-pulse opacity-30" style={{ animationDuration: '4s' }} />
-        <div className="absolute bottom-40 right-20 w-96 h-96 bg-primary/15 rounded-full blur-3xl animate-pulse opacity-25" style={{ animationDuration: '6s' }} />
-        <div className="absolute top-1/2 left-1/3 w-64 h-64 bg-primary/10 rounded-full blur-3xl animate-pulse opacity-20" style={{ animationDuration: '5s' }} />
-        
-        {/* Animated hexagon shapes */}
-        <div className="absolute top-1/4 left-1/4 w-32 h-32 animate-float-slow opacity-10">
-          <svg viewBox="0 0 100 100" className="w-full h-full">
-            <polygon points="50 0, 93.3 25, 93.3 75, 50 100, 6.7 75, 6.7 25" 
-              fill="none" stroke="hsl(var(--primary))" strokeWidth="2"
-              className="animate-pulse" style={{ animationDuration: '3s' }}/>
-            <polygon points="50 0, 93.3 25, 93.3 75, 50 100, 6.7 75, 6.7 25" 
-              fill="hsl(var(--primary) / 0.05)" className="blur-sm"/>
-          </svg>
-        </div>
-        
-        <div className="absolute top-2/3 right-1/4 w-24 h-24 animate-float-medium opacity-15">
-          <svg viewBox="0 0 100 100" className="w-full h-full">
-            <polygon points="50 0, 93.3 25, 93.3 75, 50 100, 6.7 75, 6.7 25" 
-              fill="none" stroke="hsl(var(--primary))" strokeWidth="2"
-              className="animate-pulse" style={{ animationDuration: '4s' }}/>
-            <polygon points="50 0, 93.3 25, 93.3 75, 50 100, 6.7 75, 6.7 25" 
-              fill="hsl(var(--primary) / 0.08)" className="blur-sm"/>
-          </svg>
-        </div>
-        
-        <div className="absolute bottom-1/4 left-1/3 w-20 h-20 animate-float-fast opacity-12">
-          <svg viewBox="0 0 100 100" className="w-full h-full">
-            <polygon points="50 0, 93.3 25, 93.3 75, 50 100, 6.7 75, 6.7 25" 
-              fill="none" stroke="hsl(var(--primary-glow))" strokeWidth="2"
-              className="animate-pulse" style={{ animationDuration: '2.5s' }}/>
-            <polygon points="50 0, 93.3 25, 93.3 75, 50 100, 6.7 75, 6.7 25" 
-              fill="hsl(var(--primary-glow) / 0.1)" className="blur-sm"/>
-          </svg>
-        </div>
-        
-        <div className="absolute top-1/2 right-1/3 w-28 h-28 animate-float-medium opacity-10" style={{ animationDelay: '1s' }}>
-          <svg viewBox="0 0 100 100" className="w-full h-full">
-            <polygon points="50 0, 93.3 25, 93.3 75, 50 100, 6.7 75, 6.7 25" 
-              fill="none" stroke="hsl(var(--primary))" strokeWidth="2"
-              className="animate-pulse" style={{ animationDuration: '3.5s' }}/>
-            <polygon points="50 0, 93.3 25, 93.3 75, 50 100, 6.7 75, 6.7 25" 
-              fill="hsl(var(--primary) / 0.06)" className="blur-sm"/>
-          </svg>
-        </div>
+        <div className="absolute inset-0 opacity-[0.06] [background-image:linear-gradient(hsl(var(--primary)/0.6)_1px,transparent_1px),linear-gradient(90deg,hsl(var(--primary)/0.6)_1px,transparent_1px)] [background-size:64px_64px]" />
+        <div className="absolute -top-32 left-1/4 w-[36rem] h-[36rem] bg-primary/10 rounded-full blur-3xl" />
+        <div className="absolute bottom-0 right-0 w-[28rem] h-[28rem] bg-primary/[0.07] rounded-full blur-3xl" />
       </div>
+
 
       <Navbar />
       
