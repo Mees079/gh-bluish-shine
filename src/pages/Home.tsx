@@ -180,11 +180,11 @@ const Home = () => {
   if (!config) return null;
 
   return (
-    <div className="min-h-dvh bg-secondary">
+    <div className="min-h-dvh bg-background">
       <Navbar discordLink={config.discord_link} />
 
       {/* Servicebalk */}
-      <div className="bg-white border-b border-border">
+      <div className="bg-card border-b border-border">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2.5 flex flex-wrap items-center justify-center gap-x-8 gap-y-1 text-xs sm:text-sm text-muted-foreground">
           <span className="font-medium text-foreground">Dagelijks actieve community</span>
           <span className="hidden sm:inline">Support binnen 24 uur</span>
@@ -194,13 +194,13 @@ const Home = () => {
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-10">
         {/* Hero */}
-        <section className="bg-white border border-border rounded-lg overflow-hidden">
+        <section className="bg-card border border-border rounded-lg overflow-hidden">
           <div className="grid grid-cols-1 lg:grid-cols-2">
             <div className="p-8 sm:p-12 flex flex-col justify-center gap-5">
               <span className="inline-flex w-fit items-center gap-2 text-[11px] font-bold uppercase tracking-[0.15em] text-primary bg-primary/10 px-3 py-1 rounded">
                 Hoofddorp Roleplay
               </span>
-              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-navy leading-tight">
+              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground leading-tight">
                 {config.hero_title}
               </h1>
               {config.hero_subtitle && (
@@ -251,13 +251,13 @@ const Home = () => {
               return (
                 <div
                   key={stat.id}
-                  className="bg-white border border-border rounded-lg p-5 flex items-center gap-4 hover:border-primary/40 transition-colors"
+                  className="bg-card border border-border rounded-lg p-5 flex items-center gap-4 hover:border-primary/40 transition-colors"
                 >
                   <div className="bg-secondary rounded-md p-2.5 shrink-0">
                     <IconComponent className="h-5 w-5 text-primary" />
                   </div>
                   <div className="min-w-0">
-                    <p className="text-xl font-bold text-navy leading-none">{stat.value}</p>
+                    <p className="text-xl font-bold text-foreground leading-none">{stat.value}</p>
                     <p className="text-xs text-muted-foreground mt-1 truncate">{stat.label}</p>
                   </div>
                 </div>
@@ -268,11 +268,11 @@ const Home = () => {
 
         {/* Over ons */}
         {config.show_about_section && (
-          <section ref={aboutRef} className="bg-white border border-border rounded-lg overflow-hidden">
+          <section ref={aboutRef} className="bg-card border border-border rounded-lg overflow-hidden">
             <div className={`grid grid-cols-1 ${config.about_image_url ? "lg:grid-cols-2" : ""}`}>
               <div className="p-8 sm:p-10 flex flex-col justify-center gap-4">
                 <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-primary">Over ons</p>
-                <h2 className="text-2xl sm:text-3xl font-bold text-navy">{config.about_title}</h2>
+                <h2 className="text-2xl sm:text-3xl font-bold text-foreground">{config.about_title}</h2>
                 <p className="text-muted-foreground leading-relaxed">{config.about_content}</p>
                 <div className="flex flex-wrap gap-3 pt-2">
                   <Button asChild>
@@ -300,7 +300,7 @@ const Home = () => {
         {/* Features */}
         {config.show_features_section && (
           <section ref={featuresRef}>
-            <h2 className="text-xl sm:text-2xl font-bold text-navy mb-4">{config.features_title}</h2>
+            <h2 className="text-xl sm:text-2xl font-bold text-foreground mb-4">{config.features_title}</h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {[
                 { icon: config.feature_1_icon, title: config.feature_1_title, desc: config.feature_1_description },
@@ -309,10 +309,10 @@ const Home = () => {
               ].map((feature, idx) => (
                 <div
                   key={idx}
-                  className="bg-white border border-border rounded-lg p-6 hover:border-primary/40 transition-colors"
+                  className="bg-card border border-border rounded-lg p-6 hover:border-primary/40 transition-colors"
                 >
                   <div className="text-3xl mb-3">{feature.icon}</div>
-                  <h3 className="text-lg font-bold text-navy mb-2">{feature.title}</h3>
+                  <h3 className="text-lg font-bold text-foreground mb-2">{feature.title}</h3>
                   <p className="text-sm text-muted-foreground leading-relaxed">{feature.desc}</p>
                 </div>
               ))}
@@ -323,12 +323,12 @@ const Home = () => {
         {/* Galerij */}
         {config.show_gallery && galleryImages.length > 0 && (
           <section ref={galleryRef}>
-            <h2 className="text-xl sm:text-2xl font-bold text-navy mb-4">{config.gallery_title}</h2>
+            <h2 className="text-xl sm:text-2xl font-bold text-foreground mb-4">{config.gallery_title}</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {(showAllGallery ? galleryImages : galleryImages.slice(0, 3)).map((image, idx) => (
                 <div
                   key={image.id}
-                  className="bg-white border border-border rounded-lg overflow-hidden group"
+                  className="bg-card border border-border rounded-lg overflow-hidden group"
                 >
                   <div className="relative h-52 overflow-hidden">
                     <img
@@ -339,7 +339,7 @@ const Home = () => {
                     />
                   </div>
                   {image.title && (
-                    <p className="px-4 py-3 text-sm font-medium text-navy">{image.title}</p>
+                    <p className="px-4 py-3 text-sm font-medium text-foreground">{image.title}</p>
                   )}
                 </div>
               ))}

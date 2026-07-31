@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import { Sidebar } from "@/components/Sidebar";
 import { ProductCard, Product } from "@/components/ProductCard";
 import { ProductModal } from "@/components/ProductModal";
@@ -28,9 +29,17 @@ const Shop = () => {
   const [filterOpen, setFilterOpen] = useState(false);
   const [discordLink, setDiscordLink] = useState<string | null>(null);
 
+  const [searchParams] = useSearchParams();
+
+  useEffect(() => {
+    const q = searchParams.get("q");
+    if (q) setSearchQuery(q);
+  }, [searchParams]);
+
   useEffect(() => {
     loadDiscordLink();
   }, []);
+
 
   useEffect(() => {
     if (activeCategory) {
