@@ -28,9 +28,17 @@ const Shop = () => {
   const [filterOpen, setFilterOpen] = useState(false);
   const [discordLink, setDiscordLink] = useState<string | null>(null);
 
+  const [searchParams] = useSearchParams();
+
+  useEffect(() => {
+    const q = searchParams.get("q");
+    if (q) setSearchQuery(q);
+  }, [searchParams]);
+
   useEffect(() => {
     loadDiscordLink();
   }, []);
+
 
   useEffect(() => {
     if (activeCategory) {
