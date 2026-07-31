@@ -164,6 +164,33 @@ export const Navbar = ({ discordLink: propDiscordLink }: NavbarProps) => {
         </div>
       </nav>
 
+      {/* Zwarte servicebalk */}
+      <div className="bg-[hsl(220_60%_3%)] text-white/85 border-b border-white/10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-center gap-6 sm:gap-16 py-2 text-xs sm:text-sm font-medium overflow-x-auto">
+            {[
+              { href: discordLink, label: "Join Discord" },
+              { href: robloxLink, label: "Speel op Roblox" },
+              { href: tiktokLink, label: "Volg ons op TikTok" },
+            ]
+              .filter((item) => item.href)
+              .map((item) => (
+                <a
+                  key={item.label}
+                  href={item.href as string}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="whitespace-nowrap underline underline-offset-4 decoration-white/30 hover:text-white hover:decoration-white transition-colors"
+                >
+                  {item.label}
+                </a>
+              ))}
+          </div>
+        </div>
+      </div>
+
+
+
       {/* Mobiel menu */}
       {mobileMenuOpen && (
         <div className="md:hidden bg-card border-b border-border shadow-sm">
