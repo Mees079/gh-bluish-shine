@@ -245,7 +245,7 @@ const Support = () => {
 
   if (loading && !activeTicket) {
     return (
-      <div className="min-h-screen bg-background">
+      <div className="min-h-dvh bg-background">
         <Navbar discordLink={discordLink} />
         <div className="flex items-center justify-center h-[calc(100vh-80px)]">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -255,7 +255,7 @@ const Support = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-dvh bg-background">
       <Navbar discordLink={discordLink} />
       
       <div className="container mx-auto px-4 py-8 max-w-4xl">

@@ -61,13 +61,13 @@ export default function MeosDashboard() {
   const logout = async () => { await supabase.auth.signOut(); nav("/meos"); };
 
   if (!user || !profile) {
-    return <div className="min-h-screen bg-[#0a1628] flex items-center justify-center text-white"><Loader2 className="animate-spin" /></div>;
+    return <div className="min-h-dvh bg-[#0a1628] flex items-center justify-center text-white"><Loader2 className="animate-spin" /></div>;
   }
 
   if (mustChange) return <ChangePassword onDone={() => setMustChange(false)} />;
 
   return (
-    <div className="min-h-screen bg-gray-100 font-sans">
+    <div className="min-h-dvh bg-gray-100 font-sans">
       <IncidentMonitor isMember={true} />
       {/* Top bar */}
       <header className="bg-gradient-to-r from-[#003d7a] to-[#0055a5] text-white shadow-lg">
@@ -800,7 +800,7 @@ function ChangePassword({ onDone }: { onDone: () => void }) {
     onDone();
   };
   return (
-    <div className="min-h-screen bg-[#0a1628] flex items-center justify-center p-4">
+    <div className="min-h-dvh bg-[#0a1628] flex items-center justify-center p-4">
       <div className="bg-white rounded-lg shadow-2xl max-w-md w-full p-6">
         <div className="flex items-center gap-3 mb-4">
           <Shield className="w-8 h-8 text-[#003d7a]" />

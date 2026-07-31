@@ -96,7 +96,7 @@ const OnderwereldDashboard = () => {
   const handleLogout = async () => { await supabase.auth.signOut(); navigate("/onderwereld"); };
 
   if (loading || !uid || !role || !me) {
-    return <div className="min-h-screen bg-slate-900 flex items-center justify-center text-white">Laden...</div>;
+    return <div className="min-h-dvh bg-slate-900 flex items-center justify-center text-white">Laden...</div>;
   }
 
   const roleLabel = role === "onderwereld_hoofd" ? "Hoofd Coordinator" : role === "onderwereld_coordinator" ? "Coordinator" : "Proef Coordinator";
@@ -134,7 +134,7 @@ const OnderwereldDashboard = () => {
   );
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#050a14] via-[#0a0e1a] to-[#050a14] text-white relative overflow-x-hidden">
+    <div className="min-h-dvh bg-gradient-to-br from-[#050a14] via-[#0a0e1a] to-[#050a14] text-white relative overflow-x-hidden">
       {/* Colored ambient blobs */}
       <div className="fixed -top-40 -left-40 w-[500px] h-[500px] rounded-full bg-[#00ff88]/15 blur-[120px] pointer-events-none" />
       <div className="fixed top-1/3 -right-40 w-[500px] h-[500px] rounded-full bg-[#00ff88]/10 blur-[120px] pointer-events-none" />
@@ -227,7 +227,7 @@ const OnderwereldDashboard = () => {
       </aside>
 
       {/* Main */}
-      <main className="min-h-screen relative z-10 flex flex-col">
+      <main className="min-h-dvh relative z-10 flex flex-col">
         <div className="max-w-7xl w-full mx-auto p-6 lg:p-10 pr-16 lg:pr-20 flex-1">
           {nav === "overview" && <OverviewPanel me={me} role={role} onNav={setNav} onGang={openGangDetail} />}
           {nav === "gangs" && <GangsPanel isHoofd={isHoofd} onOpen={openGangDetail} />}
@@ -541,7 +541,7 @@ function GangNewPanel({ me, uid, onDone }: any) {
           <div><Label>Gangnaam</Label><input required value={name} onChange={(e) => setName(e.target.value)} className={inputCls} placeholder="Bijv. De Vossen" /></div>
           <div>
             <Label>Startlevel</Label>
-            <div className="grid grid-cols-6 gap-2">
+            <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
               {[1, 2, 3, 4, 5, 6].map((n) => (
                 <button key={n} type="button" onClick={() => setLevel(n)}
                   className={`py-2 rounded-lg border text-sm font-bold ${level === n ? "bg-zinc-300 text-black border-zinc-100" : "bg-slate-800 border-slate-600 text-slate-300 hover:border-slate-400"}`}>
@@ -958,7 +958,7 @@ function BoostsPanel({ me, uid, isCoord }: any) {
         <form onSubmit={create} className="space-y-4">
           <div>
             <Label>Multiplier</Label>
-            <div className="grid grid-cols-4 gap-2">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
               {[2, 3, 4, 5].map(n => (
                 <button key={n} type="button" onClick={() => setMult(n)}
                   className={`py-3 rounded-lg border font-bold text-lg ${mult === n ? "bg-zinc-300 text-black border-zinc-100" : "bg-slate-800 border-slate-600 text-slate-300 hover:border-slate-400"}`}>x{n}</button>

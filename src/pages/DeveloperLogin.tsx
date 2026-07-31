@@ -45,7 +45,7 @@ const DeveloperLogin = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#050a14] flex items-center justify-center p-4 relative overflow-hidden">
+    <div className="min-h-dvh bg-[#050a14] flex items-center justify-center p-4 relative overflow-hidden">
       {/* Subtle grid background */}
       <div
         className="absolute inset-0 opacity-30"

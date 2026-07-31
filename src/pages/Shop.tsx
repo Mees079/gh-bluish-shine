@@ -196,7 +196,7 @@ const Shop = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-dvh bg-background">
       <Navbar discordLink={discordLink} />
       
       <div className="flex flex-col sm:flex-row">
@@ -212,7 +212,7 @@ const Shop = () => {
                 <div className="mb-6 space-y-4">
                   <h2 className="text-2xl sm:text-3xl font-bold text-foreground">{categoryLabel}</h2>
                   
-                  <div className="flex gap-2">
+                  <div className="flex flex-wrap gap-2">
                     <Dialog open={searchOpen} onOpenChange={setSearchOpen}>
                       <DialogTrigger asChild>
                         <Button variant="outline" size="icon">
@@ -239,7 +239,7 @@ const Shop = () => {
                     </Dialog>
 
                     <Select value={sortBy} onValueChange={setSortBy}>
-                      <SelectTrigger className="w-[200px]">
+                      <SelectTrigger className="w-full min-w-[150px] sm:w-[200px] flex-1 sm:flex-none">
                         <SelectValue placeholder="Sorteer op" />
                       </SelectTrigger>
                       <SelectContent>

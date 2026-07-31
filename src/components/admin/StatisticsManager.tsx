@@ -411,7 +411,7 @@ export const StatisticsManager = () => {
 
         {/* Detailed Tables */}
         <Tabs defaultValue="claims" className="w-full">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-3 h-auto">
             <TabsTrigger value="claims">📋 Alle Claims</TabsTrigger>
             <TabsTrigger value="products">📦 Producten Details</TabsTrigger>
             <TabsTrigger value="users">👤 Gebruikers</TabsTrigger>

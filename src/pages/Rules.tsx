@@ -142,7 +142,7 @@ const Rules = () => {
   // Overview view - showing all main categories
   if (!selectedSection) {
     return (
-      <div className="min-h-screen bg-background relative overflow-hidden">
+      <div className="min-h-dvh bg-background relative overflow-hidden">
         {/* Animated background shapes */}
         <div className="fixed inset-0 pointer-events-none opacity-10">
           <div className="absolute top-20 left-10 w-72 h-72 bg-primary/30 rounded-full blur-3xl animate-pulse" style={{ animationDuration: '4s' }} />
@@ -232,7 +232,7 @@ const Rules = () => {
 
   // Detail view - showing selected section with sidebar
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-dvh bg-background">
       <Navbar />
       
       <div className="flex h-[calc(100vh-4rem)]">

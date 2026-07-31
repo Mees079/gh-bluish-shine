@@ -492,7 +492,7 @@ export const RulesManager = () => {
             <DialogTitle>{editingSection ? "Sectie Bewerken" : "Nieuwe Sectie"}</DialogTitle>
           </DialogHeader>
           <div className="space-y-6">
-            <div className="grid grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <div className="col-span-1 space-y-2">
                 <Label>Icon (Emoji)</Label>
                 <Input

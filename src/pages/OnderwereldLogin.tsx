@@ -36,7 +36,7 @@ const OnderwereldLogin = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#050a14] via-[#0a0e1a] to-[#050a14] flex items-center justify-center p-4 relative overflow-hidden">
+    <div className="min-h-dvh bg-gradient-to-br from-[#050a14] via-[#0a0e1a] to-[#050a14] flex items-center justify-center p-4 relative overflow-hidden">
       <div className="absolute -top-40 -left-40 w-[500px] h-[500px] rounded-full bg-[#00ff88]/20 blur-[120px]" />
       <div className="absolute -bottom-40 -right-40 w-[500px] h-[500px] rounded-full bg-[#00ff88]/12 blur-[120px]" />
       <div className="absolute top-1/3 right-1/4 w-[400px] h-[400px] rounded-full bg-[#00ff88]/8 blur-[120px]" />
