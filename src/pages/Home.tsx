@@ -5,6 +5,8 @@ import { Link } from "react-router-dom";
 import { Navbar } from "@/components/Navbar";
 import { ChevronDown, Users, Server, Shield, Zap } from "lucide-react";
 import heroBanner from "@/assets/hero-banner.png";
+import hdrpLogo from "@/assets/hdrp-logo.png";
+
 import { Card } from "@/components/ui/card";
 
 interface HomeConfig {
@@ -179,54 +181,13 @@ const Home = () => {
 
   return (
     <div className="min-h-dvh bg-background relative overflow-hidden">
-      {/* Animated background shapes with hexagons */}
+      {/* Subtiele, professionele achtergrond */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden">
-        {/* Glowing orbs */}
-        <div className="absolute top-20 left-10 w-72 h-72 bg-primary/20 rounded-full blur-3xl animate-pulse opacity-30" style={{ animationDuration: '4s' }} />
-        <div className="absolute bottom-40 right-20 w-96 h-96 bg-primary/15 rounded-full blur-3xl animate-pulse opacity-25" style={{ animationDuration: '6s' }} />
-        <div className="absolute top-1/2 left-1/3 w-64 h-64 bg-primary/10 rounded-full blur-3xl animate-pulse opacity-20" style={{ animationDuration: '5s' }} />
-        
-        {/* Animated hexagon shapes */}
-        <div className="absolute top-1/4 left-1/4 w-32 h-32 animate-float-slow opacity-10">
-          <svg viewBox="0 0 100 100" className="w-full h-full">
-            <polygon points="50 0, 93.3 25, 93.3 75, 50 100, 6.7 75, 6.7 25" 
-              fill="none" stroke="hsl(var(--primary))" strokeWidth="2"
-              className="animate-pulse" style={{ animationDuration: '3s' }}/>
-            <polygon points="50 0, 93.3 25, 93.3 75, 50 100, 6.7 75, 6.7 25" 
-              fill="hsl(var(--primary) / 0.05)" className="blur-sm"/>
-          </svg>
-        </div>
-        
-        <div className="absolute top-2/3 right-1/4 w-24 h-24 animate-float-medium opacity-15">
-          <svg viewBox="0 0 100 100" className="w-full h-full">
-            <polygon points="50 0, 93.3 25, 93.3 75, 50 100, 6.7 75, 6.7 25" 
-              fill="none" stroke="hsl(var(--primary))" strokeWidth="2"
-              className="animate-pulse" style={{ animationDuration: '4s' }}/>
-            <polygon points="50 0, 93.3 25, 93.3 75, 50 100, 6.7 75, 6.7 25" 
-              fill="hsl(var(--primary) / 0.08)" className="blur-sm"/>
-          </svg>
-        </div>
-        
-        <div className="absolute bottom-1/4 left-1/3 w-20 h-20 animate-float-fast opacity-12">
-          <svg viewBox="0 0 100 100" className="w-full h-full">
-            <polygon points="50 0, 93.3 25, 93.3 75, 50 100, 6.7 75, 6.7 25" 
-              fill="none" stroke="hsl(var(--primary-glow))" strokeWidth="2"
-              className="animate-pulse" style={{ animationDuration: '2.5s' }}/>
-            <polygon points="50 0, 93.3 25, 93.3 75, 50 100, 6.7 75, 6.7 25" 
-              fill="hsl(var(--primary-glow) / 0.1)" className="blur-sm"/>
-          </svg>
-        </div>
-        
-        <div className="absolute top-1/2 right-1/3 w-28 h-28 animate-float-medium opacity-10" style={{ animationDelay: '1s' }}>
-          <svg viewBox="0 0 100 100" className="w-full h-full">
-            <polygon points="50 0, 93.3 25, 93.3 75, 50 100, 6.7 75, 6.7 25" 
-              fill="none" stroke="hsl(var(--primary))" strokeWidth="2"
-              className="animate-pulse" style={{ animationDuration: '3.5s' }}/>
-            <polygon points="50 0, 93.3 25, 93.3 75, 50 100, 6.7 75, 6.7 25" 
-              fill="hsl(var(--primary) / 0.06)" className="blur-sm"/>
-          </svg>
-        </div>
+        <div className="absolute inset-0 opacity-[0.06] [background-image:linear-gradient(hsl(var(--primary)/0.6)_1px,transparent_1px),linear-gradient(90deg,hsl(var(--primary)/0.6)_1px,transparent_1px)] [background-size:64px_64px]" />
+        <div className="absolute -top-32 left-1/4 w-[36rem] h-[36rem] bg-primary/10 rounded-full blur-3xl" />
+        <div className="absolute bottom-0 right-0 w-[28rem] h-[28rem] bg-primary/[0.07] rounded-full blur-3xl" />
       </div>
+
 
       <Navbar />
       
@@ -243,13 +204,16 @@ const Home = () => {
         
         {/* Hero content */}
         <div className="relative z-10 text-center space-y-8 px-4 max-w-6xl">
-          <div className="inline-block px-6 py-2 bg-primary/20 border border-primary/50 rounded-full backdrop-blur-md mb-4 animate-fade-in">
-            <span className="text-primary font-semibold">🎮 Nu Live & Speelbaar</span>
-          </div>
-          
-          <h1 className="text-5xl sm:text-7xl lg:text-8xl font-bold text-white drop-shadow-2xl leading-tight animate-fade-in">
+          <img
+            src={hdrpLogo}
+            alt="HDRP logo"
+            className="h-20 sm:h-24 w-auto mx-auto mb-2 animate-fade-in"
+          />
+
+          <h1 className="text-4xl sm:text-6xl lg:text-7xl font-semibold tracking-tight text-white leading-tight animate-fade-in">
             {config.hero_title}
           </h1>
+
           
           {config.hero_subtitle && (
             <p className="text-2xl sm:text-3xl text-white/90 font-light drop-shadow-lg max-w-3xl mx-auto animate-fade-in" style={{ animationDelay: '0.1s' }}>
@@ -340,9 +304,7 @@ const Home = () => {
           {config.show_about_section && (
             <div ref={aboutRef} className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center opacity-0 transition-opacity duration-1000">
               <div className="space-y-6">
-                <div className="inline-block px-4 py-1 bg-primary/10 border border-primary/30 rounded-full mb-2">
-                  <span className="text-primary font-semibold text-sm">Over Ons</span>
-                </div>
+                <p className="text-primary text-xs font-semibold uppercase tracking-[0.25em] mb-2">Over Ons</p>
                 <h2 className="text-4xl sm:text-5xl font-bold text-foreground">
                   {config.about_title}
                 </h2>
@@ -376,9 +338,7 @@ const Home = () => {
           {config.show_features_section && (
             <div ref={featuresRef} className="opacity-0 transition-opacity duration-1000">
               <div className="text-center mb-16">
-                <div className="inline-block px-4 py-1 bg-primary/10 border border-primary/30 rounded-full mb-4">
-                  <span className="text-primary font-semibold text-sm">Features</span>
-                </div>
+                <p className="text-primary text-xs font-semibold uppercase tracking-[0.25em] mb-4">Features</p>
                 <h2 className="text-4xl sm:text-5xl font-bold text-foreground">
                   {config.features_title}
                 </h2>
@@ -421,9 +381,7 @@ const Home = () => {
           {config.show_gallery && galleryImages.length > 0 && (
             <div ref={galleryRef} className="opacity-0 transition-opacity duration-1000 ease-out">
               <div className="text-center mb-16">
-                <div className="inline-block px-4 py-1 bg-primary/10 border border-primary/30 rounded-full mb-4">
-                  <span className="text-primary font-semibold text-sm">Galerij</span>
-                </div>
+                <p className="text-primary text-xs font-semibold uppercase tracking-[0.25em] mb-4">Galerij</p>
                 <h2 className="text-4xl sm:text-5xl font-bold text-foreground">
                   {config.gallery_title}
                 </h2>
@@ -505,11 +463,18 @@ const Home = () => {
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
             <div>
-              <h3 className="font-bold text-lg mb-4 text-foreground">HDRP</h3>
+              <div className="flex items-center gap-3 mb-4">
+                <img src={hdrpLogo} alt="HDRP logo" className="h-9 w-9 object-contain" />
+                <div className="leading-none">
+                  <p className="font-semibold text-foreground">HDRP</p>
+                  <p className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Hoofddorp Roleplay</p>
+                </div>
+              </div>
               <p className="text-muted-foreground text-sm">
-                {config?.footer_description || "De beste Nederlandse Roblox roleplay server met realisme en kwaliteit."}
+                {config?.footer_description || "Nederlandse Roblox roleplay-community met focus op realisme en kwaliteit."}
               </p>
             </div>
+
             <div>
               <h4 className="font-semibold mb-4 text-foreground">Links</h4>
               <div className="space-y-2">
