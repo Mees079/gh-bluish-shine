@@ -7,7 +7,7 @@ import { ChevronDown, Users, Server, Shield, Zap } from "lucide-react";
 import heroBanner from "@/assets/hero-banner.png";
 import hdrpLogo from "@/assets/hdrp-logo.png";
 
-import { Card } from "@/components/ui/card";
+
 
 interface HomeConfig {
   hero_image_url: string | null;
@@ -180,338 +180,244 @@ const Home = () => {
   if (!config) return null;
 
   return (
-    <div className="min-h-dvh bg-background relative overflow-hidden">
-      {/* Subtiele, professionele achtergrond */}
-      <div className="fixed inset-0 pointer-events-none overflow-hidden">
-        <div className="absolute inset-0 opacity-[0.06] [background-image:linear-gradient(hsl(var(--primary)/0.6)_1px,transparent_1px),linear-gradient(90deg,hsl(var(--primary)/0.6)_1px,transparent_1px)] [background-size:64px_64px]" />
-        <div className="absolute -top-32 left-1/4 w-[36rem] h-[36rem] bg-primary/10 rounded-full blur-3xl" />
-        <div className="absolute bottom-0 right-0 w-[28rem] h-[28rem] bg-primary/[0.07] rounded-full blur-3xl" />
+    <div className="min-h-dvh bg-secondary">
+      <Navbar discordLink={config.discord_link} />
+
+      {/* Servicebalk */}
+      <div className="bg-white border-b border-border">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2.5 flex flex-wrap items-center justify-center gap-x-8 gap-y-1 text-xs sm:text-sm text-muted-foreground">
+          <span className="font-medium text-foreground">Dagelijks actieve community</span>
+          <span className="hidden sm:inline">Support binnen 24 uur</span>
+          <span className="hidden md:inline">Veilig & eerlijk roleplay-beleid</span>
+        </div>
       </div>
 
-
-      <Navbar />
-      
-      {/* Hero Section */}
-      <section className="relative h-screen flex items-center justify-center overflow-hidden">
-        {/* Hero background with overlay */}
-        <div className="absolute inset-0">
-          <div 
-            className="absolute inset-0 bg-cover bg-center"
-            style={{ backgroundImage: `url(${config.hero_image_url || heroBanner})` }}
-          />
-          <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-black/50 to-background" />
-        </div>
-        
-        {/* Hero content */}
-        <div className="relative z-10 text-center space-y-8 px-4 max-w-6xl">
-          <img
-            src={hdrpLogo}
-            alt="HDRP logo"
-            className="h-20 sm:h-24 w-auto mx-auto mb-2 animate-fade-in"
-          />
-
-          <h1 className="text-4xl sm:text-6xl lg:text-7xl font-semibold tracking-tight text-white leading-tight animate-fade-in">
-            {config.hero_title}
-          </h1>
-
-          
-          {config.hero_subtitle && (
-            <p className="text-2xl sm:text-3xl text-white/90 font-light drop-shadow-lg max-w-3xl mx-auto animate-fade-in" style={{ animationDelay: '0.1s' }}>
-              {config.hero_subtitle}
-            </p>
-          )}
-          
-          <div className="flex flex-col sm:flex-row gap-4 justify-center pt-6 animate-fade-in" style={{ animationDelay: '0.2s' }}>
-            {config.roblox_link ? (
-              <Button asChild size="lg" variant="glow" className="text-lg px-10 py-7 text-xl">
-                <a 
-                  href={config.roblox_link} 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                >
-                  {config.hero_cta_text || "Start Nu"} →
-                </a>
-              </Button>
-            ) : (
-              <Button asChild size="lg" variant="glow" className="text-lg px-10 py-7 text-xl">
-                <Link to={config.hero_cta_link || "/shop"}>
-                  {config.hero_cta_text || "Start Nu"} →
-                </Link>
-              </Button>
-            )}
-            {config.discord_link && (
-              <Button 
-                asChild 
-                size="lg" 
-                variant="outline" 
-                className="text-lg px-10 py-7 text-xl border-2 border-white text-white hover:bg-white/20 backdrop-blur-sm"
-              >
-                <a 
-                  href={config.discord_link} 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                >
-                  Join Discord
-                </a>
-              </Button>
-            )}
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-10">
+        {/* Hero */}
+        <section className="bg-white border border-border rounded-lg overflow-hidden">
+          <div className="grid grid-cols-1 lg:grid-cols-2">
+            <div className="p-8 sm:p-12 flex flex-col justify-center gap-5">
+              <span className="inline-flex w-fit items-center gap-2 text-[11px] font-bold uppercase tracking-[0.15em] text-primary bg-primary/10 px-3 py-1 rounded">
+                Hoofddorp Roleplay
+              </span>
+              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-navy leading-tight">
+                {config.hero_title}
+              </h1>
+              {config.hero_subtitle && (
+                <p className="text-base sm:text-lg text-muted-foreground max-w-xl">
+                  {config.hero_subtitle}
+                </p>
+              )}
+              <div className="flex flex-wrap gap-3 pt-2">
+                {config.roblox_link ? (
+                  <Button asChild size="lg">
+                    <a href={config.roblox_link} target="_blank" rel="noopener noreferrer">
+                      {config.hero_cta_text || "Start Nu"}
+                    </a>
+                  </Button>
+                ) : (
+                  <Button asChild size="lg">
+                    <Link to={config.hero_cta_link || "/shop"}>{config.hero_cta_text || "Start Nu"}</Link>
+                  </Button>
+                )}
+                {config.discord_link && (
+                  <Button asChild size="lg" variant="outline">
+                    <a href={config.discord_link} target="_blank" rel="noopener noreferrer">
+                      Join Discord
+                    </a>
+                  </Button>
+                )}
+              </div>
+            </div>
+            <div className="relative min-h-[240px] lg:min-h-[380px] bg-navy">
+              <img
+                src={config.hero_image_url || heroBanner}
+                alt="HDRP roleplay"
+                className="absolute inset-0 w-full h-full object-cover"
+                loading="lazy"
+              />
+            </div>
           </div>
+        </section>
 
-          {/* Stats cards - auto-fit so any count fits on screen */}
-          <div
-            className="grid grid-cols-2 sm:grid-cols-3 gap-3 lg:gap-4 pt-8 w-full max-w-6xl mx-auto px-2"
-            style={{
-              gridTemplateColumns:
-                stats.length > 0
-                  ? `repeat(auto-fit, minmax(min(140px, 100%), 1fr))`
-                  : undefined,
-            }}
+        {/* Stats bento */}
+        {stats.length > 0 && (
+          <section
+            className="grid gap-4"
+            style={{ gridTemplateColumns: "repeat(auto-fit, minmax(min(160px, 100%), 1fr))" }}
           >
-            {stats.map((stat, idx) => {
+            {stats.map((stat) => {
               const IconComponent = iconMap[stat.icon] || Users;
               return (
-                <Card 
+                <div
                   key={stat.id}
-                  className="bg-background/80 backdrop-blur-md border-primary/30 p-3 lg:p-4 hover:border-primary hover:shadow-glow transition-all duration-300 animate-fade-in"
-                  style={{ animationDelay: `${idx * 0.1 + 0.3}s` }}
+                  className="bg-white border border-border rounded-lg p-5 flex items-center gap-4 hover:border-primary/40 transition-colors"
                 >
-                  <IconComponent className="h-6 w-6 lg:h-7 lg:w-7 text-primary mx-auto mb-2" />
-                  <p className="text-xl lg:text-2xl font-bold text-foreground">{stat.value}</p>
-                  <p className="text-[11px] lg:text-xs text-muted-foreground">{stat.label}</p>
-                </Card>
+                  <div className="bg-secondary rounded-md p-2.5 shrink-0">
+                    <IconComponent className="h-5 w-5 text-primary" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-xl font-bold text-navy leading-none">{stat.value}</p>
+                    <p className="text-xs text-muted-foreground mt-1 truncate">{stat.label}</p>
+                  </div>
+                </div>
               );
             })}
-          </div>
-        </div>
+          </section>
+        )}
 
-        {/* Scroll indicator */}
-        <button 
-          onClick={scrollToContent}
-          className="absolute bottom-8 left-1/2 -translate-x-1/2 animate-bounce text-white/80 hover:text-white transition-colors"
-          aria-label="Scroll naar content"
-        >
-          <ChevronDown className="h-12 w-12" />
-        </button>
-      </section>
-
-      {/* Unified Content Section with smooth transitions */}
-      <section className="relative py-24 px-4">
-        {/* Decorative shape divider */}
-        <div className="absolute top-0 left-0 right-0 h-32 bg-gradient-to-b from-background to-transparent" />
-        
-        <div className="max-w-7xl mx-auto space-y-32">
-          {/* About Section */}
-          {config.show_about_section && (
-            <div ref={aboutRef} className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center opacity-0 transition-opacity duration-1000">
-              <div className="space-y-6">
-                <p className="text-primary text-xs font-semibold uppercase tracking-[0.25em] mb-2">Over Ons</p>
-                <h2 className="text-4xl sm:text-5xl font-bold text-foreground">
-                  {config.about_title}
-                </h2>
-                <p className="text-lg text-muted-foreground leading-relaxed">
-                  {config.about_content}
-                </p>
-                <div className="flex gap-4 pt-4">
-                  <Button asChild size="lg" variant="glow">
-                    <Link to="/shop">Bezoek Shop</Link>
+        {/* Over ons */}
+        {config.show_about_section && (
+          <section ref={aboutRef} className="bg-white border border-border rounded-lg overflow-hidden">
+            <div className={`grid grid-cols-1 ${config.about_image_url ? "lg:grid-cols-2" : ""}`}>
+              <div className="p-8 sm:p-10 flex flex-col justify-center gap-4">
+                <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-primary">Over ons</p>
+                <h2 className="text-2xl sm:text-3xl font-bold text-navy">{config.about_title}</h2>
+                <p className="text-muted-foreground leading-relaxed">{config.about_content}</p>
+                <div className="flex flex-wrap gap-3 pt-2">
+                  <Button asChild>
+                    <Link to="/shop">Bezoek shop</Link>
                   </Button>
-                  <Button asChild size="lg" variant="outline">
-                    <Link to="/regels">Bekijk Regels</Link>
+                  <Button asChild variant="outline">
+                    <Link to="/regels">Bekijk regels</Link>
                   </Button>
                 </div>
               </div>
-              
               {config.about_image_url && (
-                <div className="relative h-96 lg:h-[500px] rounded-2xl overflow-hidden shadow-card hover:shadow-glow transition-all duration-500 animate-fade-in group">
-                  <img 
-                    src={config.about_image_url} 
+                <div className="relative min-h-[220px] lg:min-h-[340px]">
+                  <img
+                    src={config.about_image_url}
                     alt={config.about_title}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                    className="absolute inset-0 w-full h-full object-cover"
+                    loading="lazy"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-primary/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                 </div>
               )}
             </div>
-          )}
+          </section>
+        )}
 
-          {/* Features Section */}
-          {config.show_features_section && (
-            <div ref={featuresRef} className="opacity-0 transition-opacity duration-1000">
-              <div className="text-center mb-16">
-                <p className="text-primary text-xs font-semibold uppercase tracking-[0.25em] mb-4">Features</p>
-                <h2 className="text-4xl sm:text-5xl font-bold text-foreground">
-                  {config.features_title}
-                </h2>
-              </div>
-              
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                {[
-                  { icon: config.feature_1_icon, title: config.feature_1_title, desc: config.feature_1_description },
-                  { icon: config.feature_2_icon, title: config.feature_2_title, desc: config.feature_2_description },
-                  { icon: config.feature_3_icon, title: config.feature_3_title, desc: config.feature_3_description },
-                ].map((feature, idx) => (
-                  <Card 
-                    key={idx}
-                    className="group relative p-8 bg-card/50 backdrop-blur-sm border-2 border-border hover:border-primary transition-all duration-500 hover:shadow-glow overflow-hidden animate-slide-in"
-                    style={{ 
-                      animationDelay: `${idx * 0.2}s`
-                    }}
-                  >
-                    {/* Animated background gradient on hover */}
-                    <div className="absolute inset-0 bg-gradient-to-br from-primary/0 to-primary/0 group-hover:from-primary/5 group-hover:to-primary/10 transition-all duration-500" />
-                    
-                    <div className="relative z-10">
-                      <div className="text-6xl mb-6 group-hover:scale-110 transition-transform duration-500">
-                        {feature.icon}
-                      </div>
-                      <h3 className="text-2xl font-semibold text-foreground mb-4 group-hover:text-primary transition-colors duration-300">
-                        {feature.title}
-                      </h3>
-                      <p className="text-muted-foreground leading-relaxed">
-                        {feature.desc}
-                      </p>
-                    </div>
-                  </Card>
-                ))}
-              </div>
+        {/* Features */}
+        {config.show_features_section && (
+          <section ref={featuresRef}>
+            <h2 className="text-xl sm:text-2xl font-bold text-navy mb-4">{config.features_title}</h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {[
+                { icon: config.feature_1_icon, title: config.feature_1_title, desc: config.feature_1_description },
+                { icon: config.feature_2_icon, title: config.feature_2_title, desc: config.feature_2_description },
+                { icon: config.feature_3_icon, title: config.feature_3_title, desc: config.feature_3_description },
+              ].map((feature, idx) => (
+                <div
+                  key={idx}
+                  className="bg-white border border-border rounded-lg p-6 hover:border-primary/40 transition-colors"
+                >
+                  <div className="text-3xl mb-3">{feature.icon}</div>
+                  <h3 className="text-lg font-bold text-navy mb-2">{feature.title}</h3>
+                  <p className="text-sm text-muted-foreground leading-relaxed">{feature.desc}</p>
+                </div>
+              ))}
             </div>
-          )}
+          </section>
+        )}
 
-          {/* Gallery Section */}
-          {config.show_gallery && galleryImages.length > 0 && (
-            <div ref={galleryRef} className="opacity-0 transition-opacity duration-1000 ease-out">
-              <div className="text-center mb-16">
-                <p className="text-primary text-xs font-semibold uppercase tracking-[0.25em] mb-4">Galerij</p>
-                <h2 className="text-4xl sm:text-5xl font-bold text-foreground">
-                  {config.gallery_title}
-                </h2>
-              </div>
-              
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {(showAllGallery ? galleryImages : galleryImages.slice(0, 3)).map((image, idx) => (
-                  <div 
-                    key={image.id}
-                    className="relative h-64 rounded-2xl overflow-hidden shadow-card hover:shadow-glow transition-all duration-500 group animate-fade-in"
-                    style={{ animationDelay: `${idx * 0.15}s` }}
-                  >
-                    <img 
-                      src={image.image_url} 
-                      alt={image.title || `Gallery ${idx + 1}`}
-                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+        {/* Galerij */}
+        {config.show_gallery && galleryImages.length > 0 && (
+          <section ref={galleryRef}>
+            <h2 className="text-xl sm:text-2xl font-bold text-navy mb-4">{config.gallery_title}</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {(showAllGallery ? galleryImages : galleryImages.slice(0, 3)).map((image, idx) => (
+                <div
+                  key={image.id}
+                  className="bg-white border border-border rounded-lg overflow-hidden group"
+                >
+                  <div className="relative h-52 overflow-hidden">
+                    <img
+                      src={image.image_url}
+                      alt={image.title || `Galerij ${idx + 1}`}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      loading="lazy"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                    {image.title && (
-                      <div className="absolute bottom-0 left-0 right-0 p-6 transform translate-y-full group-hover:translate-y-0 transition-transform duration-300">
-                        <p className="text-white text-lg font-semibold">{image.title}</p>
-                      </div>
-                    )}
                   </div>
-                ))}
-              </div>
-
-              {galleryImages.length > 3 && (
-                <div className="text-center mt-8">
-                  <Button 
-                    onClick={() => setShowAllGallery(!showAllGallery)}
-                    variant="outline"
-                    size="lg"
-                    className="group"
-                  >
-                    {showAllGallery ? 'Toon Minder' : `Bekijk Alle ${galleryImages.length} Foto's`}
-                    <ChevronDown className={`ml-2 h-4 w-4 transition-transform duration-300 ${showAllGallery ? 'rotate-180' : ''}`} />
-                  </Button>
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* CTA Section */}
-          {config.show_cta_section && (
-            <div className="relative">
-              <Card className="relative p-16 bg-gradient-to-br from-primary/10 via-background to-primary/5 border-primary/30 overflow-hidden">
-                {/* Decorative elements */}
-                <div className="absolute top-0 right-0 w-64 h-64 bg-primary/20 rounded-full blur-3xl" />
-                <div className="absolute bottom-0 left-0 w-64 h-64 bg-primary/10 rounded-full blur-3xl" />
-                
-                <div className="relative z-10 text-center space-y-8 animate-fade-in">
-                  <h2 className="text-4xl sm:text-5xl font-bold text-foreground">
-                    {config.cta_section_title}
-                  </h2>
-                  <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-                    {config.cta_section_description}
-                  </p>
-                  {config.discord_link && (
-                    <Button asChild size="lg" variant="glow" className="text-lg px-12 py-7 text-xl">
-                      <a 
-                        href={config.discord_link} 
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                      >
-                        {config.cta_button_text} →
-                      </a>
-                    </Button>
+                  {image.title && (
+                    <p className="px-4 py-3 text-sm font-medium text-navy">{image.title}</p>
                   )}
                 </div>
-              </Card>
+              ))}
             </div>
-          )}
-        </div>
-      </section>
+            {galleryImages.length > 3 && (
+              <div className="text-center mt-5">
+                <Button onClick={() => setShowAllGallery(!showAllGallery)} variant="outline">
+                  {showAllGallery ? "Toon minder" : `Bekijk alle ${galleryImages.length} foto's`}
+                  <ChevronDown className={`ml-2 h-4 w-4 transition-transform ${showAllGallery ? "rotate-180" : ""}`} />
+                </Button>
+              </div>
+            )}
+          </section>
+        )}
+
+        {/* CTA */}
+        {config.show_cta_section && (
+          <section className="bg-navy rounded-lg p-8 sm:p-12 text-center">
+            <h2 className="text-2xl sm:text-3xl font-bold text-white mb-3">{config.cta_section_title}</h2>
+            <p className="text-white/70 max-w-2xl mx-auto mb-6">{config.cta_section_description}</p>
+            {config.discord_link && (
+              <Button asChild size="lg">
+                <a href={config.discord_link} target="_blank" rel="noopener noreferrer">
+                  {config.cta_button_text}
+                </a>
+              </Button>
+            )}
+          </section>
+        )}
+      </main>
 
       {/* Footer */}
-      <footer className="relative border-t border-border/50 py-12 px-4 mt-32">
-        <div className="max-w-7xl mx-auto">
+      <footer className="bg-navy text-white/70 mt-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
             <div>
               <div className="flex items-center gap-3 mb-4">
-                <img src={hdrpLogo} alt="HDRP logo" className="h-9 w-9 object-contain" />
+                <img src={hdrpLogo} alt="HDRP logo" className="h-8 w-8 object-contain brightness-0 invert" />
                 <div className="leading-none">
-                  <p className="font-semibold text-foreground">HDRP</p>
-                  <p className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Hoofddorp Roleplay</p>
+                  <p className="font-heading font-bold text-white">HDRP</p>
+                  <p className="text-[10px] uppercase tracking-[0.18em] text-white/50">Hoofddorp Roleplay</p>
                 </div>
               </div>
-              <p className="text-muted-foreground text-sm">
+              <p className="text-sm max-w-sm">
                 {config?.footer_description || "Nederlandse Roblox roleplay-community met focus op realisme en kwaliteit."}
               </p>
             </div>
 
             <div>
-              <h4 className="font-semibold mb-4 text-foreground">Links</h4>
-              <div className="space-y-2">
-                <Link to="/regels" className="block text-muted-foreground hover:text-primary transition-colors text-sm">
-                  Regels
-                </Link>
-                <Link to="/shop" className="block text-muted-foreground hover:text-primary transition-colors text-sm">
-                  Shop
-                </Link>
-                <Link to="/support" className="block text-muted-foreground hover:text-primary transition-colors text-sm">
-                  Support
-                </Link>
+              <h4 className="font-semibold mb-4 text-white text-sm uppercase tracking-wider">Links</h4>
+              <div className="space-y-2 text-sm">
+                <Link to="/regels" className="block hover:text-white transition-colors">Regels</Link>
+                <Link to="/shop" className="block hover:text-white transition-colors">Shop</Link>
+                <Link to="/support" className="block hover:text-white transition-colors">Support</Link>
               </div>
             </div>
             <div>
-              <h4 className="font-semibold mb-4 text-foreground">Community</h4>
+              <h4 className="font-semibold mb-4 text-white text-sm uppercase tracking-wider">Community</h4>
               {config.discord_link && (
-                <a 
-                  href={config.discord_link} 
-                  target="_blank" 
+                <a
+                  href={config.discord_link}
+                  target="_blank"
                   rel="noopener noreferrer"
-                  className="block text-muted-foreground hover:text-primary transition-colors text-sm"
+                  className="block text-sm hover:text-white transition-colors"
                 >
                   Discord
                 </a>
               )}
             </div>
           </div>
-          <div className="border-t border-border/50 pt-8 text-center">
-            <p className="text-muted-foreground text-sm">
-              © 2025 HDRP Hoofddorp Roleplay. Alle rechten voorbehouden.
-            </p>
+          <div className="border-t border-white/10 pt-6 text-center">
+            <p className="text-xs">© 2025 HDRP Hoofddorp Roleplay. Alle rechten voorbehouden.</p>
           </div>
         </div>
       </footer>
     </div>
   );
 };
+
 
 export default Home;
