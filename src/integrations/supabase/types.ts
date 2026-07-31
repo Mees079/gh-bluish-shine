@@ -710,6 +710,7 @@ export type Database = {
           show_cta_section: boolean | null
           show_features_section: boolean | null
           show_gallery: boolean | null
+          tiktok_link: string | null
           updated_at: string
         }
         Insert: {
@@ -754,6 +755,7 @@ export type Database = {
           show_cta_section?: boolean | null
           show_features_section?: boolean | null
           show_gallery?: boolean | null
+          tiktok_link?: string | null
           updated_at?: string
         }
         Update: {
@@ -798,6 +800,7 @@ export type Database = {
           show_cta_section?: boolean | null
           show_features_section?: boolean | null
           show_gallery?: boolean | null
+          tiktok_link?: string | null
           updated_at?: string
         }
         Relationships: []
