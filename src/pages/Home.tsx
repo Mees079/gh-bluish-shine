@@ -5,6 +5,8 @@ import { Link } from "react-router-dom";
 import { Navbar } from "@/components/Navbar";
 import { ChevronDown, Users, Server, Shield, Zap } from "lucide-react";
 import heroBanner from "@/assets/hero-banner.png";
+import hdrpLogo from "@/assets/hdrp-logo.png.asset.json";
+
 import { Card } from "@/components/ui/card";
 
 interface HomeConfig {
