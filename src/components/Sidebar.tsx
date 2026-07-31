@@ -62,11 +62,11 @@ export const Sidebar = ({ activeCategory, onCategoryChange }: SidebarProps) => {
   };
 
   return (
-    <aside className="w-full sm:w-64 min-h-auto sm:min-h-dvh bg-card border-b sm:border-r sm:border-b-0 border-border p-4 sm:p-6 flex flex-col gap-2 sm:gap-4">
-      <div className="mb-4 sm:mb-8">
-        <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-primary mb-1 sm:mb-2">HDRP Hoofddorp roleplay</h1>
-        <p className="text-xs text-muted-foreground">Aankoop preview</p>
+    <aside className="w-full sm:w-64 min-h-auto sm:min-h-dvh bg-white border-b sm:border-r sm:border-b-0 border-border p-4 sm:p-6 flex flex-col gap-2 sm:gap-4">
+      <div className="mb-2 sm:mb-4">
+        <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-muted-foreground">Categorieën</p>
       </div>
+
 
       <nav className="flex flex-row sm:flex-col gap-2 overflow-x-auto sm:overflow-x-visible pb-2 sm:pb-0">
         {loading ? (
