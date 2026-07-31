@@ -16,7 +16,6 @@ export const AdminPanelGate = () => {
       if (e.ctrlKey && e.shiftKey && e.key === "P") {
         e.preventDefault();
         setEnabled(true);
-        setTimeout(() => window.dispatchEvent(new Event("open-admin")), 0);
       }
     };
     const onOpen = () => setEnabled(true);
@@ -33,7 +32,7 @@ export const AdminPanelGate = () => {
 
   return (
     <Suspense fallback={null}>
-      <AdminPanel />
+      <AdminPanel defaultOpen />
     </Suspense>
   );
 };
