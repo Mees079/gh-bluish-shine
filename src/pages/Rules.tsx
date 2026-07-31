@@ -324,7 +324,7 @@ const Rules = () => {
                           </h3>
                         </div>
                         <div className="space-y-2 pl-4">
-                          {renderContent(subsection.content)}
+                          <RichTextDisplay content={subsection.content} />
                         </div>
                       </div>
                     ))}
