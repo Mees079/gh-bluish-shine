@@ -180,7 +180,7 @@ const Home = () => {
   if (!config) return null;
 
   return (
-    <div className="min-h-dvh bg-secondary">
+    <div className="min-h-dvh bg-background">
       <Navbar discordLink={config.discord_link} />
 
       {/* Servicebalk */}
