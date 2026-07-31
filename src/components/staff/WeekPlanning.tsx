@@ -453,17 +453,17 @@ export const WeekPlanning = ({ isBestuur, currentUserId, staffProfiles }: WeekPl
   const priorityColor = (p: string) => {
     switch (p) {
       case 'high': return 'border-red-500/50 bg-red-500/5';
-      case 'normal': return 'border-[#00ff88]/30 bg-[#00ff88]/5';
-      case 'low': return 'border-[#4b5563] bg-[#1f2937]/50';
-      default: return 'border-[#374151]';
+      case 'normal': return 'border-[#337aff]/30 bg-[#337aff]/5';
+      case 'low': return 'border-[#64748b] bg-[#25303f]/50';
+      default: return 'border-[#3a465c]';
     }
   };
 
   const statusIcon = (s: string) => {
     switch (s) {
-      case 'done': return <CheckCircle2 className="h-4 w-4 text-[#00ff88]" />;
+      case 'done': return <CheckCircle2 className="h-4 w-4 text-[#337aff]" />;
       case 'in_progress': return <Clock className="h-4 w-4 text-amber-400" />;
-      default: return <Circle className="h-4 w-4 text-[#4b5563]" />;
+      default: return <Circle className="h-4 w-4 text-[#64748b]" />;
     }
   };
 
@@ -483,7 +483,7 @@ export const WeekPlanning = ({ isBestuur, currentUserId, staffProfiles }: WeekPl
         <div className="flex justify-end">
           <button
             onClick={() => setShowPlanningPanel(true)}
-            className="flex items-center gap-2 bg-gradient-to-r from-[#00ff88] to-emerald-400 hover:from-emerald-400 hover:to-[#00ff88] text-[#0a0e1a] text-sm font-semibold px-4 py-2 rounded-lg shadow-[0_0_20px_rgba(0,255,136,0.25)] transition-all"
+            className="flex items-center gap-2 bg-gradient-to-r from-[#337aff] to-[#7aa8ff] hover:from-[#5b95ff] hover:to-[#337aff] text-white text-sm font-semibold px-4 py-2 rounded-lg shadow-[0_0_20px_rgba(51,122,255,0.25)] transition-all"
           >
             <LayoutGrid className="h-4 w-4" /> Planning Beheer
           </button>
@@ -508,16 +508,16 @@ export const WeekPlanning = ({ isBestuur, currentUserId, staffProfiles }: WeekPl
             {relevantRequests.map(r => {
               const task = tasks.find(t => t.id === r.task_id);
               return (
-                <div key={r.id} className="flex items-center justify-between bg-[#1f2937]/50 rounded-lg p-3">
+                <div key={r.id} className="flex items-center justify-between bg-[#25303f]/50 rounded-lg p-3">
                   <div>
                     <p className="text-sm text-white">{task?.title || "Onbekende taak"}</p>
-                    <p className="text-xs text-[#6b7280]">
+                    <p className="text-xs text-[#9ba7ba]">
                       {getUsername(r.requested_by)} kan deze taak {r.request_type === 'cannot_do' ? 'niet uitvoeren' : 'niet op tijd afronden'}
                       {r.message && ` — "${r.message}"`}
                     </p>
                   </div>
                   {r.requested_by !== currentUserId && (
-                    <button onClick={() => handleTakeOverTask(r)} className="px-3 py-1.5 bg-[#00ff88]/10 text-[#00ff88] rounded-lg text-xs font-medium hover:bg-[#00ff88]/20 transition-colors flex items-center gap-1">
+                    <button onClick={() => handleTakeOverTask(r)} className="px-3 py-1.5 bg-[#337aff]/10 text-[#337aff] rounded-lg text-xs font-medium hover:bg-[#337aff]/20 transition-colors flex items-center gap-1">
                       <Hand className="h-3 w-3" /> Overnemen
                     </button>
                   )}
@@ -530,32 +530,32 @@ export const WeekPlanning = ({ isBestuur, currentUserId, staffProfiles }: WeekPl
 
       {/* Week navigation */}
       <div className="flex items-center justify-between">
-        <button onClick={() => setWeekStart(addDays(weekStart, -7))} className="p-2 hover:bg-[#1f2937] rounded-lg text-[#9ca3af] transition-colors">
+        <button onClick={() => setWeekStart(addDays(weekStart, -7))} className="p-2 hover:bg-[#25303f] rounded-lg text-[#9ba7ba] transition-colors">
           <ChevronLeft className="h-5 w-5" />
         </button>
         <div className="flex items-center gap-2 text-white font-semibold">
-          <Calendar className="h-5 w-5 text-[#00ff88]" />
+          <Calendar className="h-5 w-5 text-[#337aff]" />
           <span className="text-sm sm:text-base">Week {format(weekStart, 'w')} — {format(weekStart, 'd MMM', { locale: nl })} t/m {format(addDays(weekStart, 6), 'd MMM yyyy', { locale: nl })}</span>
         </div>
-        <button onClick={() => setWeekStart(addDays(weekStart, 7))} className="p-2 hover:bg-[#1f2937] rounded-lg text-[#9ca3af] transition-colors">
+        <button onClick={() => setWeekStart(addDays(weekStart, 7))} className="p-2 hover:bg-[#25303f] rounded-lg text-[#9ba7ba] transition-colors">
           <ChevronRight className="h-5 w-5" />
         </button>
       </div>
 
       {/* Day columns */}
-      <div className="grid grid-cols-1 md:grid-cols-7 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7 gap-3">
         {days.map(day => {
           const dayTasks = getTasksForDay(day);
           const today = isToday(day);
           return (
-            <div key={day.toISOString()} className={`rounded-xl border p-3 min-h-[180px] transition-all ${today ? 'border-[#00ff88]/40 bg-[#00ff88]/5' : 'border-[#1f2937] bg-[#111827]/50'}`}>
+            <div key={day.toISOString()} className={`rounded-xl border p-3 min-h-[180px] transition-all ${today ? 'border-[#337aff]/40 bg-[#337aff]/5' : 'border-[#25303f] bg-[#0e1524]/50'}`}>
               <div className="flex items-center justify-between mb-3">
                 <div>
-                  <p className={`text-xs font-medium uppercase tracking-wider ${today ? 'text-[#00ff88]' : 'text-[#6b7280]'}`}>{format(day, 'EEE', { locale: nl })}</p>
-                  <p className={`text-lg font-bold ${today ? 'text-white' : 'text-[#9ca3af]'}`}>{format(day, 'd')}</p>
+                  <p className={`text-xs font-medium uppercase tracking-wider ${today ? 'text-[#337aff]' : 'text-[#9ba7ba]'}`}>{format(day, 'EEE', { locale: nl })}</p>
+                  <p className={`text-lg font-bold ${today ? 'text-white' : 'text-[#9ba7ba]'}`}>{format(day, 'd')}</p>
                 </div>
                 {isBestuur && (
-                  <button onClick={() => { setAddDate(day); setShowAddTask(true); }} className="p-1 hover:bg-[#00ff88]/10 rounded text-[#00ff88]/50 hover:text-[#00ff88] transition-colors">
+                  <button onClick={() => { setAddDate(day); setShowAddTask(true); }} className="p-1 hover:bg-[#337aff]/10 rounded text-[#337aff]/50 hover:text-[#337aff] transition-colors">
                     <Plus className="h-4 w-4" />
                   </button>
                 )}
@@ -565,13 +565,13 @@ export const WeekPlanning = ({ isBestuur, currentUserId, staffProfiles }: WeekPl
                   const isAssignedToMe = task.assigned_to === currentUserId;
                   const hasRequest = taskRequests.some(r => r.task_id === task.id);
                   return (
-                    <button key={task.id} onClick={() => openTask(task)} className={`w-full text-left p-2 rounded-lg border transition-all hover:scale-[1.02] ${priorityColor(task.priority)} ${isAssignedToMe ? 'ring-1 ring-[#00ff88]/40' : ''} ${hasRequest ? 'ring-1 ring-amber-500/40' : ''}`}>
+                    <button key={task.id} onClick={() => openTask(task)} className={`w-full text-left p-2 rounded-lg border transition-all hover:scale-[1.02] ${priorityColor(task.priority)} ${isAssignedToMe ? 'ring-1 ring-[#337aff]/40' : ''} ${hasRequest ? 'ring-1 ring-amber-500/40' : ''}`}>
                       <div className="flex items-start gap-2">
                         {statusIcon(task.status)}
                         <div className="flex-1 min-w-0">
-                          <p className={`text-xs font-medium truncate ${task.status === 'done' ? 'text-[#6b7280] line-through' : 'text-white'}`}>{task.title}</p>
+                          <p className={`text-xs font-medium truncate ${task.status === 'done' ? 'text-[#9ba7ba] line-through' : 'text-white'}`}>{task.title}</p>
                           {task.assigned_to && (
-                            <p className="text-[10px] text-[#6b7280] mt-0.5 flex items-center gap-1">
+                            <p className="text-[10px] text-[#9ba7ba] mt-0.5 flex items-center gap-1">
                               <UserIcon className="h-2.5 w-2.5" />{getUsername(task.assigned_to)}
                             </p>
                           )}
@@ -580,7 +580,7 @@ export const WeekPlanning = ({ isBestuur, currentUserId, staffProfiles }: WeekPl
                     </button>
                   );
                 })}
-                {dayTasks.length === 0 && <p className="text-[10px] text-[#374151] text-center py-4">Geen taken</p>}
+                {dayTasks.length === 0 && <p className="text-[10px] text-[#3a465c] text-center py-4">Geen taken</p>}
               </div>
             </div>
           );
@@ -590,50 +590,50 @@ export const WeekPlanning = ({ isBestuur, currentUserId, staffProfiles }: WeekPl
       {/* Add Task Modal */}
       {showAddTask && addDate && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-[#111827] border border-[#1f2937] rounded-2xl p-6 w-full max-w-md shadow-2xl">
+          <div className="bg-[#0e1524] border border-[#25303f] rounded-2xl p-6 w-full max-w-md shadow-2xl">
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-lg font-bold text-white">Taak Toevoegen</h3>
-              <button onClick={() => { setShowAddTask(false); setAddDate(null); setNewTitle(""); setNewDescription(""); setNewAssignedTo(""); setNewPriority("normal"); }} className="text-[#6b7280] hover:text-white"><X className="h-5 w-5" /></button>
+              <button onClick={() => { setShowAddTask(false); setAddDate(null); setNewTitle(""); setNewDescription(""); setNewAssignedTo(""); setNewPriority("normal"); }} className="text-[#9ba7ba] hover:text-white"><X className="h-5 w-5" /></button>
             </div>
-            <p className="text-sm text-[#00ff88] mb-4">{format(addDate, 'EEEE d MMMM yyyy', { locale: nl })}</p>
+            <p className="text-sm text-[#337aff] mb-4">{format(addDate, 'EEEE d MMMM yyyy', { locale: nl })}</p>
 
             {/* Quick action: Week uren */}
-            <div className="mb-4 p-3 bg-[#00ff88]/5 border border-[#00ff88]/20 rounded-xl">
-              <p className="text-sm font-medium text-[#00ff88] mb-2 flex items-center gap-2"><Clock className="h-4 w-4" /> Snelactie</p>
+            <div className="mb-4 p-3 bg-[#337aff]/5 border border-[#337aff]/20 rounded-xl">
+              <p className="text-sm font-medium text-[#337aff] mb-2 flex items-center gap-2"><Clock className="h-4 w-4" /> Snelactie</p>
               <div className="flex gap-2 items-end">
                 <div className="flex-1">
-                  <label className="text-xs text-[#6b7280] mb-1 block">Toewijzen aan</label>
-                  <select value={newAssignedTo} onChange={e => setNewAssignedTo(e.target.value)} className="w-full bg-[#1f2937] border border-[#374151] rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-[#00ff88]/50">
+                  <label className="text-xs text-[#9ba7ba] mb-1 block">Toewijzen aan</label>
+                  <select value={newAssignedTo} onChange={e => setNewAssignedTo(e.target.value)} className="w-full bg-[#25303f] border border-[#3a465c] rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-[#337aff]/50">
                     <option value="">Kies stafflid</option>
                     {staffProfiles.map(sp => (
                       <option key={sp.user_id} value={sp.user_id}>{sp.username}</option>
                     ))}
                   </select>
                 </div>
-                <button onClick={() => handleAddWeekUren(addDate)} className="px-4 py-2 bg-[#00ff88] text-[#0a0e1a] rounded-lg text-sm font-semibold whitespace-nowrap">
+                <button onClick={() => handleAddWeekUren(addDate)} className="px-4 py-2 bg-[#337aff] text-white rounded-lg text-sm font-semibold whitespace-nowrap">
                   + Week uren
                 </button>
               </div>
             </div>
 
             <div className="relative flex items-center gap-2 mb-4">
-              <div className="flex-1 h-px bg-[#1f2937]" />
-              <span className="text-xs text-[#4b5563]">of maak een gewone taak</span>
-              <div className="flex-1 h-px bg-[#1f2937]" />
+              <div className="flex-1 h-px bg-[#25303f]" />
+              <span className="text-xs text-[#64748b]">of maak een gewone taak</span>
+              <div className="flex-1 h-px bg-[#25303f]" />
             </div>
 
             <div className="space-y-4">
               <div>
-                <label className="text-[#9ca3af] text-sm mb-1 block">Titel *</label>
-                <input value={newTitle} onChange={e => setNewTitle(e.target.value)} placeholder="Taaknaam" className="w-full bg-[#1f2937] border border-[#374151] rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-[#00ff88]/50" />
+                <label className="text-[#9ba7ba] text-sm mb-1 block">Titel *</label>
+                <input value={newTitle} onChange={e => setNewTitle(e.target.value)} placeholder="Taaknaam" className="w-full bg-[#25303f] border border-[#3a465c] rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-[#337aff]/50" />
               </div>
               <div>
-                <label className="text-[#9ca3af] text-sm mb-1 block">Beschrijving</label>
-                <textarea value={newDescription} onChange={e => setNewDescription(e.target.value)} placeholder="Details over de taak..." rows={3} className="w-full bg-[#1f2937] border border-[#374151] rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-[#00ff88]/50 resize-none" />
+                <label className="text-[#9ba7ba] text-sm mb-1 block">Beschrijving</label>
+                <textarea value={newDescription} onChange={e => setNewDescription(e.target.value)} placeholder="Details over de taak..." rows={3} className="w-full bg-[#25303f] border border-[#3a465c] rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-[#337aff]/50 resize-none" />
               </div>
               <div>
-                <label className="text-[#9ca3af] text-sm mb-1 block">Toewijzen aan</label>
-                <select value={newAssignedTo} onChange={e => setNewAssignedTo(e.target.value)} className="w-full bg-[#1f2937] border border-[#374151] rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-[#00ff88]/50">
+                <label className="text-[#9ba7ba] text-sm mb-1 block">Toewijzen aan</label>
+                <select value={newAssignedTo} onChange={e => setNewAssignedTo(e.target.value)} className="w-full bg-[#25303f] border border-[#3a465c] rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-[#337aff]/50">
                   <option value="">Niet toewijzen</option>
                   {staffProfiles.map(sp => (
                     <option key={sp.user_id} value={sp.user_id}>{sp.username}</option>
@@ -641,14 +641,14 @@ export const WeekPlanning = ({ isBestuur, currentUserId, staffProfiles }: WeekPl
                 </select>
               </div>
               <div>
-                <label className="text-[#9ca3af] text-sm mb-1 block">Prioriteit</label>
-                <select value={newPriority} onChange={e => setNewPriority(e.target.value)} className="w-full bg-[#1f2937] border border-[#374151] rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-[#00ff88]/50">
+                <label className="text-[#9ba7ba] text-sm mb-1 block">Prioriteit</label>
+                <select value={newPriority} onChange={e => setNewPriority(e.target.value)} className="w-full bg-[#25303f] border border-[#3a465c] rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-[#337aff]/50">
                   <option value="low">Laag</option>
                   <option value="normal">Normaal</option>
                   <option value="high">Hoog</option>
                 </select>
               </div>
-              <button onClick={handleAddTask} disabled={!newTitle} className="w-full bg-[#00ff88] hover:bg-[#00dd77] text-[#0a0e1a] font-semibold py-2.5 rounded-lg transition-all disabled:opacity-50">Toevoegen</button>
+              <button onClick={handleAddTask} disabled={!newTitle} className="w-full bg-[#337aff] hover:bg-[#5b95ff] text-white font-semibold py-2.5 rounded-lg transition-all disabled:opacity-50">Toevoegen</button>
             </div>
           </div>
         </div>
@@ -657,7 +657,7 @@ export const WeekPlanning = ({ isBestuur, currentUserId, staffProfiles }: WeekPl
       {/* Task Detail Modal */}
       {selectedTask && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-[#111827] border border-[#1f2937] rounded-2xl p-6 w-full max-w-lg shadow-2xl max-h-[80vh] overflow-y-auto">
+          <div className="bg-[#0e1524] border border-[#25303f] rounded-2xl p-6 w-full max-w-lg shadow-2xl max-h-[80vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-bold text-white">{selectedTask.title}</h3>
               <div className="flex items-center gap-2">
@@ -666,39 +666,39 @@ export const WeekPlanning = ({ isBestuur, currentUserId, staffProfiles }: WeekPl
                     <Trash2 className="h-4 w-4" />
                   </button>
                 )}
-                <button onClick={() => setSelectedTask(null)} className="text-[#6b7280] hover:text-white"><X className="h-5 w-5" /></button>
+                <button onClick={() => setSelectedTask(null)} className="text-[#9ba7ba] hover:text-white"><X className="h-5 w-5" /></button>
               </div>
             </div>
 
-            {selectedTask.description && <p className="text-sm text-[#9ca3af] mb-4">{selectedTask.description}</p>}
+            {selectedTask.description && <p className="text-sm text-[#9ba7ba] mb-4">{selectedTask.description}</p>}
 
             <div className="flex flex-wrap gap-2 mb-4">
-              <span className="text-xs px-2 py-1 rounded bg-[#1f2937] text-[#9ca3af]">{format(new Date(selectedTask.scheduled_date + 'T00:00:00'), 'EEEE d MMMM', { locale: nl })}</span>
-              <span className={`text-xs px-2 py-1 rounded ${selectedTask.priority === 'high' ? 'bg-red-500/20 text-red-400' : selectedTask.priority === 'low' ? 'bg-[#374151] text-[#6b7280]' : 'bg-[#00ff88]/10 text-[#00ff88]'}`}>
+              <span className="text-xs px-2 py-1 rounded bg-[#25303f] text-[#9ba7ba]">{format(new Date(selectedTask.scheduled_date + 'T00:00:00'), 'EEEE d MMMM', { locale: nl })}</span>
+              <span className={`text-xs px-2 py-1 rounded ${selectedTask.priority === 'high' ? 'bg-red-500/20 text-red-400' : selectedTask.priority === 'low' ? 'bg-[#3a465c] text-[#9ba7ba]' : 'bg-[#337aff]/10 text-[#337aff]'}`}>
                 {selectedTask.priority === 'high' ? 'Hoog' : selectedTask.priority === 'low' ? 'Laag' : 'Normaal'}
               </span>
-              <span className="text-xs px-2 py-1 rounded bg-[#1f2937] text-[#9ca3af] flex items-center gap-1">
+              <span className="text-xs px-2 py-1 rounded bg-[#25303f] text-[#9ba7ba] flex items-center gap-1">
                 <UserIcon className="h-3 w-3" />{getUsername(selectedTask.assigned_to)}
               </span>
             </div>
 
             {/* Hours task: claim if unassigned and not bestuur */}
             {isHoursTask(selectedTask) && !selectedTask.assigned_to && !isBestuur && (
-              <button onClick={() => handleClaimTask(selectedTask)} className="w-full mb-4 px-4 py-2 bg-[#1f2937] text-white rounded-lg text-sm font-medium hover:border-[#00ff88]/40 border border-[#374151] transition-colors">
+              <button onClick={() => handleClaimTask(selectedTask)} className="w-full mb-4 px-4 py-2 bg-[#25303f] text-white rounded-lg text-sm font-medium hover:border-[#337aff]/40 border border-[#3a465c] transition-colors">
                 Neem taak op mij
               </button>
             )}
 
             {/* Hours task: enter hours (only assigned person) */}
             {canEnterHours(selectedTask) && (
-              <button onClick={() => openHoursEntry(selectedTask, false)} className="w-full mb-4 px-4 py-2 bg-[#00ff88] text-[#0a0e1a] rounded-lg text-sm font-semibold transition-all hover:shadow-[0_0_20px_rgba(0,255,136,0.2)]">
+              <button onClick={() => openHoursEntry(selectedTask, false)} className="w-full mb-4 px-4 py-2 bg-[#337aff] text-white rounded-lg text-sm font-semibold transition-all hover:shadow-[0_0_20px_rgba(51,122,255,0.2)]">
                 Uren invullen
               </button>
             )}
 
             {/* Hours task: view hours (everyone except the one who can edit) */}
             {canViewHours(selectedTask) && !canEnterHours(selectedTask) && (
-              <button onClick={() => openHoursEntry(selectedTask, true)} className="w-full mb-4 px-4 py-2 bg-[#1f2937] text-white rounded-lg text-sm font-medium border border-[#374151] hover:border-[#00ff88]/40 transition-colors">
+              <button onClick={() => openHoursEntry(selectedTask, true)} className="w-full mb-4 px-4 py-2 bg-[#25303f] text-white rounded-lg text-sm font-medium border border-[#3a465c] hover:border-[#337aff]/40 transition-colors">
                 Uren bekijken
               </button>
             )}
@@ -707,7 +707,7 @@ export const WeekPlanning = ({ isBestuur, currentUserId, staffProfiles }: WeekPl
             {(isBestuur || selectedTask.assigned_to === currentUserId) && (
               <div className="flex gap-2 mb-4">
                 {['open', 'in_progress', 'done'].map(s => (
-                  <button key={s} onClick={() => handleStatusChange(selectedTask, s)} className={`flex-1 text-xs py-2 rounded-lg font-medium transition-all ${selectedTask.status === s ? s === 'done' ? 'bg-[#00ff88] text-[#0a0e1a]' : s === 'in_progress' ? 'bg-amber-400 text-[#0a0e1a]' : 'bg-[#374151] text-white' : 'bg-[#1f2937] text-[#6b7280] hover:text-white'}`}>
+                  <button key={s} onClick={() => handleStatusChange(selectedTask, s)} className={`flex-1 text-xs py-2 rounded-lg font-medium transition-all ${selectedTask.status === s ? s === 'done' ? 'bg-[#337aff] text-white' : s === 'in_progress' ? 'bg-amber-400 text-white' : 'bg-[#3a465c] text-white' : 'bg-[#25303f] text-[#9ba7ba] hover:text-white'}`}>
                     {s === 'open' ? 'Open' : s === 'in_progress' ? 'Bezig' : 'Gedaan'}
                   </button>
                 ))}
@@ -722,25 +722,25 @@ export const WeekPlanning = ({ isBestuur, currentUserId, staffProfiles }: WeekPl
             )}
 
             {/* Updates */}
-            <div className="border-t border-[#1f2937] pt-4">
-              <h4 className="text-sm font-medium text-white mb-3 flex items-center gap-2"><FileText className="h-4 w-4 text-[#00ff88]" /> Updates</h4>
+            <div className="border-t border-[#25303f] pt-4">
+              <h4 className="text-sm font-medium text-white mb-3 flex items-center gap-2"><FileText className="h-4 w-4 text-[#337aff]" /> Updates</h4>
               <div className="space-y-3 mb-4 max-h-48 overflow-y-auto">
                 {taskUpdates.map(u => (
-                  <div key={u.id} className="bg-[#1f2937] rounded-lg p-3">
+                  <div key={u.id} className="bg-[#25303f] rounded-lg p-3">
                     <div className="flex items-center justify-between mb-1">
-                      <span className="text-xs text-[#00ff88] font-medium">{getUsername(u.user_id)}</span>
-                      <span className="text-[10px] text-[#4b5563]">{format(new Date(u.created_at), 'dd/MM HH:mm')}</span>
+                      <span className="text-xs text-[#337aff] font-medium">{getUsername(u.user_id)}</span>
+                      <span className="text-[10px] text-[#64748b]">{format(new Date(u.created_at), 'dd/MM HH:mm')}</span>
                     </div>
                     {u.message && <p className="text-xs text-[#d1d5db]">{u.message}</p>}
                   </div>
                 ))}
-                {taskUpdates.length === 0 && <p className="text-xs text-[#374151] text-center py-4">Nog geen updates</p>}
+                {taskUpdates.length === 0 && <p className="text-xs text-[#3a465c] text-center py-4">Nog geen updates</p>}
               </div>
 
               {(isBestuur || selectedTask.assigned_to === currentUserId) && (
                 <div className="flex gap-2">
-                  <input value={updateMessage} onChange={e => setUpdateMessage(e.target.value)} placeholder="Voeg een update toe..." onKeyDown={e => e.key === 'Enter' && handleAddUpdate()} className="flex-1 bg-[#0a0e1a] border border-[#374151] rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-[#00ff88]/50" />
-                  <button onClick={handleAddUpdate} disabled={!updateMessage.trim()} className="px-4 py-2 bg-[#00ff88] text-[#0a0e1a] rounded-lg text-sm font-medium disabled:opacity-50 transition-all">Verstuur</button>
+                  <input value={updateMessage} onChange={e => setUpdateMessage(e.target.value)} placeholder="Voeg een update toe..." onKeyDown={e => e.key === 'Enter' && handleAddUpdate()} className="flex-1 bg-[#080d17] border border-[#3a465c] rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-[#337aff]/50" />
+                  <button onClick={handleAddUpdate} disabled={!updateMessage.trim()} className="px-4 py-2 bg-[#337aff] text-white rounded-lg text-sm font-medium disabled:opacity-50 transition-all">Verstuur</button>
                 </div>
               )}
             </div>
@@ -751,26 +751,26 @@ export const WeekPlanning = ({ isBestuur, currentUserId, staffProfiles }: WeekPl
       {/* Hours Entry/View Modal */}
       {showHoursModal && selectedTask && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[70] p-4">
-          <div className="bg-[#111827] border border-[#1f2937] rounded-2xl p-6 w-full max-w-2xl shadow-2xl max-h-[85vh] overflow-y-auto">
+          <div className="bg-[#0e1524] border border-[#25303f] rounded-2xl p-6 w-full max-w-2xl shadow-2xl max-h-[85vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-4">
               <div>
                 <h3 className="text-lg font-bold text-white">{hoursViewOnly ? 'Uren overzicht' : 'Uren invullen'}</h3>
-                <p className="text-sm text-[#6b7280]">
+                <p className="text-sm text-[#9ba7ba]">
                   Week {format(new Date(`${getTaskWeekStart(selectedTask)}T00:00:00`), 'w')} — {format(new Date(`${getTaskWeekStart(selectedTask)}T00:00:00`), 'd MMM', { locale: nl })} t/m {format(addDays(new Date(`${getTaskWeekStart(selectedTask)}T00:00:00`), 6), 'd MMM yyyy', { locale: nl })}
                 </p>
               </div>
-              <button onClick={closeHoursModal} className="text-[#6b7280] hover:text-white"><X className="h-5 w-5" /></button>
+              <button onClick={closeHoursModal} className="text-[#9ba7ba] hover:text-white"><X className="h-5 w-5" /></button>
             </div>
 
             {hoursLoading ? (
               <div className="flex justify-center py-12">
-                <div className="w-6 h-6 border-2 border-[#00ff88] border-t-transparent rounded-full animate-spin" />
+                <div className="w-6 h-6 border-2 border-[#337aff] border-t-transparent rounded-full animate-spin" />
               </div>
             ) : hoursViewOnly ? (
               /* View-only mode */
               <div className="space-y-3">
                 {hourRows.length === 0 || (hourRows.length === 1 && !hourRows[0].personName) ? (
-                  <p className="text-sm text-[#374151] text-center py-8">Nog geen uren ingevuld voor deze week.</p>
+                  <p className="text-sm text-[#3a465c] text-center py-8">Nog geen uren ingevuld voor deze week.</p>
                 ) : (
                   <>
                     {/* Summary overview */}
@@ -818,14 +818,14 @@ export const WeekPlanning = ({ isBestuur, currentUserId, staffProfiles }: WeekPl
                         <div className="space-y-2 mb-3">
                           <Section title="Promoties" kind="promotion" items={promotions} icon={TrendingUp} color={{ border: 'border-amber-400/30', bg: 'bg-amber-400/5', text: 'text-amber-300' }} />
                           <Section title="Inactiviteit waarschuwingen" kind="warning" items={warnings} icon={AlertTriangle} color={{ border: 'border-red-500/30', bg: 'bg-red-500/5', text: 'text-red-400' }} />
-                          <Section title="In orde" kind="ok" items={ok} icon={Check} color={{ border: 'border-[#00ff88]/30', bg: 'bg-[#00ff88]/5', text: 'text-[#00ff88]' }} />
+                          <Section title="In orde" kind="ok" items={ok} icon={Check} color={{ border: 'border-[#337aff]/30', bg: 'bg-[#337aff]/5', text: 'text-[#337aff]' }} />
                           <Section title="Nieuw deze week" kind="new" items={newThisWeek} icon={Check} color={{ border: 'border-blue-400/30', bg: 'bg-blue-400/5', text: 'text-blue-300' }} />
-                          <Section title="Afgemeld" kind="afgemeld" items={afgemeld} icon={UserIcon} color={{ border: 'border-[#374151]', bg: 'bg-[#1f2937]/40', text: 'text-[#9ca3af]' }} />
+                          <Section title="Afgemeld" kind="afgemeld" items={afgemeld} icon={UserIcon} color={{ border: 'border-[#3a465c]', bg: 'bg-[#25303f]/40', text: 'text-[#9ba7ba]' }} />
                         </div>
                       );
                     })()}
 
-                    <div className="grid grid-cols-[1fr_80px_80px] gap-2 px-3 py-2 text-xs font-medium text-[#6b7280] uppercase tracking-wider">
+                    <div className="grid grid-cols-[1fr_80px_80px] gap-2 px-3 py-2 text-xs font-medium text-[#9ba7ba] uppercase tracking-wider">
                       <span>Naam</span>
                       <span className="text-center">Uren</span>
                       <span className="text-center">Status</span>
@@ -834,16 +834,16 @@ export const WeekPlanning = ({ isBestuur, currentUserId, staffProfiles }: WeekPl
                       const status = getRowStatus(row, getTaskWeekStart(selectedTask));
                       const required = getRequiredHoursForRow(row, getTaskWeekStart(selectedTask));
                       return (
-                        <div key={row.rowId} className="bg-[#0a0e1a] border border-[#1f2937] rounded-lg px-3 py-3">
+                        <div key={row.rowId} className="bg-[#080d17] border border-[#25303f] rounded-lg px-3 py-3">
                           <div className="grid grid-cols-[1fr_80px_80px] gap-2 items-center">
                             <span className="text-sm text-white font-medium">{row.personName}</span>
-                            <span className={`text-sm text-center ${row.afgemeld || row.aangemeldDezeWeek ? 'text-[#374151]' : 'text-white'}`}>
+                            <span className={`text-sm text-center ${row.afgemeld || row.aangemeldDezeWeek ? 'text-[#3a465c]' : 'text-white'}`}>
                               {row.afgemeld || row.aangemeldDezeWeek ? '-' : (parseFloat(row.hours) || 0).toFixed(1).replace('.', ',')}
                             </span>
                             <span className={`text-xs text-center px-2 py-1 rounded ${
                               row.afgemeld ? 'bg-red-500/10 text-red-400' :
                               row.aangemeldDezeWeek ? 'bg-blue-400/10 text-blue-300' :
-                              'bg-[#00ff88]/10 text-[#00ff88]'
+                              'bg-[#337aff]/10 text-[#337aff]'
                             }`}>
                               {row.afgemeld ? 'Afgemeld' : row.aangemeldDezeWeek ? 'Nieuw' : 'Actief'}
                             </span>
@@ -852,7 +852,7 @@ export const WeekPlanning = ({ isBestuur, currentUserId, staffProfiles }: WeekPl
                             <div className={`mt-2 inline-flex items-center gap-1.5 px-2 py-1 rounded-md text-xs font-medium ${
                               status === 'inactivity' ? 'bg-red-500/10 text-red-400' :
                               status === 'promotion' ? 'bg-amber-400/10 text-amber-300' :
-                              'bg-[#00ff88]/10 text-[#00ff88]'
+                              'bg-[#337aff]/10 text-[#337aff]'
                             }`}>
                               {status === 'inactivity' && <><AlertTriangle className="h-3 w-3" /> Inactiviteit waarschuwing — onder de {Math.min(5, required).toFixed(1).replace('.', ',')} uur</>}
                               {status === 'ok' && <><Check className="h-3 w-3" /> {row.aangemeldDezeWeek ? 'Nieuw deze week — 0 uur vereist' : 'In orde'}</>}
@@ -860,7 +860,7 @@ export const WeekPlanning = ({ isBestuur, currentUserId, staffProfiles }: WeekPl
                             </div>
                           )}
                           {row.afgemeld && (
-                            <p className="text-[10px] text-[#6b7280] mt-1.5">
+                            <p className="text-[10px] text-[#9ba7ba] mt-1.5">
                               {findAbsenceForName(row.personName, getTaskWeekStart(selectedTask))
                                 ? `Moet deze week nog ${required.toFixed(1).replace('.', ',')} uur halen`
                                 : 'Geen uren vereist deze week'}
@@ -869,9 +869,9 @@ export const WeekPlanning = ({ isBestuur, currentUserId, staffProfiles }: WeekPl
                         </div>
                       );
                     })}
-                    <div className="flex justify-between items-center bg-[#1f2937] rounded-lg px-3 py-3 mt-2">
-                      <span className="text-sm font-medium text-[#9ca3af]">Totaal uren</span>
-                      <span className="text-sm font-bold text-[#00ff88]">
+                    <div className="flex justify-between items-center bg-[#25303f] rounded-lg px-3 py-3 mt-2">
+                      <span className="text-sm font-medium text-[#9ba7ba]">Totaal uren</span>
+                      <span className="text-sm font-bold text-[#337aff]">
                         {hourRows.filter(r => !r.afgemeld && !r.aangemeldDezeWeek && r.personName).reduce((sum, r) => sum + (parseFloat(r.hours) || 0), 0).toFixed(1).replace('.', ',')}
                       </span>
                     </div>
@@ -881,7 +881,7 @@ export const WeekPlanning = ({ isBestuur, currentUserId, staffProfiles }: WeekPl
             ) : (
               /* Edit mode */
               <div className="space-y-3">
-                <p className="text-sm text-[#9ca3af] mb-2">
+                <p className="text-sm text-[#9ba7ba] mb-2">
                   Vul per persoon de naam in, het aantal uren, en of diegene afgemeld is. Afgemelde personen worden automatisch herkend.
                 </p>
                 {hourRows.map((row, index) => {
@@ -889,14 +889,14 @@ export const WeekPlanning = ({ isBestuur, currentUserId, staffProfiles }: WeekPl
                   const status = getRowStatus(row, weekStartValue);
                   const required = getRequiredHoursForRow(row, weekStartValue);
                   return (
-                    <div key={row.rowId} className="bg-[#0a0e1a] border border-[#1f2937] rounded-xl p-3 space-y-2">
+                    <div key={row.rowId} className="bg-[#080d17] border border-[#25303f] rounded-xl p-3 space-y-2">
                       <div className="grid grid-cols-[1fr_80px_auto_auto_auto] gap-2 items-center">
                         <input
                           type="text"
                           value={row.personName}
                           onChange={e => updateHourRow(row.rowId, 'personName', e.target.value)}
                           placeholder={`Naam ${index + 1}`}
-                          className="bg-[#1f2937] border border-[#374151] rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-[#00ff88]/50"
+                          className="bg-[#25303f] border border-[#3a465c] rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-[#337aff]/50"
                         />
                         <input
                           type="number"
@@ -906,14 +906,14 @@ export const WeekPlanning = ({ isBestuur, currentUserId, staffProfiles }: WeekPl
                           onChange={e => updateHourRow(row.rowId, 'hours', e.target.value)}
                           disabled={row.afgemeld}
                           placeholder="0"
-                          className="bg-[#1f2937] border border-[#374151] rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-[#00ff88]/50 disabled:opacity-40 text-center"
+                          className="bg-[#25303f] border border-[#3a465c] rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-[#337aff]/50 disabled:opacity-40 text-center"
                         />
                         <button
                           onClick={() => updateHourRow(row.rowId, 'afgemeld', !row.afgemeld)}
                           className={`h-9 px-3 rounded-lg border text-xs font-medium transition-colors whitespace-nowrap ${
                             row.afgemeld
                               ? 'border-red-500/30 bg-red-500/10 text-red-400'
-                              : 'border-[#374151] bg-[#1f2937] text-[#9ca3af] hover:text-white'
+                              : 'border-[#3a465c] bg-[#25303f] text-[#9ba7ba] hover:text-white'
                           }`}
                         >
                           {row.afgemeld ? 'Afgemeld' : 'Actief'}
@@ -924,14 +924,14 @@ export const WeekPlanning = ({ isBestuur, currentUserId, staffProfiles }: WeekPl
                           className={`h-9 px-3 rounded-lg border text-xs font-medium transition-colors whitespace-nowrap ${
                             row.aangemeldDezeWeek
                               ? 'border-blue-400/40 bg-blue-400/10 text-blue-300'
-                              : 'border-[#374151] bg-[#1f2937] text-[#9ca3af] hover:text-white'
+                              : 'border-[#3a465c] bg-[#25303f] text-[#9ba7ba] hover:text-white'
                           }`}
                         >
                           Deze week aangemeld
                         </button>
                         <button
                           onClick={() => removeHourRow(row.rowId)}
-                          className="h-9 w-9 rounded-lg border border-[#374151] bg-[#1f2937] text-[#6b7280] hover:text-red-400 transition-colors flex items-center justify-center"
+                          className="h-9 w-9 rounded-lg border border-[#3a465c] bg-[#25303f] text-[#9ba7ba] hover:text-red-400 transition-colors flex items-center justify-center"
                         >
                           <Trash2 className="h-3.5 w-3.5" />
                         </button>
@@ -940,7 +940,7 @@ export const WeekPlanning = ({ isBestuur, currentUserId, staffProfiles }: WeekPl
                         <div className={`inline-flex items-center gap-1.5 px-2 py-1 rounded-md text-xs font-medium ${
                           status === 'inactivity' ? 'bg-red-500/10 text-red-400' :
                           status === 'promotion' ? 'bg-amber-400/10 text-amber-300' :
-                          'bg-[#00ff88]/10 text-[#00ff88]'
+                          'bg-[#337aff]/10 text-[#337aff]'
                         }`}>
                           {status === 'inactivity' && <><AlertTriangle className="h-3 w-3" /> Inactiviteit waarschuwing — onder de {Math.min(5, required).toFixed(1).replace('.', ',')} uur</>}
                           {status === 'ok' && <><Check className="h-3 w-3" /> {row.aangemeldDezeWeek ? 'Nieuw deze week — 0 uur vereist' : 'In orde'}</>}
@@ -948,7 +948,7 @@ export const WeekPlanning = ({ isBestuur, currentUserId, staffProfiles }: WeekPl
                         </div>
                       )}
                       {row.afgemeld && row.personName && (
-                        <p className="text-[10px] text-[#6b7280]">
+                        <p className="text-[10px] text-[#9ba7ba]">
                           {findAbsenceForName(row.personName, getTaskWeekStart(selectedTask))
                             ? `Afgemeld — moet deze week alsnog ${required.toFixed(1).replace('.', ',')} uur halen`
                             : 'Afgemeld — geen uren vereist deze week'}
@@ -960,7 +960,7 @@ export const WeekPlanning = ({ isBestuur, currentUserId, staffProfiles }: WeekPl
 
                 <button
                   onClick={addHourRow}
-                  className="w-full border border-dashed border-[#374151] rounded-xl py-3 text-sm font-medium text-[#00ff88] hover:border-[#00ff88]/40 hover:bg-[#00ff88]/5 transition-colors flex items-center justify-center gap-2"
+                  className="w-full border border-dashed border-[#3a465c] rounded-xl py-3 text-sm font-medium text-[#337aff] hover:border-[#337aff]/40 hover:bg-[#337aff]/5 transition-colors flex items-center justify-center gap-2"
                 >
                   <Plus className="h-4 w-4" /> Persoon toevoegen
                 </button>
@@ -969,11 +969,11 @@ export const WeekPlanning = ({ isBestuur, currentUserId, staffProfiles }: WeekPl
 
             {!hoursViewOnly && (
               <div className="flex justify-end gap-2 mt-6">
-                <button onClick={closeHoursModal} className="px-4 py-2 text-sm text-[#9ca3af] hover:text-white transition-colors">Sluiten</button>
+                <button onClick={closeHoursModal} className="px-4 py-2 text-sm text-[#9ba7ba] hover:text-white transition-colors">Sluiten</button>
                 <button
                   onClick={handleHoursSubmit}
                   disabled={hoursSubmitting || hoursLoading}
-                  className="px-5 py-2.5 bg-[#00ff88] text-[#0a0e1a] rounded-lg text-sm font-semibold disabled:opacity-50 transition-all"
+                  className="px-5 py-2.5 bg-[#337aff] text-white rounded-lg text-sm font-semibold disabled:opacity-50 transition-all"
                 >
                   {hoursSubmitting ? 'Opslaan...' : 'Uren opslaan'}
                 </button>
@@ -986,24 +986,24 @@ export const WeekPlanning = ({ isBestuur, currentUserId, staffProfiles }: WeekPl
       {/* Request Transfer Modal */}
       {showRequestModal && selectedTask && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[60] p-4">
-          <div className="bg-[#111827] border border-[#1f2937] rounded-2xl p-6 w-full max-w-sm shadow-2xl">
+          <div className="bg-[#0e1524] border border-[#25303f] rounded-2xl p-6 w-full max-w-sm shadow-2xl">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-base font-bold text-white">Overdrachtsverzoek</h3>
-              <button onClick={() => setShowRequestModal(false)} className="text-[#6b7280] hover:text-white"><X className="h-5 w-5" /></button>
+              <button onClick={() => setShowRequestModal(false)} className="text-[#9ba7ba] hover:text-white"><X className="h-5 w-5" /></button>
             </div>
             <div className="space-y-4">
               <div>
-                <label className="text-[#9ca3af] text-sm mb-1 block">Type</label>
-                <select value={requestType} onChange={e => setRequestType(e.target.value)} className="w-full bg-[#1f2937] border border-[#374151] rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-[#00ff88]/50">
+                <label className="text-[#9ba7ba] text-sm mb-1 block">Type</label>
+                <select value={requestType} onChange={e => setRequestType(e.target.value)} className="w-full bg-[#25303f] border border-[#3a465c] rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-[#337aff]/50">
                   <option value="cannot_do">Kan ik niet doen</option>
                   <option value="delayed">Niet op tijd</option>
                 </select>
               </div>
               <div>
-                <label className="text-[#9ca3af] text-sm mb-1 block">Toelichting</label>
-                <textarea value={requestMessage} onChange={e => setRequestMessage(e.target.value)} placeholder="Waarom kun je deze taak niet doen..." rows={3} className="w-full bg-[#1f2937] border border-[#374151] rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-[#00ff88]/50 resize-none" />
+                <label className="text-[#9ba7ba] text-sm mb-1 block">Toelichting</label>
+                <textarea value={requestMessage} onChange={e => setRequestMessage(e.target.value)} placeholder="Waarom kun je deze taak niet doen..." rows={3} className="w-full bg-[#25303f] border border-[#3a465c] rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-[#337aff]/50 resize-none" />
               </div>
-              <button onClick={handleCreateRequest} className="w-full bg-amber-500 hover:bg-amber-600 text-[#0a0e1a] font-semibold py-2.5 rounded-lg transition-all">Verzoek indienen</button>
+              <button onClick={handleCreateRequest} className="w-full bg-amber-500 hover:bg-amber-600 text-white font-semibold py-2.5 rounded-lg transition-all">Verzoek indienen</button>
             </div>
           </div>
         </div>

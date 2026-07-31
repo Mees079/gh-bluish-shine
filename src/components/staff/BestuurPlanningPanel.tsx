@@ -44,7 +44,7 @@ interface Props {
 
 const PRIORITY_META: Record<string, { label: string; ring: string; dot: string }> = {
   low:    { label: "Laag",    ring: "border-slate-700",         dot: "bg-slate-500" },
-  normal: { label: "Normaal", ring: "border-[#1f2937]",         dot: "bg-[#00ff88]" },
+  normal: { label: "Normaal", ring: "border-[#25303f]",         dot: "bg-[#337aff]" },
   high:   { label: "Hoog",    ring: "border-amber-500/40",      dot: "bg-amber-400" },
   urgent: { label: "Urgent",  ring: "border-red-500/50",        dot: "bg-red-500" },
 };
@@ -200,39 +200,39 @@ export const BestuurPlanningPanel = ({ currentUserId, staffProfiles, onClose }: 
   return (
     <div className="fixed inset-0 z-[100] bg-[#050a14]/95 backdrop-blur-md overflow-auto">
       {/* Top bar */}
-      <header className="sticky top-0 z-10 border-b border-[#1f2937] bg-[#0a0e1a]/90 backdrop-blur-xl">
+      <header className="sticky top-0 z-10 border-b border-[#25303f] bg-[#080d17]/90 backdrop-blur-xl">
         <div className="max-w-[1600px] mx-auto px-4 sm:px-6 py-4 flex items-center justify-between gap-4 flex-wrap">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-[#00ff88]/10 rounded-xl flex items-center justify-center border border-[#00ff88]/30">
-              <CalendarIcon className="h-5 w-5 text-[#00ff88]" />
+            <div className="w-10 h-10 bg-[#337aff]/10 rounded-xl flex items-center justify-center border border-[#337aff]/30">
+              <CalendarIcon className="h-5 w-5 text-[#337aff]" />
             </div>
             <div>
               <h2 className="text-lg font-bold text-white">Planning Beheer</h2>
-              <p className="text-xs text-[#6b7280]">Sleep taken tussen dagen om te verplaatsen</p>
+              <p className="text-xs text-[#9ba7ba]">Sleep taken tussen dagen om te verplaatsen</p>
             </div>
           </div>
 
           <div className="flex items-center gap-2">
             <button
               onClick={() => setWeekStart(prev => subWeeks(prev, 1))}
-              className="p-2 text-[#6b7280] hover:text-white hover:bg-[#1f2937] rounded-lg transition-colors"
+              className="p-2 text-[#9ba7ba] hover:text-white hover:bg-[#25303f] rounded-lg transition-colors"
             ><ChevronLeft className="h-4 w-4" /></button>
             <button
               onClick={() => setWeekStart(startOfWeek(new Date(), { weekStartsOn: 1 }))}
-              className="px-3 py-1.5 text-xs text-[#00ff88] hover:bg-[#00ff88]/10 rounded-md transition-colors"
+              className="px-3 py-1.5 text-xs text-[#337aff] hover:bg-[#337aff]/10 rounded-md transition-colors"
             >Vandaag</button>
             <span className="text-sm text-white font-medium px-2 min-w-[160px] text-center">
               {format(weekStart, "d MMM", { locale: nl })} – {format(addDays(weekStart, 6), "d MMM yyyy", { locale: nl })}
             </span>
             <button
               onClick={() => setWeekStart(prev => addWeeks(prev, 1))}
-              className="p-2 text-[#6b7280] hover:text-white hover:bg-[#1f2937] rounded-lg transition-colors"
+              className="p-2 text-[#9ba7ba] hover:text-white hover:bg-[#25303f] rounded-lg transition-colors"
             ><ChevronRight className="h-4 w-4" /></button>
           </div>
 
           <button
             onClick={onClose}
-            className="flex items-center gap-2 px-3 py-2 text-sm text-[#6b7280] hover:text-white hover:bg-[#1f2937] rounded-lg transition-colors"
+            className="flex items-center gap-2 px-3 py-2 text-sm text-[#9ba7ba] hover:text-white hover:bg-[#25303f] rounded-lg transition-colors"
           >
             <X className="h-4 w-4" /> Sluiten
           </button>
@@ -241,22 +241,22 @@ export const BestuurPlanningPanel = ({ currentUserId, staffProfiles, onClose }: 
         {/* Search + bulk delete */}
         <div className="max-w-[1600px] mx-auto px-4 sm:px-6 pb-3 flex items-center gap-2 flex-wrap">
           <div className="relative flex-1 min-w-[220px] max-w-md">
-            <Search className="h-4 w-4 text-[#6b7280] absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+            <Search className="h-4 w-4 text-[#9ba7ba] absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
             <input
               value={search}
               onChange={e => setSearch(e.target.value)}
               placeholder="Zoek op taaknaam, beschrijving of persoon..."
-              className="w-full bg-[#0a0e1a] border border-[#1f2937] rounded-lg pl-9 pr-9 py-2 text-sm text-white placeholder:text-[#4b5563] focus:outline-none focus:border-[#00ff88]/40"
+              className="w-full bg-[#080d17] border border-[#25303f] rounded-lg pl-9 pr-9 py-2 text-sm text-white placeholder:text-[#64748b] focus:outline-none focus:border-[#337aff]/40"
             />
             {search && (
-              <button onClick={() => setSearch("")} className="absolute right-2 top-1/2 -translate-y-1/2 text-[#6b7280] hover:text-white">
+              <button onClick={() => setSearch("")} className="absolute right-2 top-1/2 -translate-y-1/2 text-[#9ba7ba] hover:text-white">
                 <X className="h-4 w-4" />
               </button>
             )}
           </div>
           {search.trim() && (
             <>
-              <span className="text-xs text-[#6b7280]">{matchedTasks.length} match{matchedTasks.length === 1 ? "" : "es"}</span>
+              <span className="text-xs text-[#9ba7ba]">{matchedTasks.length} match{matchedTasks.length === 1 ? "" : "es"}</span>
               {matchedTasks.length > 0 && (
                 <button
                   onClick={bulkDelete}
@@ -274,10 +274,10 @@ export const BestuurPlanningPanel = ({ currentUserId, staffProfiles, onClose }: 
       <main className="max-w-[1600px] mx-auto px-4 sm:px-6 py-6">
         {loading ? (
           <div className="flex items-center justify-center py-20">
-            <div className="w-8 h-8 border-2 border-[#00ff88] border-t-transparent rounded-full animate-spin" />
+            <div className="w-8 h-8 border-2 border-[#337aff] border-t-transparent rounded-full animate-spin" />
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-7 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7 gap-3">
             {days.map(day => {
               const ds = format(day, "yyyy-MM-dd");
               const dayTasks = tasksFor(day);
@@ -291,23 +291,23 @@ export const BestuurPlanningPanel = ({ currentUserId, staffProfiles, onClose }: 
                   onDrop={(e) => onDrop(e, ds)}
                   className={`flex flex-col rounded-xl border transition-all min-h-[300px] ${
                     isOver
-                      ? "border-[#00ff88] bg-[#00ff88]/5 shadow-[0_0_20px_rgba(0,255,136,0.15)]"
+                      ? "border-[#337aff] bg-[#337aff]/5 shadow-[0_0_20px_rgba(51,122,255,0.15)]"
                       : today
-                        ? "border-[#00ff88]/30 bg-[#00ff88]/[0.02]"
-                        : "border-[#1f2937] bg-[#111827]/40"
+                        ? "border-[#337aff]/30 bg-[#337aff]/[0.02]"
+                        : "border-[#25303f] bg-[#0e1524]/40"
                   }`}
                 >
                   {/* Day header */}
-                  <div className="p-3 border-b border-[#1f2937] flex items-center justify-between">
+                  <div className="p-3 border-b border-[#25303f] flex items-center justify-between">
                     <div>
-                      <div className={`text-xs uppercase tracking-wide ${today ? "text-[#00ff88]" : "text-[#6b7280]"}`}>
+                      <div className={`text-xs uppercase tracking-wide ${today ? "text-[#337aff]" : "text-[#9ba7ba]"}`}>
                         {format(day, "EEEE", { locale: nl })}
                       </div>
                       <div className="text-lg font-bold text-white leading-none">
                         {format(day, "d MMM", { locale: nl })}
                       </div>
                     </div>
-                    <span className="text-xs text-[#6b7280] bg-[#1f2937] rounded-full px-2 py-0.5">
+                    <span className="text-xs text-[#9ba7ba] bg-[#25303f] rounded-full px-2 py-0.5">
                       {dayTasks.length}
                     </span>
                   </div>
@@ -325,17 +325,17 @@ export const BestuurPlanningPanel = ({ currentUserId, staffProfiles, onClose }: 
                           onDragStart={() => onDragStart(t.id)}
                           onDragEnd={onDragEnd}
                           onClick={() => setEditing(t)}
-                          className={`group relative cursor-grab active:cursor-grabbing bg-[#0a0e1a] border ${pm.ring} rounded-lg p-2.5 hover:border-[#00ff88]/40 transition-all ${dragging ? "opacity-40" : ""}`}
+                          className={`group relative cursor-grab active:cursor-grabbing bg-[#080d17] border ${pm.ring} rounded-lg p-2.5 hover:border-[#337aff]/40 transition-all ${dragging ? "opacity-40" : ""}`}
                         >
                           <button
                             onClick={(e) => { e.stopPropagation(); deleteTask(t); }}
                             title="Verwijder taak"
-                            className="absolute top-1.5 right-1.5 z-10 p-1 rounded-md text-[#374151] hover:text-red-400 hover:bg-red-500/10 opacity-0 group-hover:opacity-100 transition-all"
+                            className="absolute top-1.5 right-1.5 z-10 p-1 rounded-md text-[#3a465c] hover:text-red-400 hover:bg-red-500/10 opacity-0 group-hover:opacity-100 transition-all"
                           >
                             <Trash2 className="h-3.5 w-3.5" />
                           </button>
                           <div className="flex items-start gap-2 pr-6">
-                            <GripVertical className="h-4 w-4 text-[#374151] mt-0.5 flex-shrink-0 group-hover:text-[#6b7280]" />
+                            <GripVertical className="h-4 w-4 text-[#3a465c] mt-0.5 flex-shrink-0 group-hover:text-[#9ba7ba]" />
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center gap-1.5 mb-1">
                                 <span className={`h-1.5 w-1.5 rounded-full ${pm.dot}`} />
@@ -348,7 +348,7 @@ export const BestuurPlanningPanel = ({ currentUserId, staffProfiles, onClose }: 
                                   <sm.Icon className="h-3 w-3" /> {sm.label}
                                 </span>
                                 {t.assigned_to && (
-                                  <span className="text-[#6b7280] bg-[#1f2937] rounded px-1.5 py-0.5">
+                                  <span className="text-[#9ba7ba] bg-[#25303f] rounded px-1.5 py-0.5">
                                     {usernameOf(t.assigned_to)}
                                   </span>
                                 )}
@@ -361,20 +361,20 @@ export const BestuurPlanningPanel = ({ currentUserId, staffProfiles, onClose }: 
 
                     {/* Quick add */}
                     {addOpen === ds ? (
-                      <div className="bg-[#0a0e1a] border border-[#00ff88]/30 rounded-lg p-2 space-y-2">
+                      <div className="bg-[#080d17] border border-[#337aff]/30 rounded-lg p-2 space-y-2">
                         <input
                           autoFocus
                           value={addTitle}
                           onChange={e => setAddTitle(e.target.value)}
                           onKeyDown={e => { if (e.key === "Enter") submitQuickAdd(ds); if (e.key === "Escape") setAddOpen(null); }}
                           placeholder="Titel..."
-                          className="w-full bg-[#0a0e1a] border border-[#1f2937] rounded px-2 py-1.5 text-sm text-white placeholder:text-[#374151] focus:outline-none focus:border-[#00ff88]/50"
+                          className="w-full bg-[#080d17] border border-[#25303f] rounded px-2 py-1.5 text-sm text-white placeholder:text-[#3a465c] focus:outline-none focus:border-[#337aff]/50"
                         />
                         <div className="flex gap-1.5">
                           <select
                             value={addAssignee}
                             onChange={e => setAddAssignee(e.target.value)}
-                            className="flex-1 bg-[#0a0e1a] border border-[#1f2937] rounded px-1.5 py-1 text-xs text-white focus:outline-none focus:border-[#00ff88]/50"
+                            className="flex-1 bg-[#080d17] border border-[#25303f] rounded px-1.5 py-1 text-xs text-white focus:outline-none focus:border-[#337aff]/50"
                             style={{ colorScheme: "dark" }}
                           >
                             <option value="">Niemand</option>
@@ -385,7 +385,7 @@ export const BestuurPlanningPanel = ({ currentUserId, staffProfiles, onClose }: 
                           <select
                             value={addPriority}
                             onChange={e => setAddPriority(e.target.value)}
-                            className="bg-[#0a0e1a] border border-[#1f2937] rounded px-1.5 py-1 text-xs text-white focus:outline-none focus:border-[#00ff88]/50"
+                            className="bg-[#080d17] border border-[#25303f] rounded px-1.5 py-1 text-xs text-white focus:outline-none focus:border-[#337aff]/50"
                             style={{ colorScheme: "dark" }}
                           >
                             {Object.entries(PRIORITY_META).map(([k, v]) => (
@@ -396,18 +396,18 @@ export const BestuurPlanningPanel = ({ currentUserId, staffProfiles, onClose }: 
                         <div className="flex gap-1.5">
                           <button
                             onClick={() => submitQuickAdd(ds)}
-                            className="flex-1 bg-[#00ff88]/15 text-[#00ff88] hover:bg-[#00ff88]/25 text-xs font-medium py-1.5 rounded"
+                            className="flex-1 bg-[#337aff]/15 text-[#337aff] hover:bg-[#337aff]/25 text-xs font-medium py-1.5 rounded"
                           >Toevoegen</button>
                           <button
                             onClick={() => { setAddOpen(null); setAddTitle(""); }}
-                            className="px-2 text-xs text-[#6b7280] hover:text-white"
+                            className="px-2 text-xs text-[#9ba7ba] hover:text-white"
                           >Annuleer</button>
                         </div>
                       </div>
                     ) : (
                       <button
                         onClick={() => setAddOpen(ds)}
-                        className="w-full flex items-center justify-center gap-1.5 py-2 text-xs text-[#374151] hover:text-[#00ff88] hover:bg-[#00ff88]/5 rounded-lg border border-dashed border-[#1f2937] hover:border-[#00ff88]/30 transition-colors"
+                        className="w-full flex items-center justify-center gap-1.5 py-2 text-xs text-[#3a465c] hover:text-[#337aff] hover:bg-[#337aff]/5 rounded-lg border border-dashed border-[#25303f] hover:border-[#337aff]/30 transition-colors"
                       >
                         <Plus className="h-3.5 w-3.5" /> Taak
                       </button>
@@ -423,48 +423,48 @@ export const BestuurPlanningPanel = ({ currentUserId, staffProfiles, onClose }: 
       {/* Edit Modal */}
       {editing && (
         <div className="fixed inset-0 z-[110] bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="w-full max-w-lg bg-[#0a0e1a] border border-[#1f2937] rounded-2xl shadow-2xl">
-            <div className="flex items-center justify-between p-5 border-b border-[#1f2937]">
+          <div className="w-full max-w-lg bg-[#080d17] border border-[#25303f] rounded-2xl shadow-2xl">
+            <div className="flex items-center justify-between p-5 border-b border-[#25303f]">
               <h3 className="text-base font-bold text-white">Taak bewerken</h3>
-              <button onClick={() => setEditing(null)} className="text-[#6b7280] hover:text-white">
+              <button onClick={() => setEditing(null)} className="text-[#9ba7ba] hover:text-white">
                 <X className="h-5 w-5" />
               </button>
             </div>
             <div className="p-5 space-y-4">
               <div>
-                <label className="text-xs text-[#6b7280] mb-1.5 block">Titel</label>
+                <label className="text-xs text-[#9ba7ba] mb-1.5 block">Titel</label>
                 <input
                   value={editing.title}
                   onChange={e => setEditing({ ...editing, title: e.target.value })}
-                  className="w-full bg-[#111827] border border-[#1f2937] rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-[#00ff88]/50"
+                  className="w-full bg-[#0e1524] border border-[#25303f] rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-[#337aff]/50"
                 />
               </div>
               <div>
-                <label className="text-xs text-[#6b7280] mb-1.5 block">Beschrijving</label>
+                <label className="text-xs text-[#9ba7ba] mb-1.5 block">Beschrijving</label>
                 <textarea
                   rows={3}
                   value={editing.description || ""}
                   onChange={e => setEditing({ ...editing, description: e.target.value })}
-                  className="w-full bg-[#111827] border border-[#1f2937] rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-[#00ff88]/50"
+                  className="w-full bg-[#0e1524] border border-[#25303f] rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-[#337aff]/50"
                 />
               </div>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="text-xs text-[#6b7280] mb-1.5 block">Datum</label>
+                  <label className="text-xs text-[#9ba7ba] mb-1.5 block">Datum</label>
                   <input
                     type="date"
                     value={editing.scheduled_date}
                     onChange={e => setEditing({ ...editing, scheduled_date: e.target.value })}
-                    className="w-full bg-[#111827] border border-[#1f2937] rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-[#00ff88]/50"
+                    className="w-full bg-[#0e1524] border border-[#25303f] rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-[#337aff]/50"
                     style={{ colorScheme: "dark" }}
                   />
                 </div>
                 <div>
-                  <label className="text-xs text-[#6b7280] mb-1.5 block">Status</label>
+                  <label className="text-xs text-[#9ba7ba] mb-1.5 block">Status</label>
                   <select
                     value={editing.status}
                     onChange={e => setEditing({ ...editing, status: e.target.value })}
-                    className="w-full bg-[#111827] border border-[#1f2937] rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-[#00ff88]/50"
+                    className="w-full bg-[#0e1524] border border-[#25303f] rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-[#337aff]/50"
                     style={{ colorScheme: "dark" }}
                   >
                     {Object.entries(STATUS_META).map(([k, v]) => (
@@ -473,11 +473,11 @@ export const BestuurPlanningPanel = ({ currentUserId, staffProfiles, onClose }: 
                   </select>
                 </div>
                 <div>
-                  <label className="text-xs text-[#6b7280] mb-1.5 block">Toegewezen aan</label>
+                  <label className="text-xs text-[#9ba7ba] mb-1.5 block">Toegewezen aan</label>
                   <select
                     value={editing.assigned_to || ""}
                     onChange={e => setEditing({ ...editing, assigned_to: e.target.value || null })}
-                    className="w-full bg-[#111827] border border-[#1f2937] rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-[#00ff88]/50"
+                    className="w-full bg-[#0e1524] border border-[#25303f] rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-[#337aff]/50"
                     style={{ colorScheme: "dark" }}
                   >
                     <option value="">Niemand</option>
@@ -487,11 +487,11 @@ export const BestuurPlanningPanel = ({ currentUserId, staffProfiles, onClose }: 
                   </select>
                 </div>
                 <div>
-                  <label className="text-xs text-[#6b7280] mb-1.5 block">Prioriteit</label>
+                  <label className="text-xs text-[#9ba7ba] mb-1.5 block">Prioriteit</label>
                   <select
                     value={editing.priority}
                     onChange={e => setEditing({ ...editing, priority: e.target.value })}
-                    className="w-full bg-[#111827] border border-[#1f2937] rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-[#00ff88]/50"
+                    className="w-full bg-[#0e1524] border border-[#25303f] rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-[#337aff]/50"
                     style={{ colorScheme: "dark" }}
                   >
                     {Object.entries(PRIORITY_META).map(([k, v]) => (
@@ -501,16 +501,16 @@ export const BestuurPlanningPanel = ({ currentUserId, staffProfiles, onClose }: 
                 </div>
               </div>
             </div>
-            <div className="flex items-center justify-between p-5 border-t border-[#1f2937]">
+            <div className="flex items-center justify-between p-5 border-t border-[#25303f]">
               <button
                 onClick={() => deleteTask(editing)}
                 className="flex items-center gap-1.5 text-sm text-red-400 hover:text-red-300 hover:bg-red-500/10 px-3 py-2 rounded-lg transition-colors"
               ><Trash2 className="h-4 w-4" /> Verwijderen</button>
               <div className="flex gap-2">
-                <button onClick={() => setEditing(null)} className="px-4 py-2 text-sm text-[#6b7280] hover:text-white">Annuleren</button>
+                <button onClick={() => setEditing(null)} className="px-4 py-2 text-sm text-[#9ba7ba] hover:text-white">Annuleren</button>
                 <button
                   onClick={saveEdit}
-                  className="flex items-center gap-1.5 bg-[#00ff88] hover:bg-[#00ff88]/90 text-[#0a0e1a] text-sm font-semibold px-4 py-2 rounded-lg"
+                  className="flex items-center gap-1.5 bg-[#337aff] hover:bg-[#337aff]/90 text-white text-sm font-semibold px-4 py-2 rounded-lg"
                 ><Save className="h-4 w-4" /> Opslaan</button>
               </div>
             </div>

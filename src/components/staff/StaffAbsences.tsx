@@ -136,34 +136,34 @@ export const StaffAbsences = ({ isBestuur, currentUserId, staffProfiles }: Props
   });
 
   if (loading) {
-    return <div className="flex justify-center py-12"><div className="w-6 h-6 border-2 border-[#00ff88] border-t-transparent rounded-full animate-spin" /></div>;
+    return <div className="flex justify-center py-12"><div className="w-6 h-6 border-2 border-[#337aff] border-t-transparent rounded-full animate-spin" /></div>;
   }
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="text-lg font-bold text-white flex items-center gap-2">
-          <UserX className="h-5 w-5 text-[#00ff88]" />
+          <UserX className="h-5 w-5 text-[#337aff]" />
           Afmeldingen
         </h2>
-        <button onClick={() => setShowAdd(true)} className="flex items-center gap-2 px-3 py-2 bg-[#00ff88]/10 text-[#00ff88] rounded-lg text-sm font-medium hover:bg-[#00ff88]/20 transition-colors">
+        <button onClick={() => setShowAdd(true)} className="flex items-center gap-2 px-3 py-2 bg-[#337aff]/10 text-[#337aff] rounded-lg text-sm font-medium hover:bg-[#337aff]/20 transition-colors">
           <Plus className="h-4 w-4" /> Iemand afmelden
         </button>
       </div>
 
       {showAdd && (
-        <div className="bg-[#111827]/80 border border-[#00ff88]/20 rounded-xl p-5 space-y-4">
+        <div className="bg-[#0e1524]/80 border border-[#337aff]/20 rounded-xl p-5 space-y-4">
           <div className="flex items-center justify-between">
             <h3 className="text-sm font-semibold text-white">Afmelding aanmaken</h3>
-            <button onClick={() => setShowAdd(false)} className="text-[#6b7280] hover:text-white"><X className="h-4 w-4" /></button>
+            <button onClick={() => setShowAdd(false)} className="text-[#9ba7ba] hover:text-white"><X className="h-4 w-4" /></button>
           </div>
 
           <div>
-            <label className="text-[#9ca3af] text-sm mb-1 block">Persoon</label>
+            <label className="text-[#9ba7ba] text-sm mb-1 block">Persoon</label>
             <select
               value={selectedName}
               onChange={e => setSelectedName(e.target.value)}
-              className="w-full bg-[#1f2937] border border-[#374151] rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-[#00ff88]/50"
+              className="w-full bg-[#25303f] border border-[#3a465c] rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-[#337aff]/50"
             >
               <option value="">Mezelf</option>
               {staffProfiles.map(sp => (
@@ -175,48 +175,48 @@ export const StaffAbsences = ({ isBestuur, currentUserId, staffProfiles }: Props
 
           {selectedName === '__custom__' && (
             <div>
-              <label className="text-[#9ca3af] text-sm mb-1 block">Naam</label>
+              <label className="text-[#9ba7ba] text-sm mb-1 block">Naam</label>
               <input
                 value={customName}
                 onChange={e => setCustomName(e.target.value)}
                 placeholder="Vul naam in"
-                className="w-full bg-[#1f2937] border border-[#374151] rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-[#00ff88]/50"
+                className="w-full bg-[#25303f] border border-[#3a465c] rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-[#337aff]/50"
               />
             </div>
           )}
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-              <label className="text-[#9ca3af] text-sm mb-1 block">Vanaf *</label>
+              <label className="text-[#9ba7ba] text-sm mb-1 block">Vanaf *</label>
               <input
                 type="date"
                 value={startDate}
                 onChange={e => setStartDate(e.target.value)}
-                className="w-full bg-[#1f2937] border border-[#374151] rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-[#00ff88]/50"
+                className="w-full bg-[#25303f] border border-[#3a465c] rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-[#337aff]/50"
               />
             </div>
             <div>
-              <label className="text-[#9ca3af] text-sm mb-1 block">Tot *</label>
+              <label className="text-[#9ba7ba] text-sm mb-1 block">Tot *</label>
               <input
                 type="date"
                 value={endDate}
                 onChange={e => setEndDate(e.target.value)}
-                className="w-full bg-[#1f2937] border border-[#374151] rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-[#00ff88]/50"
+                className="w-full bg-[#25303f] border border-[#3a465c] rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-[#337aff]/50"
               />
             </div>
           </div>
 
           <div>
-            <label className="text-[#9ca3af] text-sm mb-1 block">Reden (optioneel)</label>
+            <label className="text-[#9ba7ba] text-sm mb-1 block">Reden (optioneel)</label>
             <input
               value={reason}
               onChange={e => setReason(e.target.value)}
               placeholder="Reden van afmelding"
-              className="w-full bg-[#1f2937] border border-[#374151] rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-[#00ff88]/50"
+              className="w-full bg-[#25303f] border border-[#3a465c] rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-[#337aff]/50"
             />
           </div>
 
-          <button onClick={handleAdd} disabled={!endDate || !startDate || (selectedName === '__custom__' && !customName.trim())} className="px-4 py-2 bg-[#00ff88] text-[#0a0e1a] rounded-lg text-sm font-semibold disabled:opacity-50 transition-all">
+          <button onClick={handleAdd} disabled={!endDate || !startDate || (selectedName === '__custom__' && !customName.trim())} className="px-4 py-2 bg-[#337aff] text-white rounded-lg text-sm font-semibold disabled:opacity-50 transition-all">
             Bevestigen
           </button>
         </div>
@@ -240,17 +240,17 @@ export const StaffAbsences = ({ isBestuur, currentUserId, staffProfiles }: Props
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium text-white">{getDisplayName(a)}</p>
-                      {cleanReason && <p className="text-xs text-[#9ca3af] mt-0.5">{cleanReason}</p>}
+                      {cleanReason && <p className="text-xs text-[#9ba7ba] mt-0.5">{cleanReason}</p>}
                       <p className="text-xs text-amber-400 mt-1">
                         {format(absStart, 'd MMM', { locale: nl })} t/m {format(absEnd, 'd MMM yyyy', { locale: nl })}
                       </p>
-                      <div className="mt-2 inline-flex items-center gap-1.5 px-2 py-1 rounded-md bg-[#00ff88]/10 text-[#00ff88] text-xs font-medium">
+                      <div className="mt-2 inline-flex items-center gap-1.5 px-2 py-1 rounded-md bg-[#337aff]/10 text-[#337aff] text-xs font-medium">
                         <Clock className="h-3 w-3" />
                         Moet deze week nog {requiredHours.toFixed(1).replace('.', ',')} uur halen
                       </div>
                     </div>
                     {(isBestuur || a.user_id === currentUserId) && (
-                      <button onClick={() => handleDeactivate(a.id)} className="px-3 py-1.5 text-xs bg-[#1f2937] text-[#9ca3af] hover:text-white rounded-lg transition-colors flex items-center gap-1 flex-shrink-0">
+                      <button onClick={() => handleDeactivate(a.id)} className="px-3 py-1.5 text-xs bg-[#25303f] text-[#9ba7ba] hover:text-white rounded-lg transition-colors flex items-center gap-1 flex-shrink-0">
                         <Check className="h-3 w-3" /> Terug
                       </button>
                     )}
@@ -265,16 +265,16 @@ export const StaffAbsences = ({ isBestuur, currentUserId, staffProfiles }: Props
       {/* Past absences */}
       {pastAbsences.length > 0 && (
         <div>
-          <h3 className="text-sm font-medium text-[#6b7280] mb-3">Geschiedenis</h3>
+          <h3 className="text-sm font-medium text-[#9ba7ba] mb-3">Geschiedenis</h3>
           <div className="space-y-2">
             {pastAbsences.slice(0, 10).map(a => (
-              <div key={a.id} className="bg-[#111827]/40 border border-[#1f2937] rounded-xl p-4 opacity-60">
+              <div key={a.id} className="bg-[#0e1524]/40 border border-[#25303f] rounded-xl p-4 opacity-60">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm text-[#9ca3af]">{getDisplayName(a)}</p>
-                    {getCleanReason(a) && <p className="text-xs text-[#6b7280] mt-0.5">{getCleanReason(a)}</p>}
+                    <p className="text-sm text-[#9ba7ba]">{getDisplayName(a)}</p>
+                    {getCleanReason(a) && <p className="text-xs text-[#9ba7ba] mt-0.5">{getCleanReason(a)}</p>}
                   </div>
-                  <span className="text-xs text-[#4b5563]">
+                  <span className="text-xs text-[#64748b]">
                     {fmt(a.start_date, 'd MMM')} – {fmt(a.end_date, 'd MMM yyyy')}
                   </span>
                 </div>
@@ -285,7 +285,7 @@ export const StaffAbsences = ({ isBestuur, currentUserId, staffProfiles }: Props
       )}
 
       {absences.length === 0 && (
-        <div className="text-center py-12 text-[#374151]">
+        <div className="text-center py-12 text-[#3a465c]">
           <UserX className="h-10 w-10 mx-auto mb-3 opacity-50" />
           <p className="text-sm">Niemand is afgemeld</p>
         </div>
