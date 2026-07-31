@@ -185,7 +185,7 @@ export const StaffAbsences = ({ isBestuur, currentUserId, staffProfiles }: Props
             </div>
           )}
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <label className="text-[#9ba7ba] text-sm mb-1 block">Vanaf *</label>
               <input

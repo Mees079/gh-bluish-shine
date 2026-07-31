@@ -134,7 +134,7 @@ export const StaffHours = ({ isBestuur, currentUserId, staffProfiles }: Props) =
         </div>
       ) : (
         <>
-          <div className="grid grid-cols-3 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div className="bg-[#0e1524]/60 border border-[#25303f] rounded-xl p-4 text-center">
               <p className="text-2xl font-bold text-[#337aff]">{activeEntries.length}</p>
               <p className="text-xs text-[#9ba7ba]">Actief</p>

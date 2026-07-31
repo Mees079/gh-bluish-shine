@@ -277,7 +277,7 @@ export const BestuurPlanningPanel = ({ currentUserId, staffProfiles, onClose }: 
             <div className="w-8 h-8 border-2 border-[#337aff] border-t-transparent rounded-full animate-spin" />
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-7 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7 gap-3">
             {days.map(day => {
               const ds = format(day, "yyyy-MM-dd");
               const dayTasks = tasksFor(day);
@@ -448,7 +448,7 @@ export const BestuurPlanningPanel = ({ currentUserId, staffProfiles, onClose }: 
                   className="w-full bg-[#0e1524] border border-[#25303f] rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-[#337aff]/50"
                 />
               </div>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <label className="text-xs text-[#9ba7ba] mb-1.5 block">Datum</label>
                   <input
