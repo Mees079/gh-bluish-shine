@@ -341,7 +341,7 @@ export const HomeManager = () => {
 
   return (
     <Tabs defaultValue="hero" className="w-full">
-      <TabsList className="grid w-full grid-cols-8">
+      <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 h-auto">
         <TabsTrigger value="hero">Hero</TabsTrigger>
         <TabsTrigger value="stats">Stats</TabsTrigger>
         <TabsTrigger value="about">Over</TabsTrigger>
