@@ -304,9 +304,7 @@ const Home = () => {
           {config.show_about_section && (
             <div ref={aboutRef} className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center opacity-0 transition-opacity duration-1000">
               <div className="space-y-6">
-                <div className="inline-block px-4 py-1 bg-primary/10 border border-primary/30 rounded-full mb-2">
-                  <span className="text-primary font-semibold text-sm">Over Ons</span>
-                </div>
+                <p className="text-primary text-xs font-semibold uppercase tracking-[0.25em] mb-2">Over Ons</p>
                 <h2 className="text-4xl sm:text-5xl font-bold text-foreground">
                   {config.about_title}
                 </h2>
@@ -340,9 +338,7 @@ const Home = () => {
           {config.show_features_section && (
             <div ref={featuresRef} className="opacity-0 transition-opacity duration-1000">
               <div className="text-center mb-16">
-                <div className="inline-block px-4 py-1 bg-primary/10 border border-primary/30 rounded-full mb-4">
-                  <span className="text-primary font-semibold text-sm">Features</span>
-                </div>
+                <p className="text-primary text-xs font-semibold uppercase tracking-[0.25em] mb-4">Features</p>
                 <h2 className="text-4xl sm:text-5xl font-bold text-foreground">
                   {config.features_title}
                 </h2>
@@ -385,9 +381,7 @@ const Home = () => {
           {config.show_gallery && galleryImages.length > 0 && (
             <div ref={galleryRef} className="opacity-0 transition-opacity duration-1000 ease-out">
               <div className="text-center mb-16">
-                <div className="inline-block px-4 py-1 bg-primary/10 border border-primary/30 rounded-full mb-4">
-                  <span className="text-primary font-semibold text-sm">Galerij</span>
-                </div>
+                <p className="text-primary text-xs font-semibold uppercase tracking-[0.25em] mb-4">Galerij</p>
                 <h2 className="text-4xl sm:text-5xl font-bold text-foreground">
                   {config.gallery_title}
                 </h2>
