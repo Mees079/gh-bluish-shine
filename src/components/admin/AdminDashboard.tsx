@@ -36,11 +36,10 @@ export const AdminDashboard = ({ user, onLogout }: AdminDashboardProps) => {
       </div>
 
       <Tabs defaultValue="codes" className="w-full">
-        <TabsList className="grid w-full grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 h-auto">
+        <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 h-auto">
           <TabsTrigger value="codes">Codes</TabsTrigger>
           <TabsTrigger value="support">Support</TabsTrigger>
-          <TabsTrigger value="staff">Staff</TabsTrigger>
-          <TabsTrigger value="developers">Developers</TabsTrigger>
+          <TabsTrigger value="accounts">Accounts</TabsTrigger>
           <TabsTrigger value="site">Site Bewerken</TabsTrigger>
         </TabsList>
 
@@ -52,12 +51,21 @@ export const AdminDashboard = ({ user, onLogout }: AdminDashboardProps) => {
           <SupportManager />
         </TabsContent>
 
-        <TabsContent value="staff" className="mt-6">
-          <StaffAccountManager />
-        </TabsContent>
+        <TabsContent value="accounts" className="mt-6">
+          <Tabs defaultValue="staff" className="w-full">
+            <TabsList className="grid w-full grid-cols-2 h-auto">
+              <TabsTrigger value="staff">Staff</TabsTrigger>
+              <TabsTrigger value="developers">Developers</TabsTrigger>
+            </TabsList>
 
-        <TabsContent value="developers" className="mt-6">
-          <DeveloperAccountManager />
+            <TabsContent value="staff" className="mt-6">
+              <StaffAccountManager />
+            </TabsContent>
+
+            <TabsContent value="developers" className="mt-6">
+              <DeveloperAccountManager />
+            </TabsContent>
+          </Tabs>
         </TabsContent>
 
         <TabsContent value="site" className="mt-6">

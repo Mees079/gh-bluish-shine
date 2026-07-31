@@ -17,6 +17,8 @@ interface NavbarProps {
   discordLink?: string | null;
 }
 
+const TIKTOK_URL = "https://www.tiktok.com/@hdrp_mees";
+
 const panels = [
   { to: "/staff", label: "Staff panel", icon: ShieldCheck },
   { to: "/developer", label: "Development panel", icon: Code2 },
@@ -29,7 +31,7 @@ export const Navbar = ({ discordLink: propDiscordLink }: NavbarProps) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [discordLink, setDiscordLink] = useState(propDiscordLink);
   const [robloxLink, setRobloxLink] = useState<string | null>(null);
-  const [tiktokLink, setTiktokLink] = useState<string | null>(null);
+  const [tiktokLink, setTiktokLink] = useState<string | null>(TIKTOK_URL);
   const [query, setQuery] = useState("");
   const location = useLocation();
   const navigate = useNavigate();
@@ -39,11 +41,11 @@ export const Navbar = ({ discordLink: propDiscordLink }: NavbarProps) => {
       const { data } = await supabase
         .from('home_config')
         .select('discord_link, roblox_link, tiktok_link')
-        .single();
+        .maybeSingle();
 
       if (data?.discord_link && !propDiscordLink) setDiscordLink(data.discord_link);
       setRobloxLink(data?.roblox_link ?? null);
-      setTiktokLink(data?.tiktok_link ?? null);
+      setTiktokLink(data?.tiktok_link ?? TIKTOK_URL);
     };
 
     loadLinks();
@@ -167,7 +169,7 @@ export const Navbar = ({ discordLink: propDiscordLink }: NavbarProps) => {
       {/* Zwarte servicebalk */}
       <div className="bg-[hsl(220_60%_3%)] text-white/85 border-b border-white/10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-center gap-6 sm:gap-16 py-2 text-xs sm:text-sm font-medium overflow-x-auto">
+          <div className="flex flex-wrap items-center justify-center gap-x-5 gap-y-1 sm:gap-x-16 py-2 text-[11px] sm:text-sm font-medium text-center">
             {[
               { href: discordLink, label: "Join Discord" },
               { href: robloxLink, label: "Speel op Roblox" },
@@ -180,7 +182,7 @@ export const Navbar = ({ discordLink: propDiscordLink }: NavbarProps) => {
                   href={item.href as string}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="whitespace-nowrap underline underline-offset-4 decoration-white/30 hover:text-white hover:decoration-white transition-colors"
+                  className="underline underline-offset-4 decoration-white/30 hover:text-white hover:decoration-white transition-colors"
                 >
                   {item.label}
                 </a>
@@ -218,6 +220,23 @@ export const Navbar = ({ discordLink: propDiscordLink }: NavbarProps) => {
               </Link>
             ))}
             <div className="pt-1">{loginMenu}</div>
+            {[
+              { href: discordLink, label: "Join Discord" },
+              { href: robloxLink, label: "Speel op Roblox" },
+              { href: tiktokLink, label: "Volg ons op TikTok" },
+            ]
+              .filter((item) => item.href)
+              .map((item) => (
+                <a
+                  key={item.label}
+                  href={item.href as string}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="block py-2 text-sm font-semibold text-foreground border-b border-border last:border-0"
+                >
+                  {item.label}
+                </a>
+              ))}
             {discordLink && (
               <a
                 href={discordLink}

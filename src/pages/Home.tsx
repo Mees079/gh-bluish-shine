@@ -177,7 +177,21 @@ const Home = () => {
     window.scrollTo({ top: window.innerHeight, behavior: 'smooth' });
   };
 
-  if (!config) return null;
+  if (!config) {
+    return (
+      <div className="min-h-dvh bg-background">
+        <Navbar />
+        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+          <div className="h-64 sm:h-80 rounded-lg bg-card border border-border animate-pulse" />
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            {[0, 1, 2, 3].map((i) => (
+              <div key={i} className="h-24 rounded-lg bg-card border border-border animate-pulse" />
+            ))}
+          </div>
+        </main>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-dvh bg-background">
