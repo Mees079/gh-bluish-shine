@@ -47,17 +47,17 @@ export const StaffChangePassword = ({ onComplete }: StaffChangePasswordProps) =>
   };
 
   return (
-    <div className="min-h-dvh bg-[#0a0e1a] flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_rgba(0,255,136,0.08)_0%,_transparent_60%)]" />
+    <div className="min-h-dvh bg-[#080d17] flex items-center justify-center p-4">
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_rgba(51,122,255,0.08)_0%,_transparent_60%)]" />
       
       <div className="relative w-full max-w-md">
-        <div className="bg-[#111827]/80 backdrop-blur-xl border border-[#00ff88]/20 rounded-2xl p-8 shadow-[0_0_40px_rgba(0,255,136,0.1)]">
+        <div className="bg-[#0e1524]/80 backdrop-blur-xl border border-[#337aff]/20 rounded-2xl p-8 shadow-[0_0_40px_rgba(51,122,255,0.1)]">
           <div className="text-center mb-8">
             <div className="mx-auto w-16 h-16 bg-amber-500/10 rounded-2xl flex items-center justify-center mb-4 border border-amber-500/30">
               <ShieldCheck className="h-8 w-8 text-amber-400" />
             </div>
             <h1 className="text-2xl font-bold text-white">Wachtwoord Wijzigen</h1>
-            <p className="text-[#6b7280] text-sm mt-2">Je moet je tijdelijke wachtwoord wijzigen voordat je verder kunt</p>
+            <p className="text-[#9ba7ba] text-sm mt-2">Je moet je tijdelijke wachtwoord wijzigen voordat je verder kunt</p>
           </div>
 
           {error && (
@@ -68,7 +68,7 @@ export const StaffChangePassword = ({ onComplete }: StaffChangePasswordProps) =>
 
           <form onSubmit={handleChange} className="space-y-5">
             <div>
-              <label className="text-[#9ca3af] text-sm font-medium mb-2 block">Nieuw wachtwoord</label>
+              <label className="text-[#9ba7ba] text-sm font-medium mb-2 block">Nieuw wachtwoord</label>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#4b5563]" />
                 <input
@@ -77,13 +77,13 @@ export const StaffChangePassword = ({ onComplete }: StaffChangePasswordProps) =>
                   onChange={(e) => setNewPassword(e.target.value)}
                   placeholder="Minimaal 8 tekens"
                   required
-                  className="w-full bg-[#1f2937] border border-[#374151] rounded-lg pl-10 pr-4 py-3 text-white placeholder-[#4b5563] focus:outline-none focus:border-[#00ff88]/50 focus:ring-1 focus:ring-[#00ff88]/30 transition-all"
+                  className="w-full bg-[#25303f] border border-[#3a465c] rounded-lg pl-10 pr-4 py-3 text-white placeholder-[#4b5563] focus:outline-none focus:border-[#337aff]/50 focus:ring-1 focus:ring-[#337aff]/30 transition-all"
                 />
               </div>
             </div>
 
             <div>
-              <label className="text-[#9ca3af] text-sm font-medium mb-2 block">Bevestig wachtwoord</label>
+              <label className="text-[#9ba7ba] text-sm font-medium mb-2 block">Bevestig wachtwoord</label>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#4b5563]" />
                 <input
@@ -92,7 +92,7 @@ export const StaffChangePassword = ({ onComplete }: StaffChangePasswordProps) =>
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   placeholder="Herhaal wachtwoord"
                   required
-                  className="w-full bg-[#1f2937] border border-[#374151] rounded-lg pl-10 pr-4 py-3 text-white placeholder-[#4b5563] focus:outline-none focus:border-[#00ff88]/50 focus:ring-1 focus:ring-[#00ff88]/30 transition-all"
+                  className="w-full bg-[#25303f] border border-[#3a465c] rounded-lg pl-10 pr-4 py-3 text-white placeholder-[#4b5563] focus:outline-none focus:border-[#337aff]/50 focus:ring-1 focus:ring-[#337aff]/30 transition-all"
                 />
               </div>
             </div>
@@ -100,7 +100,7 @@ export const StaffChangePassword = ({ onComplete }: StaffChangePasswordProps) =>
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-[#00ff88] hover:bg-[#00dd77] text-[#0a0e1a] font-semibold py-3 rounded-lg transition-all duration-200 disabled:opacity-50 shadow-[0_0_20px_rgba(0,255,136,0.3)]"
+              className="w-full bg-[#337aff] hover:bg-[#00dd77] text-[#080d17] font-semibold py-3 rounded-lg transition-all duration-200 disabled:opacity-50 shadow-[0_0_20px_rgba(51,122,255,0.3)]"
             >
               {loading ? "Wijzigen..." : "Wachtwoord Wijzigen"}
             </button>

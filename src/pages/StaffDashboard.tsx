@@ -110,8 +110,8 @@ const StaffDashboard = () => {
 
   if (loading) {
     return (
-      <div className="min-h-dvh bg-[#0a0e1a] flex items-center justify-center">
-        <div className="w-8 h-8 border-2 border-[#00ff88] border-t-transparent rounded-full animate-spin" />
+      <div className="min-h-dvh bg-[#080d17] flex items-center justify-center">
+        <div className="w-8 h-8 border-2 border-[#337aff] border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
@@ -128,7 +128,7 @@ const StaffDashboard = () => {
       case 'bestuur':
         return <span className="text-xs px-2 py-0.5 rounded bg-amber-500/20 text-amber-400 font-medium">Bestuur</span>;
       default:
-        return <span className="text-xs px-2 py-0.5 rounded bg-[#00ff88]/20 text-[#00ff88] font-medium">Staff Coördinatie</span>;
+        return <span className="text-xs px-2 py-0.5 rounded bg-[#337aff]/20 text-[#337aff] font-medium">Staff Coördinatie</span>;
     }
   };
 
@@ -150,27 +150,27 @@ const StaffDashboard = () => {
     });
 
   return (
-    <div className="min-h-dvh bg-[#0a0e1a]">
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,_rgba(0,255,136,0.04)_0%,_transparent_50%)]" />
+    <div className="min-h-dvh bg-[#080d17]">
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,_rgba(51,122,255,0.04)_0%,_transparent_50%)]" />
 
       {/* Header */}
-      <header className="relative border-b border-[#1f2937] bg-[#111827]/80 backdrop-blur-xl">
+      <header className="relative border-b border-[#25303f] bg-[#0e1524]/80 backdrop-blur-xl">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-[#00ff88]/10 rounded-xl flex items-center justify-center border border-[#00ff88]/30">
-              <Shield className="h-5 w-5 text-[#00ff88]" />
+            <div className="w-10 h-10 bg-[#337aff]/10 rounded-xl flex items-center justify-center border border-[#337aff]/30">
+              <Shield className="h-5 w-5 text-[#337aff]" />
             </div>
             <div>
               <h1 className="text-lg font-bold text-white">Staff Panel</h1>
               <div className="flex items-center gap-2">
-                <span className="text-xs text-[#6b7280]">{profile?.username || user?.email?.split('@')[0]}</span>
+                <span className="text-xs text-[#9ba7ba]">{profile?.username || user?.email?.split('@')[0]}</span>
                 {getRoleBadge()}
                 {isAbsent && <span className="text-xs px-2 py-0.5 rounded bg-amber-500/20 text-amber-400 font-medium">Afgemeld</span>}
               </div>
             </div>
           </div>
 
-          <button onClick={handleLogout} className="flex items-center gap-2 px-3 py-2 text-sm text-[#6b7280] hover:text-white hover:bg-[#1f2937] rounded-lg transition-colors">
+          <button onClick={handleLogout} className="flex items-center gap-2 px-3 py-2 text-sm text-[#9ba7ba] hover:text-white hover:bg-[#25303f] rounded-lg transition-colors">
             <LogOut className="h-4 w-4" />
             <span className="hidden sm:inline">Uitloggen</span>
           </button>
@@ -185,8 +185,8 @@ const StaffDashboard = () => {
                 onClick={() => setActiveTab(tab.id)}
                 className={`flex items-center gap-2 px-4 py-2.5 text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${
                   activeTab === tab.id
-                    ? 'border-[#00ff88] text-[#00ff88]'
-                    : 'border-transparent text-[#6b7280] hover:text-white'
+                    ? 'border-[#337aff] text-[#337aff]'
+                    : 'border-transparent text-[#9ba7ba] hover:text-white'
                 }`}
               >
                 <tab.icon className="h-4 w-4" />
@@ -201,10 +201,10 @@ const StaffDashboard = () => {
       <main className="relative max-w-7xl mx-auto px-4 sm:px-6 py-6">
         {activeTab === 'dashboard' && (
           <div className="space-y-6">
-            <div className="bg-[#111827]/60 border border-[#1f2937] rounded-2xl p-8 text-center">
-              <LayoutDashboard className="h-12 w-12 text-[#374151] mx-auto mb-4" />
+            <div className="bg-[#0e1524]/60 border border-[#25303f] rounded-2xl p-8 text-center">
+              <LayoutDashboard className="h-12 w-12 text-[#3a465c] mx-auto mb-4" />
               <h2 className="text-xl font-bold text-white mb-2">Welkom, {profile?.username || user?.email?.split('@')[0]}!</h2>
-              <p className="text-[#6b7280] text-sm">
+              <p className="text-[#9ba7ba] text-sm">
                 {isBestuur
                   ? 'Je hebt volledige toegang tot het Staff Panel.'
                   : 'Bekijk je taken, berichten en uren.'}
@@ -218,7 +218,7 @@ const StaffDashboard = () => {
                   <AlertTriangle className="h-5 w-5 text-amber-400 flex-shrink-0" />
                   <div>
                     <p className="text-sm font-medium text-amber-400">{openTaskCount} open {openTaskCount === 1 ? 'taak' : 'taken'}</p>
-                    <p className="text-xs text-[#6b7280]">Aan jou toegewezen</p>
+                    <p className="text-xs text-[#9ba7ba]">Aan jou toegewezen</p>
                   </div>
                 </div>
               )}
@@ -227,7 +227,7 @@ const StaffDashboard = () => {
                   <UserX className="h-5 w-5 text-red-400 flex-shrink-0" />
                   <div>
                     <p className="text-sm font-medium text-red-400">Je bent afgemeld</p>
-                    <p className="text-xs text-[#6b7280]">Bekijk je afmelding bij Afmeldingen</p>
+                    <p className="text-xs text-[#9ba7ba]">Bekijk je afmelding bij Afmeldingen</p>
                   </div>
                 </div>
               )}
@@ -236,7 +236,7 @@ const StaffDashboard = () => {
                   <AlertTriangle className="h-5 w-5 text-red-400 flex-shrink-0" />
                   <div>
                     <p className="text-sm font-medium text-red-400">⚠️ Afgemeld met open taken</p>
-                    <p className="text-xs text-[#6b7280]">Er staan nog taken open voor afgemelde leden</p>
+                    <p className="text-xs text-[#9ba7ba]">Er staan nog taken open voor afgemelde leden</p>
                   </div>
                 </div>
               )}
