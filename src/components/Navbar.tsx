@@ -2,7 +2,7 @@ import { Link, useLocation } from "react-router-dom";
 import { Menu } from "lucide-react";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import hdrpLogo from "@/assets/hdrp-logo.png.asset.json";
+import hdrpLogo from "@/assets/hdrp-logo.png";
 
 
 interface NavbarProps {
@@ -39,7 +39,7 @@ export const Navbar = ({ discordLink: propDiscordLink }: NavbarProps) => {
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
-            <img src={hdrpLogo.url} alt="HDRP logo" className="h-9 w-9 object-contain" />
+            <img src={hdrpLogo} alt="HDRP logo" className="h-9 w-9 object-contain" />
             <span className="flex flex-col leading-none">
               <span className="text-lg font-semibold tracking-tight text-foreground">HDRP</span>
               <span className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Hoofddorp Roleplay</span>

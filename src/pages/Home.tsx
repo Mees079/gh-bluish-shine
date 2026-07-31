@@ -5,7 +5,7 @@ import { Link } from "react-router-dom";
 import { Navbar } from "@/components/Navbar";
 import { ChevronDown, Users, Server, Shield, Zap } from "lucide-react";
 import heroBanner from "@/assets/hero-banner.png";
-import hdrpLogo from "@/assets/hdrp-logo.png.asset.json";
+import hdrpLogo from "@/assets/hdrp-logo.png";
 
 import { Card } from "@/components/ui/card";
 
@@ -205,7 +205,7 @@ const Home = () => {
         {/* Hero content */}
         <div className="relative z-10 text-center space-y-8 px-4 max-w-6xl">
           <img
-            src={hdrpLogo.url}
+            src={hdrpLogo}
             alt="HDRP logo"
             className="h-20 sm:h-24 w-auto mx-auto mb-2 animate-fade-in"
           />
@@ -464,7 +464,7 @@ const Home = () => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
             <div>
               <div className="flex items-center gap-3 mb-4">
-                <img src={hdrpLogo.url} alt="HDRP logo" className="h-9 w-9 object-contain" />
+                <img src={hdrpLogo} alt="HDRP logo" className="h-9 w-9 object-contain" />
                 <div className="leading-none">
                   <p className="font-semibold text-foreground">HDRP</p>
                   <p className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Hoofddorp Roleplay</p>
