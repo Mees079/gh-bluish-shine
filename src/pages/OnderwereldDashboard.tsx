@@ -541,7 +541,7 @@ function GangNewPanel({ me, uid, onDone }: any) {
           <div><Label>Gangnaam</Label><input required value={name} onChange={(e) => setName(e.target.value)} className={inputCls} placeholder="Bijv. De Vossen" /></div>
           <div>
             <Label>Startlevel</Label>
-            <div className="grid grid-cols-6 gap-2">
+            <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
               {[1, 2, 3, 4, 5, 6].map((n) => (
                 <button key={n} type="button" onClick={() => setLevel(n)}
                   className={`py-2 rounded-lg border text-sm font-bold ${level === n ? "bg-zinc-300 text-black border-zinc-100" : "bg-slate-800 border-slate-600 text-slate-300 hover:border-slate-400"}`}>
@@ -958,7 +958,7 @@ function BoostsPanel({ me, uid, isCoord }: any) {
         <form onSubmit={create} className="space-y-4">
           <div>
             <Label>Multiplier</Label>
-            <div className="grid grid-cols-4 gap-2">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
               {[2, 3, 4, 5].map(n => (
                 <button key={n} type="button" onClick={() => setMult(n)}
                   className={`py-3 rounded-lg border font-bold text-lg ${mult === n ? "bg-zinc-300 text-black border-zinc-100" : "bg-slate-800 border-slate-600 text-slate-300 hover:border-slate-400"}`}>x{n}</button>

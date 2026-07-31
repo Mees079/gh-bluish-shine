@@ -396,7 +396,7 @@ export const CodesManager = () => {
   return (
     <>
     <Tabs defaultValue="create" className="w-full">
-      <TabsList className="grid w-full grid-cols-3">
+      <TabsList className="grid w-full grid-cols-3 h-auto">
         <TabsTrigger value="create">Code Aanmaken</TabsTrigger>
         <TabsTrigger value="active">
           Actieve Codes <Badge variant="secondary" className="ml-2">{activeCodes.length}</Badge>

@@ -334,7 +334,7 @@ export const CategoriesManager = () => {
                   onChange={(e) => setIconSearch(e.target.value)}
                 />
                 {filteredIcons.length > 0 && (
-                  <div className="grid grid-cols-4 gap-1 mt-2 max-h-40 overflow-y-auto border rounded p-2">
+                  <div className="grid grid-cols-3 sm:grid-cols-4 gap-1 mt-2 max-h-40 overflow-y-auto border rounded p-2">
                     {filteredIcons.map((name) => {
                       const Icon = (LucideIcons as any)[name];
                       const isSelected = selectedIcons.includes(name);
