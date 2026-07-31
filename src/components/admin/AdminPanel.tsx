@@ -6,8 +6,8 @@ import { AdminDashboard } from "./AdminDashboard";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 
-export const AdminPanel = () => {
-  const [open, setOpen] = useState(false);
+export const AdminPanel = ({ defaultOpen = false }: { defaultOpen?: boolean }) => {
+  const [open, setOpen] = useState(defaultOpen);
   const [user, setUser] = useState<User | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
