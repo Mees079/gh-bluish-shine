@@ -170,22 +170,23 @@ const Rules = () => {
               <Card 
                 key={section.id}
                 onClick={() => setSelectedSection(section.id)}
-                className="p-8 hover:shadow-glow transition-all duration-500 border-2 border-border hover:border-primary cursor-pointer animate-fade-in overflow-hidden relative group"
+                className="p-6 sm:p-8 hover:shadow-glow transition-all duration-500 border-2 border-border hover:border-primary cursor-pointer animate-fade-in overflow-hidden relative group"
                 style={{ animationDelay: `${idx * 0.1}s` }}
               >
                 {/* Decorative gradient overlay */}
                 <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
                 
                 <div className="relative z-10">
-                  <div className="flex items-start gap-6 mb-4">
-                    <div className="text-6xl group-hover:scale-110 transition-transform duration-300">{section.icon}</div>
-                    <div className="flex-1">
-                      <h2 className="text-3xl font-bold text-foreground mb-2 group-hover:text-primary transition-colors">
+                  <div className="flex items-start gap-4 sm:gap-6 mb-4">
+                    <div className="text-4xl sm:text-6xl group-hover:scale-110 transition-transform duration-300">{section.icon}</div>
+                    <div className="flex-1 min-w-0">
+                      <h2 className="text-xl sm:text-3xl font-bold text-foreground mb-2 group-hover:text-primary transition-colors">
                         {section.title}
                       </h2>
                       <div className="h-1 w-20 bg-primary/30 group-hover:bg-primary/60 group-hover:w-32 transition-all duration-300" />
                     </div>
                   </div>
+
 
                   {section.content && (
                     <p className="text-muted-foreground line-clamp-3 mt-4">
