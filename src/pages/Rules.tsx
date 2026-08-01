@@ -236,9 +236,39 @@ const Rules = () => {
     <div className="min-h-dvh bg-background">
       <Navbar />
       
-      <div className="flex h-[calc(100vh-4rem)]">
+      {/* Mobile header */}
+      <div className="lg:hidden border-b border-border bg-card/50 backdrop-blur-sm p-4 space-y-3">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => setSelectedSection(null)}
+          className="-ml-2"
+        >
+          <ArrowLeft className="h-4 w-4 mr-2" />
+          Terug naar overzicht
+        </Button>
+        <div className="flex items-center gap-3">
+          <span className="text-3xl">{currentSection?.icon}</span>
+          <h1 className="text-xl font-bold text-foreground">{currentSection?.title}</h1>
+        </div>
+        {currentSection?.subsections && currentSection.subsections.length > 0 && (
+          <div className="flex gap-2 overflow-x-auto pb-1 -mx-1 px-1">
+            {currentSection.subsections.map((subsection, idx) => (
+              <button
+                key={idx}
+                onClick={() => scrollToSubsection(idx)}
+                className="whitespace-nowrap px-3 py-1.5 text-xs rounded-full border border-border/60 bg-secondary/40 text-muted-foreground active:bg-primary/10"
+              >
+                {subsection.title}
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+
+      <div className="flex lg:h-[calc(100vh-4rem)]">
         {/* Sidebar */}
-        <aside className="w-80 border-r border-border bg-card/50 backdrop-blur-sm flex flex-col">
+        <aside className="hidden lg:flex w-80 border-r border-border bg-card/50 backdrop-blur-sm flex-col">
           <div className="p-6 border-b border-border flex-shrink-0">
             <Button
               variant="ghost"
