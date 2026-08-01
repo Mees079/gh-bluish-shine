@@ -326,11 +326,11 @@ const Rules = () => {
         </aside>
 
         {/* Main content */}
-        <main className="flex-1 overflow-hidden bg-background">
-          <ScrollArea id="content-area" className="h-full">
-            <div className="max-w-4xl mx-auto p-8">
+        <main className="flex-1 min-w-0 lg:overflow-hidden bg-background">
+          <ScrollArea id="content-area" className="lg:h-full">
+            <div className="max-w-4xl mx-auto p-4 sm:p-6 lg:p-8">
               <div className="animate-fade-in space-y-8">
-                <div className="flex items-start gap-6 mb-8">
+                <div className="hidden lg:flex items-start gap-6 mb-8">
                   <div className="text-6xl">{currentSection?.icon}</div>
                   <div className="flex-1">
                     <h2 className="text-4xl font-bold text-foreground mb-3">
@@ -339,6 +339,7 @@ const Rules = () => {
                     <div className="h-1 w-24 bg-primary/50 rounded" />
                   </div>
                 </div>
+
 
                 {currentSection?.subsections && currentSection.subsections.length > 0 && (
                   <div className="space-y-12">
