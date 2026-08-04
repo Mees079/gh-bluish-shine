@@ -2139,6 +2139,18 @@ export type Database = {
       ow_recalc_gang: { Args: { _gang_id: string }; Returns: undefined }
       ow_weekly_inactivity_check: { Args: never; Returns: undefined }
       schedule_weekly_uren_tasks: { Args: never; Returns: undefined }
+      submit_application: {
+        Args: {
+          _age: string
+          _answers: Json
+          _discord_id: string
+          _discord_name: string
+          _name: string
+          _roblox_name: string
+          _team: string
+        }
+        Returns: string
+      }
     }
     Enums: {
       app_role:
