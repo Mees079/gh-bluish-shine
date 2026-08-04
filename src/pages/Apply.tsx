@@ -192,13 +192,22 @@ const Apply = () => {
         status: "pending",
       };
 
-      const { error } = await supabase.from("applications").insert(payload);
+      const { data: newId, error } = await (supabase.rpc as any)("submit_application", {
+        _team: payload.team,
+        _name: payload.name,
+        _discord_name: payload.discord_name,
+        _discord_id: payload.discord_id,
+        _roblox_name: payload.roblox_name,
+        _age: payload.age,
+        _answers: labelled,
+      });
 
       if (error) throw error;
 
       await supabase.functions.invoke("notify-application", {
         body: {
           event: "submitted",
+          application_id: newId,
           team: payload.team,
           name: payload.name,
           discord_name: payload.discord_name,
