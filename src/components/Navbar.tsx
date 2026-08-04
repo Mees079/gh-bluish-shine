@@ -58,6 +58,7 @@ export const Navbar = ({ discordLink: propDiscordLink }: NavbarProps) => {
     { to: "/regels", label: "Regels" },
     { to: "/shop", label: "Shop" },
     { to: "/support", label: "Support" },
+    { to: "/solliciteren", label: "Solliciteren" },
   ];
 
   const submitSearch = (e: React.FormEvent) => {

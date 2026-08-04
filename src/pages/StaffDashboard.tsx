@@ -7,7 +7,8 @@ import { StaffAnnouncements } from "@/components/staff/StaffAnnouncements";
 import { StaffAbsences } from "@/components/staff/StaffAbsences";
 import { StaffHours } from "@/components/staff/StaffHours";
 import { StaffPersonnel } from "@/components/staff/StaffPersonnel";
-import { Shield, LogOut, Calendar, LayoutDashboard, Megaphone, UserX, Clock, Users, AlertTriangle } from "lucide-react";
+import { StaffApplications } from "@/components/staff/StaffApplications";
+import { Shield, LogOut, Calendar, LayoutDashboard, Megaphone, UserX, Clock, Users, AlertTriangle, ClipboardList } from "lucide-react";
 import { isPast, parseISO } from "date-fns";
 
 interface StaffProfile {
@@ -138,6 +139,7 @@ const StaffDashboard = () => {
     { id: 'announcements', label: 'Berichten', icon: Megaphone },
     { id: 'absences', label: 'Afmeldingen', icon: UserX },
     { id: 'hours', label: 'Uren', icon: Clock },
+    { id: 'applications', label: 'Sollicitaties', icon: ClipboardList },
     ...(isBestuur ? [{ id: 'personnel', label: 'Personeel', icon: Users }] : []),
   ];
 
@@ -258,6 +260,10 @@ const StaffDashboard = () => {
 
         {activeTab === 'hours' && user && (
           <StaffHours isBestuur={isBestuur} currentUserId={user.id} staffProfiles={staffProfiles} />
+        )}
+
+        {activeTab === 'applications' && user && (
+          <StaffApplications currentUserName={profile?.username || user?.email?.split('@')[0] || 'Staff'} />
         )}
 
         {activeTab === 'personnel' && isBestuur && (
