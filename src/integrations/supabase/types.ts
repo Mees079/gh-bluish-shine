@@ -14,6 +14,60 @@ export type Database = {
   }
   public: {
     Tables: {
+      applications: {
+        Row: {
+          age: string | null
+          answers: Json
+          created_at: string
+          discord_id: string | null
+          discord_name: string
+          id: string
+          name: string
+          review_note: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          reviewed_by_name: string | null
+          roblox_name: string
+          status: string
+          team: string
+          updated_at: string
+        }
+        Insert: {
+          age?: string | null
+          answers?: Json
+          created_at?: string
+          discord_id?: string | null
+          discord_name: string
+          id?: string
+          name: string
+          review_note?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          reviewed_by_name?: string | null
+          roblox_name: string
+          status?: string
+          team?: string
+          updated_at?: string
+        }
+        Update: {
+          age?: string | null
+          answers?: Json
+          created_at?: string
+          discord_id?: string | null
+          discord_name?: string
+          id?: string
+          name?: string
+          review_note?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          reviewed_by_name?: string | null
+          roblox_name?: string
+          status?: string
+          team?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       categories: {
         Row: {
           active: boolean
