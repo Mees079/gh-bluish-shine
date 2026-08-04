@@ -23,3 +23,6 @@ verify_jwt = false
 
 [functions.ow-init-hdrp]
 verify_jwt = false
+
+[functions.notify-application]
+verify_jwt = false
