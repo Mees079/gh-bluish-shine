@@ -85,10 +85,28 @@ Deno.serve(async (req) => {
         });
     }
 
+    const apiKey = Deno.env.get('BOTGHOST_API_KEY');
+
+    const variables = [
+      { name: 'event', variable: '{event}', value: body.event },
+      { name: 'team', variable: '{team}', value: TEAM_LABELS[body.team] ?? body.team },
+      { name: 'name', variable: '{name}', value: body.name },
+      { name: 'age', variable: '{age}', value: body.age ?? '-' },
+      { name: 'discord_name', variable: '{discord_name}', value: body.discord_name ?? '-' },
+      { name: 'discord_id', variable: '{discord_id}', value: body.discord_id ?? '-' },
+      { name: 'roblox_name', variable: '{roblox_name}', value: body.roblox_name ?? '-' },
+      { name: 'reviewer', variable: '{reviewer}', value: body.reviewer ?? '-' },
+      { name: 'application_id', variable: '{application_id}', value: body.application_id ?? '-' },
+    ];
+
     const res = await fetch(webhookUrl, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        ...(apiKey ? { Authorization: apiKey } : {}),
+      },
       body: JSON.stringify({
+        variables,
         embeds: [
           {
             title: meta.title,
