@@ -192,7 +192,7 @@ const Apply = () => {
         status: "pending",
       };
 
-      const { data: newId, error } = await supabase.rpc("submit_application", {
+      const { data: newId, error } = await (supabase.rpc as any)("submit_application", {
         _team: payload.team,
         _name: payload.name,
         _discord_name: payload.discord_name,
