@@ -1,468 +1,127 @@
-import { useState, useEffect, useRef } from "react";
+import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { Navbar } from "@/components/Navbar";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Badge } from "@/components/ui/badge";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { supabase } from "@/integrations/supabase/client";
-import { toast } from "@/hooks/use-toast";
-import { MessageCircle, Send, ArrowLeft, Loader2 } from "lucide-react";
-
-interface SupportTicket {
-  id: string;
-  ticket_number: string;
-  name: string;
-  email: string;
-  roblox_name: string;
-  discord_name: string;
-  subject: string;
-  recipient: string;
-  status: string;
-  created_at: string;
-}
-
-interface SupportMessage {
-  id: string;
-  ticket_id: string;
-  message: string;
-  is_admin_reply: boolean;
-  created_at: string;
-}
+import { MessageCircle, ArrowRight, Clock, ShieldCheck, HelpCircle, FileText } from "lucide-react";
 
 const Support = () => {
-  const [activeTicket, setActiveTicket] = useState<SupportTicket | null>(null);
-  const [messages, setMessages] = useState<SupportMessage[]>([]);
-  const [newMessage, setNewMessage] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [sendingMessage, setSendingMessage] = useState(false);
   const [discordLink, setDiscordLink] = useState<string | null>(null);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
-
-  // Form state for new ticket
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    roblox_name: "",
-    discord_name: "",
-    subject: "",
-    recipient: "",
-    message: ""
-  });
 
   useEffect(() => {
-    loadDiscordLink();
-    checkExistingTicket();
+    supabase
+      .from("home_config")
+      .select("discord_link")
+      .maybeSingle()
+      .then(({ data }) => setDiscordLink(data?.discord_link ?? null));
   }, []);
 
-  useEffect(() => {
-    if (activeTicket) {
-      loadMessages();
-      // Set up realtime subscription
-      const channel = supabase
-        .channel(`ticket-${activeTicket.id}`)
-        .on(
-          'postgres_changes',
-          {
-            event: 'INSERT',
-            schema: 'public',
-            table: 'support_messages',
-            filter: `ticket_id=eq.${activeTicket.id}`
-          },
-          (payload) => {
-            setMessages(prev => [...prev, payload.new as SupportMessage]);
-          }
-        )
-        .subscribe();
-
-      return () => {
-        supabase.removeChannel(channel);
-      };
-    }
-  }, [activeTicket]);
-
-  useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
-
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  };
-
-  const loadDiscordLink = async () => {
-    const { data } = await supabase
-      .from('home_config')
-      .select('discord_link')
-      .limit(1)
-      .single();
-    if (data) setDiscordLink(data.discord_link);
-  };
-
-  const checkExistingTicket = async () => {
-    const savedTicketNumber = localStorage.getItem('support_ticket_number');
-    if (savedTicketNumber) {
-      setLoading(true);
-      const { data, error } = await supabase
-        .rpc('get_support_ticket_by_number', { _ticket_number: savedTicketNumber });
-
-      if (data && data.length > 0 && !error) {
-        setActiveTicket(data[0] as SupportTicket);
-      } else {
-        localStorage.removeItem('support_ticket_number');
-      }
-      setLoading(false);
-    }
-  };
-
-  const loadMessages = async () => {
-    if (!activeTicket) return;
-
-    const { data, error } = await supabase
-      .rpc('get_support_messages_by_ticket_number', { _ticket_number: activeTicket.ticket_number });
-
-    if (data && !error) {
-      setMessages(data as SupportMessage[]);
-    }
-  };
-
-
-  const generateTicketNumber = () => {
-    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-    let result = 'TKT-';
-    for (let i = 0; i < 8; i++) {
-      result += chars.charAt(Math.floor(Math.random() * chars.length));
-    }
-    return result;
-  };
-
-  const handleSubmitTicket = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!formData.name || !formData.email || !formData.roblox_name || !formData.discord_name || !formData.subject || !formData.recipient || !formData.message) {
-      toast({
-        title: "Fout",
-        description: "Vul alle velden in",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    setLoading(true);
-    const ticketNumber = generateTicketNumber();
-
-    const { data: ticketData, error: ticketError } = await supabase
-      .rpc('create_support_ticket', {
-        _ticket_number: ticketNumber,
-        _name: formData.name,
-        _email: formData.email,
-        _roblox_name: formData.roblox_name,
-        _discord_name: formData.discord_name,
-        _subject: formData.subject,
-        _recipient: formData.recipient,
-        _message: formData.message,
-      });
-
-    if (ticketError || !ticketData) {
-      console.error('create ticket failed', ticketError);
-      toast({
-        title: "Fout",
-        description: "Kon ticket niet aanmaken. Probeer het opnieuw.",
-        variant: "destructive"
-      });
-      setLoading(false);
-      return;
-    }
-
-    localStorage.setItem('support_ticket_number', ticketNumber);
-    setActiveTicket(ticketData as SupportTicket);
-
-    toast({
-      title: "Ticket aangemaakt!",
-      description: `Je ticketnummer is ${ticketNumber}. Bewaar dit nummer!`
-    });
-
-    setLoading(false);
-  };
-
-  const handleSendMessage = async () => {
-    if (!newMessage.trim() || !activeTicket) return;
-
-    setSendingMessage(true);
-    const { data, error } = await supabase
-      .rpc('add_support_message_by_number', {
-        _ticket_number: activeTicket.ticket_number,
-        _message: newMessage,
-      });
-
-    if (error) {
-      console.error('send message failed', error);
-      toast({
-        title: "Fout",
-        description: "Kon bericht niet versturen. Probeer het opnieuw.",
-        variant: "destructive"
-      });
-    } else {
-      setNewMessage("");
-      if (data) {
-        // Optimistically append; realtime may not fire for anon subscribers
-        setMessages((prev) => [...prev, data as SupportMessage]);
-      }
-    }
-    setSendingMessage(false);
-  };
-
-
-  const handleNewTicket = () => {
-    localStorage.removeItem('support_ticket_number');
-    setActiveTicket(null);
-    setMessages([]);
-    setFormData({
-      name: "",
-      email: "",
-      roblox_name: "",
-      discord_name: "",
-      subject: "",
-      recipient: "",
-      message: ""
-    });
-  };
-
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case 'open':
-        return <Badge className="bg-green-500">Open</Badge>;
-      case 'in_progress':
-        return <Badge className="bg-yellow-500">In Behandeling</Badge>;
-      case 'closed':
-        return <Badge variant="secondary">Gesloten</Badge>;
-      default:
-        return <Badge>{status}</Badge>;
-    }
-  };
-
-  if (loading && !activeTicket) {
-    return (
-      <div className="min-h-dvh bg-background">
-        <Navbar discordLink={discordLink} />
-        <div className="flex items-center justify-center h-[calc(100vh-80px)]">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        </div>
-      </div>
-    );
-  }
+  const cards = [
+    {
+      icon: Clock,
+      title: "Snelle reactie",
+      text: "Ons supportteam staat dagelijks klaar en reageert doorgaans binnen enkele uren op je ticket.",
+    },
+    {
+      icon: ShieldCheck,
+      title: "Veilig & privé",
+      text: "Je ticket is alleen zichtbaar voor jou en het HDRP-supportteam. Deel nooit je wachtwoord.",
+    },
+    {
+      icon: FileText,
+      title: "Goed voorbereid",
+      text: "Vermeld je Roblox-naam, wat er gebeurde en voeg bewijs (screenshots of clips) toe.",
+    },
+  ];
 
   return (
     <div className="min-h-dvh bg-background">
       <Navbar discordLink={discordLink} />
-      
-      <div className="container mx-auto px-4 py-8 max-w-4xl">
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-foreground mb-2">Support</h1>
-          <p className="text-muted-foreground">
-            Heb je een vraag of probleem? We helpen je graag!
-          </p>
-        </div>
 
-        {activeTicket ? (
-          <Card className="border-primary/20">
-            <CardHeader className="border-b">
-              <div className="flex items-center justify-between">
-                <div>
-                  <CardTitle className="flex items-center gap-2">
-                    <MessageCircle className="h-5 w-5" />
-                    {activeTicket.subject}
-                  </CardTitle>
-                  <CardDescription className="mt-1">
-                    Ticket #{activeTicket.ticket_number} • Voor: {activeTicket.recipient}
-                  </CardDescription>
-                </div>
-                <div className="flex items-center gap-2">
-                  {getStatusBadge(activeTicket.status)}
-                  <Button variant="outline" size="sm" onClick={handleNewTicket}>
-                    <ArrowLeft className="h-4 w-4 mr-1" />
-                    Nieuw Ticket
-                  </Button>
-                </div>
+      <main>
+        {/* Hero */}
+        <section className="relative overflow-hidden border-b border-border bg-navy text-navy-foreground">
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_hsl(var(--primary)/0.22)_0%,_transparent_60%)]" />
+          <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-24 text-center">
+            <span className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-4 py-1.5 text-[11px] font-semibold uppercase tracking-[0.2em]">
+              Support
+            </span>
+            <h1 className="mt-6 font-heading text-3xl sm:text-5xl font-bold tracking-tight">
+              Hulp nodig? Maak een ticket aan in onze Discord
+            </h1>
+            <p className="mt-4 max-w-2xl mx-auto text-sm sm:text-base text-navy-foreground/70">
+              Alle support van Hoofddorp Roleplay verloopt via Discord. Open daar een ticket en een
+              medewerker van het supportteam helpt je persoonlijk verder.
+            </p>
+
+            <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
+              <a
+                href={discordLink || "#"}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={`inline-flex items-center justify-center gap-2 h-12 px-7 rounded-full bg-primary text-primary-foreground text-sm font-semibold transition-colors hover:bg-primary/90 ${
+                  discordLink ? "" : "pointer-events-none opacity-60"
+                }`}
+              >
+                <MessageCircle className="h-5 w-5" />
+                Ticket aanmaken in Discord
+                <ArrowRight className="h-4 w-4" />
+              </a>
+              <Link
+                to="/regels"
+                className="inline-flex items-center justify-center gap-2 h-12 px-7 rounded-full border border-white/20 text-sm font-semibold hover:bg-white/10 transition-colors"
+              >
+                Bekijk eerst de regels
+              </Link>
+            </div>
+          </div>
+        </section>
+
+        {/* Stappen */}
+        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 sm:py-20">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+            {[
+              { step: "01", title: "Join de Discord", text: "Klik op de knop hierboven en word lid van de officiële HDRP Discord-server." },
+              { step: "02", title: "Open een ticket", text: "Ga naar het kanaal #ticket-aanmaken en kies de categorie die bij jouw vraag past." },
+              { step: "03", title: "Krijg hulp", text: "Beschrijf je vraag zo duidelijk mogelijk. Een teamlid pakt je ticket zo snel mogelijk op." },
+            ].map((item) => (
+              <div key={item.step} className="rounded-2xl border border-border bg-card p-6">
+                <span className="font-heading text-3xl font-bold text-primary">{item.step}</span>
+                <h2 className="mt-3 text-lg font-semibold text-foreground">{item.title}</h2>
+                <p className="mt-2 text-sm text-muted-foreground leading-relaxed">{item.text}</p>
               </div>
-            </CardHeader>
-            <CardContent className="p-0">
-              <ScrollArea className="h-[400px] p-4">
-                <div className="space-y-4">
-                  {messages.map((msg) => (
-                    <div
-                      key={msg.id}
-                      className={`flex ${msg.is_admin_reply ? 'justify-start' : 'justify-end'}`}
-                    >
-                      <div
-                        className={`max-w-[80%] rounded-lg p-3 ${
-                          msg.is_admin_reply
-                            ? 'bg-secondary text-secondary-foreground'
-                            : 'bg-primary text-primary-foreground'
-                        }`}
-                      >
-                        <p className="text-sm whitespace-pre-wrap">{msg.message}</p>
-                        <p className={`text-xs mt-1 ${msg.is_admin_reply ? 'text-muted-foreground' : 'text-primary-foreground/70'}`}>
-                          {msg.is_admin_reply ? 'Staff' : 'Jij'} • {new Date(msg.created_at).toLocaleString('nl-NL')}
-                        </p>
-                      </div>
-                    </div>
-                  ))}
-                  <div ref={messagesEndRef} />
-                </div>
-              </ScrollArea>
-              
-              {activeTicket.status !== 'closed' && (
-                <div className="border-t p-4">
-                  <div className="flex gap-2">
-                    <Textarea
-                      placeholder="Type je bericht..."
-                      value={newMessage}
-                      onChange={(e) => setNewMessage(e.target.value)}
-                      className="min-h-[60px]"
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter' && !e.shiftKey) {
-                          e.preventDefault();
-                          handleSendMessage();
-                        }
-                      }}
-                    />
-                    <Button 
-                      onClick={handleSendMessage} 
-                      disabled={sendingMessage || !newMessage.trim()}
-                      className="px-6"
-                    >
-                      {sendingMessage ? (
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                      ) : (
-                        <Send className="h-4 w-4" />
-                      )}
-                    </Button>
-                  </div>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        ) : (
-          <Card>
-            <CardHeader>
-              <CardTitle>Nieuw Support Ticket</CardTitle>
-              <CardDescription>
-                Vul onderstaand formulier in om een support ticket aan te maken
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <form onSubmit={handleSubmitTicket} className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="name">Naam *</Label>
-                    <Input
-                      id="name"
-                      placeholder="Je naam"
-                      value={formData.name}
-                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="email">E-mailadres *</Label>
-                    <Input
-                      id="email"
-                      type="email"
-                      placeholder="je@email.com"
-                      value={formData.email}
-                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                    />
-                  </div>
-                </div>
+            ))}
+          </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="roblox_name">Roblox Naam *</Label>
-                    <Input
-                      id="roblox_name"
-                      placeholder="Je Roblox gebruikersnaam"
-                      value={formData.roblox_name}
-                      onChange={(e) => setFormData({ ...formData, roblox_name: e.target.value })}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="discord_name">Discord Naam *</Label>
-                    <Input
-                      id="discord_name"
-                      placeholder="Je Discord gebruikersnaam"
-                      value={formData.discord_name}
-                      onChange={(e) => setFormData({ ...formData, discord_name: e.target.value })}
-                    />
-                  </div>
-                </div>
+          <div className="mt-5 grid grid-cols-1 md:grid-cols-3 gap-5">
+            {cards.map((card) => (
+              <div key={card.title} className="rounded-2xl border border-border bg-secondary/30 p-6">
+                <card.icon className="h-6 w-6 text-primary" />
+                <h3 className="mt-3 text-base font-semibold text-foreground">{card.title}</h3>
+                <p className="mt-2 text-sm text-muted-foreground leading-relaxed">{card.text}</p>
+              </div>
+            ))}
+          </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="recipient">Voor wie is dit bericht? *</Label>
-                  <Select
-                    value={formData.recipient}
-                    onValueChange={(value) => setFormData({ ...formData, recipient: value })}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Selecteer ontvanger" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="Algemeen">Algemeen</SelectItem>
-                      <SelectItem value="Management">Management</SelectItem>
-                      <SelectItem value="Staff Team">Staff Team</SelectItem>
-                      <SelectItem value="Development">Development</SelectItem>
-                      <SelectItem value="Shop Support">Shop Support</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="subject">Onderwerp *</Label>
-                  <Input
-                    id="subject"
-                    placeholder="Waar gaat je vraag/probleem over?"
-                    value={formData.subject}
-                    onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="message">Bericht *</Label>
-                  <Textarea
-                    id="message"
-                    placeholder="Beschrijf je vraag of probleem zo duidelijk mogelijk..."
-                    className="min-h-[150px]"
-                    value={formData.message}
-                    onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-                  />
-                </div>
-
-                <Button type="submit" className="w-full" disabled={loading}>
-                  {loading ? (
-                    <>
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                      Versturen...
-                    </>
-                  ) : (
-                    <>
-                      <Send className="h-4 w-4 mr-2" />
-                      Ticket Versturen
-                    </>
-                  )}
-                </Button>
-              </form>
-            </CardContent>
-          </Card>
-        )}
-      </div>
-
-      {/* Footer */}
-      <footer className="bg-card/50 border-t mt-12 py-8">
-        <div className="container mx-auto px-4 text-center text-muted-foreground">
-          <p>© 2024 HDRP. Alle rechten voorbehouden.</p>
-        </div>
-      </footer>
+          <div className="mt-10 rounded-2xl border border-border bg-card p-6 sm:p-8 flex flex-col sm:flex-row items-start sm:items-center gap-5 justify-between">
+            <div className="flex items-start gap-4">
+              <HelpCircle className="h-7 w-7 text-primary shrink-0" />
+              <div>
+                <h2 className="text-lg font-semibold text-foreground">Wil je bij het team komen?</h2>
+                <p className="text-sm text-muted-foreground">
+                  Solliciteer direct voor het staff-, development- of content creator team.
+                </p>
+              </div>
+            </div>
+            <Link
+              to="/solliciteren"
+              className="inline-flex items-center gap-2 h-11 px-6 rounded-full border border-primary/40 text-primary text-sm font-semibold hover:bg-primary/10 transition-colors"
+            >
+              Naar solliciteren
+              <ArrowRight className="h-4 w-4" />
+            </Link>
+          </div>
+        </section>
+      </main>
     </div>
   );
 };
