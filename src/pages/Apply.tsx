@@ -192,18 +192,13 @@ const Apply = () => {
         status: "pending",
       };
 
-      const { data, error } = await supabase
-        .from("applications")
-        .insert(payload)
-        .select("id")
-        .single();
+      const { error } = await supabase.from("applications").insert(payload);
 
       if (error) throw error;
 
       await supabase.functions.invoke("notify-application", {
         body: {
           event: "submitted",
-          application_id: data?.id,
           team: payload.team,
           name: payload.name,
           discord_name: payload.discord_name,
