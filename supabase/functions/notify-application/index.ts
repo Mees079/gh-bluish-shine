@@ -86,7 +86,7 @@ Deno.serve(async (req) => {
     }
 
     const apiKey = Deno.env.get('BOTGHOST_API_KEY');
-    console.log('debug', { hasKey: !!apiKey, keyLen: apiKey?.length ?? 0, host: new URL(webhookUrl).host });
+    
 
     const variables = [
       { name: 'event', variable: '{event}', value: body.event },
