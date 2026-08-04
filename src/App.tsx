@@ -11,6 +11,7 @@ import { AdminPanelGate } from "@/components/admin/AdminPanelGate";
 const Shop = lazy(() => import("./pages/Shop"));
 const Rules = lazy(() => import("./pages/Rules"));
 const Support = lazy(() => import("./pages/Support"));
+const Apply = lazy(() => import("./pages/Apply"));
 const StaffLogin = lazy(() => import("./pages/StaffLogin"));
 const StaffDashboard = lazy(() => import("./pages/StaffDashboard"));
 const DeveloperLogin = lazy(() => import("./pages/DeveloperLogin"));
@@ -47,6 +48,7 @@ const App = () => (
             <Route path="/shop" element={<Shop />} />
             <Route path="/regels" element={<Rules />} />
             <Route path="/support" element={<Support />} />
+            <Route path="/solliciteren" element={<Apply />} />
             <Route path="/staff" element={<StaffLogin />} />
             <Route path="/staff/dashboard" element={<StaffDashboard />} />
             <Route path="/developer" element={<DeveloperLogin />} />
