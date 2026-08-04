@@ -39,13 +39,21 @@ Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response(null, { headers: corsHeaders });
 
   try {
-    const webhookUrl = Deno.env.get('BOTGHOST_WEBHOOK_URL');
+    const body = (await req.json()) as Payload;
+
+    // Nieuwe sollicitatie -> eigen webhook, beoordeling (goedgekeurd/afgewezen) -> andere webhook
+    const isNew = body?.event === 'submitted';
+    const webhookUrl = isNew
+      ? Deno.env.get('BOTGHOST_WEBHOOK_NEW')
+      : Deno.env.get('BOTGHOST_WEBHOOK_ACCEPTED');
+
     if (!webhookUrl) {
-      console.warn('BOTGHOST_WEBHOOK_URL is not configured');
+      console.warn(`Webhook secret ontbreekt voor event ${body?.event}`);
       return new Response(JSON.stringify({ success: false, skipped: true }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
+
 
     const body = (await req.json()) as Payload;
     if (!body?.event || !body?.name) {
