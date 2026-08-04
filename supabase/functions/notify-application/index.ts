@@ -39,14 +39,6 @@ Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response(null, { headers: corsHeaders });
 
   try {
-    const webhookUrl = Deno.env.get('BOTGHOST_WEBHOOK_URL');
-    if (!webhookUrl) {
-      console.warn('BOTGHOST_WEBHOOK_URL is not configured');
-      return new Response(JSON.stringify({ success: false, skipped: true }), {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
-    }
-
     const body = (await req.json()) as Payload;
     if (!body?.event || !body?.name) {
       return new Response(JSON.stringify({ error: 'Missing fields' }), {
@@ -54,6 +46,20 @@ Deno.serve(async (req) => {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
+
+    // Nieuwe sollicitatie -> eigen webhook, beoordeling (goedgekeurd/afgewezen) -> andere webhook
+    const webhookUrl =
+      body.event === 'submitted'
+        ? Deno.env.get('BOTGHOST_WEBHOOK_NEW')
+        : Deno.env.get('BOTGHOST_WEBHOOK_ACCEPTED');
+
+    if (!webhookUrl) {
+      console.warn(`Webhook secret ontbreekt voor event ${body.event}`);
+      return new Response(JSON.stringify({ success: false, skipped: true }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
 
     const meta = EVENT_META[body.event] ?? EVENT_META.submitted;
 
