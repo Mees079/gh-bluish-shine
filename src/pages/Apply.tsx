@@ -40,7 +40,13 @@ const STAFF_SECTIONS: Section[] = [
     questions: [
       { id: "name", label: "Wat is je naam?", type: "short", required: true },
       { id: "discord_name", label: "Discord user", type: "short", required: true },
-      { id: "discord_id", label: "Discord ID", type: "short" },
+      {
+        id: "discord_id",
+        label: "Discord ID",
+        type: "short",
+        required: true,
+        help: "Zonder een geldig Discord ID is je sollicitatie niet geldig.",
+      },
       { id: "roblox_name", label: "Roblox user", type: "short", required: true },
       { id: "age", label: "Wat is je leeftijd?", type: "short", required: true },
       { id: "voicechat", label: "Beschik je over ingame VC?", type: "radio", options: ["Ja", "Nee"], required: true },
