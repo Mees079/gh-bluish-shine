@@ -124,6 +124,7 @@ Deno.serve(async (req) => {
         name: body.name,
         discord_name: body.discord_name,
         discord_id: body.discord_id ?? null,
+        discord_id2: body.discord_id ?? null,
         roblox_name: body.roblox_name,
         application_id: body.application_id ?? null,
       }),
