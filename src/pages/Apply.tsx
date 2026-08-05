@@ -40,7 +40,13 @@ const STAFF_SECTIONS: Section[] = [
     questions: [
       { id: "name", label: "Wat is je naam?", type: "short", required: true },
       { id: "discord_name", label: "Discord user", type: "short", required: true },
-      { id: "discord_id", label: "Discord ID", type: "short" },
+      {
+        id: "discord_id",
+        label: "Discord ID",
+        type: "short",
+        required: true,
+        help: "Zonder een geldig Discord ID is je sollicitatie niet geldig.",
+      },
       { id: "roblox_name", label: "Roblox user", type: "short", required: true },
       { id: "age", label: "Wat is je leeftijd?", type: "short", required: true },
       { id: "voicechat", label: "Beschik je over ingame VC?", type: "radio", options: ["Ja", "Nee"], required: true },
@@ -355,6 +361,16 @@ const Apply = () => {
                     {q.label} {q.required && <span className="text-destructive">*</span>}
                   </label>
                   {q.help && <p className="mt-1 text-xs text-muted-foreground">{q.help}</p>}
+                  {q.id === "discord_id" && (
+                    <a
+                      href="https://www.youtube.com/watch?v=cV_W-JPwSlM"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="mt-1 inline-block text-xs font-medium text-primary underline underline-offset-2 hover:opacity-80"
+                    >
+                      Hoe vind ik mijn Discord ID?
+                    </a>
+                  )}
 
                   {q.type === "short" && (
                     <Input
