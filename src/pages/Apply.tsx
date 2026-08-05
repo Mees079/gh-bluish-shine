@@ -361,6 +361,16 @@ const Apply = () => {
                     {q.label} {q.required && <span className="text-destructive">*</span>}
                   </label>
                   {q.help && <p className="mt-1 text-xs text-muted-foreground">{q.help}</p>}
+                  {q.id === "discord_id" && (
+                    <a
+                      href="https://www.youtube.com/watch?v=cV_W-JPwSlM"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="mt-1 inline-block text-xs font-medium text-primary underline underline-offset-2 hover:opacity-80"
+                    >
+                      Hoe vind ik mijn Discord ID?
+                    </a>
+                  )}
 
                   {q.type === "short" && (
                     <Input
