@@ -88,18 +88,60 @@ Deno.serve(async (req) => {
     const apiKey = Deno.env.get('BOTGHOST_API_KEY');
     
 
-    const variables = [
-      { name: 'event', variable: '{event}', value: body.event },
-      { name: 'team', variable: '{team}', value: TEAM_LABELS[body.team] ?? body.team },
-      { name: 'name', variable: '{name}', value: body.name },
-      { name: 'age', variable: '{age}', value: body.age ?? '-' },
-      { name: 'discord_name', variable: '{discord_name}', value: body.discord_name ?? '-' },
-      { name: 'discord_id', variable: '{discord_id}', value: body.discord_id ?? '-' },
-      { name: 'discord_id2', variable: '{discord_id2}', value: body.discord_id ?? '-' },
-      { name: 'roblox_name', variable: '{roblox_name}', value: body.roblox_name ?? '-' },
-      { name: 'reviewer', variable: '{reviewer}', value: body.reviewer ?? '-' },
-      { name: 'application_id', variable: '{application_id}', value: body.application_id ?? '-' },
-    ];
+    const isSubmitted = body.event === 'submitted';
+
+    // Nieuwe sollicitatie: exact de oude, simpele payload zoals hij eerder werkte.
+    const payload = isSubmitted
+      ? {
+          event: body.event,
+          team: body.team,
+          name: body.name,
+          discord_name: body.discord_name,
+          discord_id: body.discord_id ?? null,
+          roblox_name: body.roblox_name,
+          age: body.age ?? null,
+          application_id: body.application_id ?? null,
+          embeds: [
+            {
+              title: meta.title,
+              color: meta.color,
+              fields,
+              footer: { text: 'HDRP Sollicitatiesysteem' },
+              timestamp: new Date().toISOString(),
+            },
+          ],
+        }
+      : {
+          variables: [
+            { name: 'event', variable: '{event}', value: body.event },
+            { name: 'team', variable: '{team}', value: TEAM_LABELS[body.team] ?? body.team },
+            { name: 'name', variable: '{name}', value: body.name },
+            { name: 'age', variable: '{age}', value: body.age ?? '-' },
+            { name: 'discord_name', variable: '{discord_name}', value: body.discord_name ?? '-' },
+            { name: 'discord_id', variable: '{discord_id}', value: body.discord_id ?? '-' },
+            { name: 'discord_id2', variable: '{discord_id2}', value: body.discord_id ?? '-' },
+            { name: 'roblox_name', variable: '{roblox_name}', value: body.roblox_name ?? '-' },
+            { name: 'reviewer', variable: '{reviewer}', value: body.reviewer ?? '-' },
+            { name: 'application_id', variable: '{application_id}', value: body.application_id ?? '-' },
+          ],
+          embeds: [
+            {
+              title: meta.title,
+              color: meta.color,
+              fields,
+              footer: { text: 'HDRP Sollicitatiesysteem' },
+              timestamp: new Date().toISOString(),
+            },
+          ],
+          event: body.event,
+          team: body.team,
+          name: body.name,
+          discord_name: body.discord_name,
+          discord_id: body.discord_id ?? null,
+          discord_id2: body.discord_id ?? null,
+          roblox_name: body.roblox_name,
+          application_id: body.application_id ?? null,
+        };
 
     const res = await fetch(webhookUrl, {
       method: 'POST',
@@ -107,27 +149,7 @@ Deno.serve(async (req) => {
         'Content-Type': 'application/json',
         ...(apiKey ? { Authorization: apiKey } : {}),
       },
-      body: JSON.stringify({
-        variables,
-        embeds: [
-          {
-            title: meta.title,
-            color: meta.color,
-            fields,
-            footer: { text: 'HDRP Sollicitatiesysteem' },
-            timestamp: new Date().toISOString(),
-          },
-        ],
-        // Extra platte velden zodat BotGhost variabelen makkelijk kan uitlezen
-        event: body.event,
-        team: body.team,
-        name: body.name,
-        discord_name: body.discord_name,
-        discord_id: body.discord_id ?? null,
-        discord_id2: body.discord_id ?? null,
-        roblox_name: body.roblox_name,
-        application_id: body.application_id ?? null,
-      }),
+      body: JSON.stringify(payload),
     });
 
     if (!res.ok) {
