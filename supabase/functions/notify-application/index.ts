@@ -47,11 +47,13 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Nieuwe sollicitatie -> eigen webhook, beoordeling (goedgekeurd/afgewezen) -> andere webhook
+    // Nieuwe sollicitatie -> eigen webhook, afgewezen -> eigen webhook, rest -> accepted webhook
     const webhookUrl =
       body.event === 'submitted'
         ? Deno.env.get('BOTGHOST_WEBHOOK_NEW')
-        : Deno.env.get('BOTGHOST_WEBHOOK_ACCEPTED');
+        : body.event === 'rejected'
+          ? Deno.env.get('BOTGHOST_WEBHOOK_REJECTED') ?? Deno.env.get('BOTGHOST_WEBHOOK_ACCEPTED')
+          : Deno.env.get('BOTGHOST_WEBHOOK_ACCEPTED');
 
     if (!webhookUrl) {
       console.warn(`Webhook secret ontbreekt voor event ${body.event}`);
