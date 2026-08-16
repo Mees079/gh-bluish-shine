@@ -40,6 +40,13 @@ Deno.serve(async (req) => {
 
   try {
     const body = (await req.json()) as Payload;
+
+    // Verwijderde sollicitaties sturen nooit een webhook
+    if (body?.event === 'deleted') {
+      return new Response(JSON.stringify({ success: true, skipped: true }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
     if (!body?.event || !body?.name) {
       return new Response(JSON.stringify({ error: 'Missing fields' }), {
         status: 400,
