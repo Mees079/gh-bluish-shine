@@ -109,7 +109,6 @@ export const StaffApplications = ({ currentUserName }: Props) => {
       return;
     }
 
-    await notify(app, "deleted");
     toast({ title: "Verwijderd", description: `Sollicitatie van ${app.name} is verwijderd.` });
     setSelected(null);
     load();
