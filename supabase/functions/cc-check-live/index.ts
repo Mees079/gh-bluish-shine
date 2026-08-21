@@ -54,6 +54,12 @@ Deno.serve(async (req) => {
     const { data: creators, error: creatorsError } = await supa.from("cc_creators").select("*").eq("is_active", true);
     if (creatorsError) throw creatorsError;
 
+    // Kostenbesparing: niets te doen als er geen actieve creators zijn
+    if (!creators || creators.length === 0) {
+      return new Response(JSON.stringify({ ok: true, skipped: "no active creators" }), { headers: { ...cors, "Content-Type": "application/json" } });
+    }
+
+
     const nowIso = new Date().toISOString();
     const { data: activeBoosts } = await supa
       .from("cc_boosts")
