@@ -1,0 +1,1 @@
+SELECT cron.unschedule('cc-check-live-every-5-minutes') WHERE EXISTS (SELECT 1 FROM cron.job WHERE jobname = 'cc-check-live-every-5-minutes'); DO $$ BEGIN IF EXISTS (SELECT 1 FROM cron.job WHERE jobid = 4) THEN PERFORM cron.unschedule(4); END IF; END $$;
